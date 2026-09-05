@@ -42,3 +42,17 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# Firebase Studio / Project IDX
+.idx/
+
+# AI instructions & blueprints
+AGENTS.md
+agents.md
+CLAUDE.md
+claude.md
+GEMINI.md
+gemini.md
+blueprint.md
+bluepront.md
+

@@ -16,7 +16,7 @@ export async function GET() {
   let dbStatus: 'ok' | 'error' = 'ok';
 
   try {
-    const { data, error } = await supabaseServer
+    const { error } = await supabaseServer
       .from('schemes')
       .select('id', { count: 'exact', head: true });
 

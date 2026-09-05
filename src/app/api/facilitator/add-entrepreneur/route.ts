@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { supabaseServer } from '@/lib/supabase/server';
 
@@ -21,7 +21,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let { phone, name, sector, facilitator_id } = parsed.data;
+    const { name, sector, facilitator_id } = parsed.data;
+    let { phone } = parsed.data;
 
     // Standardize phone format (+91...)
     const digits = phone.replace(/\D/g, '');
