@@ -6,6 +6,7 @@
  * Right: Warm Cream (#F5F1E6) with glassmorphic sign-in card and serif typography.
  */
 
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { playfair, jakarta } from '@/lib/fonts';
@@ -123,7 +124,9 @@ export default function LoginPage() {
             </div>
 
             {/* Login Form (Google OAuth + Email/Password) */}
-            <LoginForm />
+            <Suspense fallback={<div className="py-12 text-center text-xs font-mono text-slate-400">Loading authentication portal...</div>}>
+              <LoginForm />
+            </Suspense>
 
             {/* Trust signals inside the card */}
             <div className="mt-8 pt-6 border-t border-slate-200/80 space-y-2.5 text-xs text-slate-500">

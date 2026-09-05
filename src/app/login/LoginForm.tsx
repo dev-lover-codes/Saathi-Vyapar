@@ -3,28 +3,48 @@
 /**
  * src/app/login/LoginForm.tsx
  *
- * Client Component: Supports dual authentication methods:
- * 1. Sign in with Google (OAuth)
- * 2. Login & Sign up with Email and Password
+ * Single-screen dual authentication form:
+ * 1. Email & Password with two direct action buttons: "Sign In" and "Create Account"
+ * 2. Visual divider ("or")
+ * 3. "Sign in with Google" OAuth button
+ *
+ * Handles email confirmation callback notices (?confirmed=true) and displays
+ * friendly plain-language status messages.
  */
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/supabase/client';
-
-type AuthMode = 'signin' | 'signup';
 
 export default function LoginForm() {
   const router = useRouter();
-  const [mode, setMode] = useState<AuthMode>('signin');
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSignInLoading, setIsSignInLoading] = useState(false);
+  const [isSignUpLoading, setIsSignUpLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+
+  // Derive message states directly from search params without setState in useEffect
+  const isConfirmed = searchParams.get('confirmed') === 'true';
+  const authError = searchParams.get('error');
+
+  const urlErrorMessage =
+    authError === 'confirmation_failed'
+      ? 'The confirmation link is invalid or has expired. Please sign up again or request a new link.'
+      : authError === 'auth_failed'
+        ? 'Authentication failed. Please try signing in again.'
+        : '';
+
+  const urlSuccessMessage = isConfirmed
+    ? 'Email confirmed successfully! You can now sign in with your email and password.'
+    : '';
+
+  const activeError = error || urlErrorMessage;
+  const activeSuccess = successMessage || urlSuccessMessage;
 
   useEffect(() => {
     // Check if user already has an active session
@@ -46,8 +66,9 @@ export default function LoginForm() {
     // Listen for auth state changes
     const {
       data: { subscription },
-    } = supabaseClient.auth.onAuthStateChange((_event, session) => {
-      if (session) {
+    } = supabaseClient.auth.onAuthStateChange((event, session) => {
+      // Only redirect on SIGNED_IN event
+      if (event === 'SIGNED_IN' && session) {
         router.push('/dashboard');
         router.refresh();
       }
@@ -58,7 +79,177 @@ export default function LoginForm() {
     };
   }, [router]);
 
-  // Google OAuth Sign-in
+  /**
+   * Translates raw Supabase and network errors into clear, friendly language.
+   */
+  function formatErrorMessage(err: unknown): string {
+    if (!err) return 'An unexpected error occurred. Please try again.';
+    const message = (
+      err instanceof Error
+        ? err.message
+        : typeof err === 'string'
+          ? err
+          : (err as { message?: string }).message || ''
+    ).toLowerCase();
+
+    if (
+      message.includes('invalid login credentials') ||
+      message.includes('invalid_grant') ||
+      message.includes('invalid username or password')
+    ) {
+      return 'Incorrect email or password. Please double check your details and try again.';
+    }
+
+    if (
+      message.includes('user already registered') ||
+      message.includes('already exists') ||
+      message.includes('duplicate')
+    ) {
+      return 'An account with this email address already exists. Please click "Sign In" instead.';
+    }
+
+    if (message.includes('email not confirmed')) {
+      return 'Your email address has not been confirmed yet. Please check your inbox for the confirmation link.';
+    }
+
+    if (
+      message.includes('password should be at least 6') ||
+      message.includes('weak_password') ||
+      message.includes('password must be at least 6')
+    ) {
+      return 'Password must be at least 6 characters long. Please choose a longer password.';
+    }
+
+    if (
+      message.includes('invalid email') ||
+      message.includes('unable to validate email') ||
+      message.includes('valid email')
+    ) {
+      return 'Please enter a valid email address (e.g. name@example.com).';
+    }
+
+    if (message.includes('rate limit') || message.includes('too many requests')) {
+      return 'Too many attempts in a short time. Please wait a minute before trying again.';
+    }
+
+    if (
+      message.includes('failed to fetch') ||
+      message.includes('network') ||
+      message.includes('offline')
+    ) {
+      return 'Unable to reach the server. Please check your internet connection.';
+    }
+
+    if (
+      message.includes('signup disabled') ||
+      message.includes('signups not allowed')
+    ) {
+      return 'Account registration is currently restricted. Please contact support.';
+    }
+
+    // Friendly fallback
+    return err instanceof Error
+      ? err.message
+      : 'Authentication failed. Please verify your details and try again.';
+  }
+
+  // 1. Handle Sign In with Email & Password
+  async function handleSignIn(e: React.FormEvent) {
+    e.preventDefault();
+    setError('');
+    setSuccessMessage('');
+
+    if (!email.trim() || !password) {
+      setError('Please enter both your email address and password.');
+      return;
+    }
+
+    setIsSignInLoading(true);
+
+    try {
+      const { data, error: signInError } =
+        await supabaseClient.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        });
+
+      if (signInError) {
+        setError(formatErrorMessage(signInError));
+        setIsSignInLoading(false);
+        return;
+      }
+
+      if (data.session) {
+        setSuccessMessage('Signed in successfully! Redirecting to dashboard...');
+        router.push('/dashboard');
+        router.refresh();
+      } else {
+        setIsSignInLoading(false);
+      }
+    } catch (err) {
+      setError(formatErrorMessage(err));
+      setIsSignInLoading(false);
+    }
+  }
+
+  // 2. Handle Create Account with Email & Password
+  async function handleSignUp() {
+    setError('');
+    setSuccessMessage('');
+
+    if (!email.trim() || !password) {
+      setError('Please enter an email address and password to create an account.');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Your password must be at least 6 characters long.');
+      return;
+    }
+
+    setIsSignUpLoading(true);
+
+    try {
+      const redirectUrl =
+        typeof window !== 'undefined'
+          ? `${window.location.origin}/auth/confirm`
+          : undefined;
+
+      const { data, error: signUpError } = await supabaseClient.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: {
+            full_name: email.split('@')[0],
+          },
+          emailRedirectTo: redirectUrl,
+        },
+      });
+
+      if (signUpError) {
+        setError(formatErrorMessage(signUpError));
+        setIsSignUpLoading(false);
+        return;
+      }
+
+      // If user created, instruct them to check their email (since account is not usable until confirmed)
+      if (data.user) {
+        setSuccessMessage(
+          'Check your email to confirm your account. Once verified, you can sign in with your email and password.'
+        );
+      } else {
+        setSuccessMessage(
+          'Account created! Please check your email to verify your account.'
+        );
+      }
+      setIsSignUpLoading(false);
+    } catch (err) {
+      setError(formatErrorMessage(err));
+      setIsSignUpLoading(false);
+    }
+  }
+
+  // 3. Handle Google OAuth Sign In
   async function handleGoogleSignIn() {
     setIsGoogleLoading(true);
     setError('');
@@ -82,130 +273,189 @@ export default function LoginForm() {
       });
 
       if (authError) {
-        setError(authError.message);
+        setError(formatErrorMessage(authError));
         setIsGoogleLoading(false);
       }
     } catch (err: unknown) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Unable to connect to Google authentication. Please try again.'
-      );
+      setError(formatErrorMessage(err));
       setIsGoogleLoading(false);
     }
   }
 
-  // Email & Password Auth (Sign In or Sign Up)
-  async function handleEmailAuth(e: React.FormEvent) {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-    setSuccessMessage('');
-
-    if (!email || !password) {
-      setError('Please provide both email and password.');
-      setIsLoading(false);
-      return;
-    }
-
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      if (mode === 'signin') {
-        // Sign In with Email & Password
-        const { data, error: signInError } = await supabaseClient.auth.signInWithPassword({
-          email: email.trim(),
-          password,
-        });
-
-        if (signInError) {
-          setError(signInError.message);
-          setIsLoading(false);
-          return;
-        }
-
-        if (data.session) {
-          setSuccessMessage('Login successful! Redirecting...');
-          router.push('/dashboard');
-          router.refresh();
-        }
-      } else {
-        // Sign Up with Email & Password
-        const redirectUrl =
-          typeof window !== 'undefined'
-            ? `${window.location.origin}/auth/callback`
-            : undefined;
-
-        const { data, error: signUpError } = await supabaseClient.auth.signUp({
-          email: email.trim(),
-          password,
-          options: {
-            data: {
-              full_name: fullName.trim() || email.split('@')[0],
-            },
-            emailRedirectTo: redirectUrl,
-          },
-        });
-
-        if (signUpError) {
-          setError(signUpError.message);
-          setIsLoading(false);
-          return;
-        }
-
-        if (data.session) {
-          setSuccessMessage('Account created successfully! Redirecting...');
-          router.push('/dashboard');
-          router.refresh();
-        } else if (data.user) {
-          setSuccessMessage(
-            'Account created! Please check your email for a confirmation link to complete sign-in.'
-          );
-          setIsLoading(false);
-        }
-      }
-    } catch (err: unknown) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'An unexpected error occurred during authentication.'
-      );
-      setIsLoading(false);
-    }
-  }
+  const isAnyLoading = isSignInLoading || isSignUpLoading || isGoogleLoading;
 
   return (
     <div className="w-full">
       {/* Error Alert */}
-      {error && (
+      {activeError && (
         <div className="mb-4 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5 shadow-sm">
           <span className="text-base shrink-0">⚠️</span>
-          <div className="flex-1">
-            <span className="font-semibold">Error:</span> {error}
+          <div className="flex-1 leading-relaxed">
+            <span className="font-semibold">Notice:</span> {activeError}
           </div>
         </div>
       )}
 
       {/* Success Alert */}
-      {successMessage && (
+      {activeSuccess && (
         <div className="mb-4 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-start gap-2.5 shadow-sm">
-          <span className="text-base shrink-0">✅</span>
-          <div className="flex-1">
-            <span className="font-semibold">Success:</span> {successMessage}
+          <span className="text-base shrink-0">✉️</span>
+          <div className="flex-1 leading-relaxed font-medium">
+            {activeSuccess}
           </div>
         </div>
       )}
 
-      {/* ── Method 1: Sign in with Google ── */}
+      {/* ── 1. Email & Password Form ── */}
+      <form onSubmit={handleSignIn} className="space-y-4">
+        {/* Email Input */}
+        <div>
+          <label
+            htmlFor="email"
+            className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5"
+          >
+            Email Address (ईमेल)
+          </label>
+          <input
+            id="email"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            autoComplete="email"
+            disabled={isAnyLoading}
+            className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-[#C9A24B]/20 transition-all shadow-inner disabled:bg-slate-100 disabled:cursor-not-allowed"
+          />
+        </div>
+
+        {/* Password Input */}
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <label
+              htmlFor="password"
+              className="block text-xs font-semibold uppercase tracking-wider text-slate-700"
+            >
+              Password (पासवर्ड)
+            </label>
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              disabled={isAnyLoading}
+              className="text-[11px] text-slate-500 hover:text-slate-800 font-medium cursor-pointer"
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
+          </div>
+          <input
+            id="password"
+            type={showPassword ? 'text' : 'password'}
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            autoComplete="current-password"
+            disabled={isAnyLoading}
+            className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-[#C9A24B]/20 transition-all shadow-inner disabled:bg-slate-100 disabled:cursor-not-allowed"
+          />
+          <p className="text-[11px] text-slate-500 mt-1">
+            Minimum 6 characters
+          </p>
+        </div>
+
+        {/* Two Buttons: "Sign In" and "Create Account" */}
+        <div className="pt-1 flex flex-col sm:flex-row items-center gap-3">
+          {/* Button 1: Sign In */}
+          <button
+            type="submit"
+            disabled={isAnyLoading}
+            className="w-full sm:flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-[#0B1E33] hover:bg-[#132c4a] active:bg-[#071320] text-white shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:hover:scale-100"
+          >
+            {isSignInLoading ? (
+              <>
+                <svg
+                  className="animate-spin h-4 w-4 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                <span>Signing In...</span>
+              </>
+            ) : (
+              <span>Sign In (लॉगिन)</span>
+            )}
+          </button>
+
+          {/* Button 2: Create Account */}
+          <button
+            type="button"
+            onClick={handleSignUp}
+            disabled={isAnyLoading}
+            className="w-full sm:flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-white hover:bg-[#FAF8F3] active:bg-slate-100 text-[#0B1E33] border-2 border-[#0B1E33]/30 hover:border-[#0B1E33] shadow-sm hover:shadow hover:scale-[1.01] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:hover:scale-100"
+          >
+            {isSignUpLoading ? (
+              <>
+                <svg
+                  className="animate-spin h-4 w-4 text-[#0B1E33]"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                <span>Creating...</span>
+              </>
+            ) : (
+              <span>Create Account (खाता बनाएं)</span>
+            )}
+          </button>
+        </div>
+      </form>
+
+      {/* ── 2. Visual Divider ("or") ── */}
+      <div className="relative my-6 text-center">
+        <div className="absolute inset-0 flex items-center" aria-hidden="true">
+          <div className="w-full border-t border-slate-300/80" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-3.5 text-slate-500 font-semibold tracking-wider">
+            or
+          </span>
+        </div>
+      </div>
+
+      {/* ── 3. Sign in with Google Button ── */}
       <button
         type="button"
         onClick={handleGoogleSignIn}
-        disabled={isGoogleLoading || isLoading}
-        className="w-full relative group flex items-center justify-center gap-3 bg-white text-slate-800 font-semibold py-3.5 px-5 rounded-2xl border border-slate-300/80 shadow-sm hover:border-[#C9A24B] hover:shadow-[0_10px_25px_-4px_rgba(201,162,75,0.25)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 ease-out cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:hover:scale-100"
+        disabled={isAnyLoading}
+        className="w-full relative group flex items-center justify-center gap-3 bg-white text-slate-800 font-semibold py-3.5 px-5 rounded-2xl border border-slate-300/80 shadow-sm hover:border-[#C9A24B] hover:shadow-[0_10px_25px_-4px_rgba(201,162,75,0.25)] hover:scale-[1.01] active:scale-[0.98] transition-all duration-200 ease-out cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:hover:scale-100"
       >
         {isGoogleLoading ? (
           <>
@@ -257,161 +507,6 @@ export default function LoginForm() {
           </>
         )}
       </button>
-
-      {/* Divider */}
-      <div className="relative my-6 text-center">
-        <div className="absolute inset-0 flex items-center" aria-hidden="true">
-          <div className="w-full border-t border-slate-300/80" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-[#FAF8F3] px-3 text-slate-500 font-semibold tracking-wider">
-            or continue with email
-          </span>
-        </div>
-      </div>
-
-      {/* ── Method 2: Email and Password ── */}
-      {/* Mode Switcher Tabs */}
-      <div className="flex bg-slate-200/70 p-1 rounded-xl mb-5 text-xs font-semibold">
-        <button
-          type="button"
-          onClick={() => {
-            setMode('signin');
-            setError('');
-          }}
-          className={`flex-1 py-2 rounded-lg transition-all ${
-            mode === 'signin'
-              ? 'bg-white text-[#0B1E33] shadow-sm'
-              : 'text-slate-600 hover:text-slate-900'
-          }`}
-        >
-          Sign In (लॉगिन)
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setMode('signup');
-            setError('');
-          }}
-          className={`flex-1 py-2 rounded-lg transition-all ${
-            mode === 'signup'
-              ? 'bg-white text-[#0B1E33] shadow-sm'
-              : 'text-slate-600 hover:text-slate-900'
-          }`}
-        >
-          Sign Up (खाता बनाएं)
-        </button>
-      </div>
-
-      <form onSubmit={handleEmailAuth} className="space-y-4">
-        {mode === 'signup' && (
-          <div>
-            <label
-              htmlFor="fullName"
-              className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5"
-            >
-              Full Name (नाम)
-            </label>
-            <input
-              id="fullName"
-              type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="e.g. Ramesh Kumar"
-              className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-[#C9A24B]/20 transition-all shadow-inner"
-            />
-          </div>
-        )}
-
-        <div>
-          <label
-            htmlFor="email"
-            className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5"
-          >
-            Email Address (ईमेल)
-          </label>
-          <input
-            id="email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            autoComplete="email"
-            className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-[#C9A24B]/20 transition-all shadow-inner"
-          />
-        </div>
-
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label
-              htmlFor="password"
-              className="block text-xs font-semibold uppercase tracking-wider text-slate-700"
-            >
-              Password (पासवर्ड)
-            </label>
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="text-[11px] text-slate-500 hover:text-slate-800 font-medium"
-            >
-              {showPassword ? 'Hide' : 'Show'}
-            </button>
-          </div>
-          <input
-            id="password"
-            type={showPassword ? 'text' : 'password'}
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-            className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#C9A24B] focus:ring-2 focus:ring-[#C9A24B]/20 transition-all shadow-inner"
-          />
-          {mode === 'signup' && (
-            <p className="text-[11px] text-slate-500 mt-1">
-              Minimum 6 characters
-            </p>
-          )}
-        </div>
-
-        {/* Submit Button with Hover & Press Micro-Animation */}
-        <button
-          type="submit"
-          disabled={isLoading || isGoogleLoading}
-          className="w-full mt-2 py-3 px-5 rounded-xl font-bold text-sm bg-[#0B1E33] hover:bg-[#122b47] active:bg-[#071320] text-white shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed disabled:hover:scale-100"
-        >
-          {isLoading ? (
-            <>
-              <svg
-                className="animate-spin h-4 w-4 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
-              <span>Processing...</span>
-            </>
-          ) : (
-            <span>
-              {mode === 'signin' ? 'लॉगिन करें • Sign In' : 'खाता बनाएं • Create Account'}
-            </span>
-          )}
-        </button>
-      </form>
     </div>
   );
 }
