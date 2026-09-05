@@ -118,18 +118,18 @@ export default function LoginPage() {
               </h1>
 
               <p className="text-xs sm:text-sm text-slate-600 mt-2.5 leading-relaxed font-normal">
-                Sign in with your Google account to access your live financial dashboard, break-even unit analytics, and verified government subsidy matches.
+                Sign in with your Google account or email & password to access your live financial dashboard, break-even unit analytics, and verified government subsidy matches.
               </p>
             </div>
 
-            {/* Google Sign-in Form with Scale + Shadow Shift */}
+            {/* Login Form (Google OAuth + Email/Password) */}
             <LoginForm />
 
             {/* Trust signals inside the card */}
             <div className="mt-8 pt-6 border-t border-slate-200/80 space-y-2.5 text-xs text-slate-500">
               <div className="flex items-center gap-2">
                 <span className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-[10px]">✓</span>
-                <span>Instant access without passwords or OTP delays</span>
+                <span>Dual sign-in options: Google OAuth or Email & Password</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-[10px]">✓</span>
