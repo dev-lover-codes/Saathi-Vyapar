@@ -104,17 +104,34 @@ export default function StitchFolio() {
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
           scrolled
             ? "bg-surface-container-lowest/95 backdrop-blur-md shadow-2xl border-b border-surface-container-highest/60"
-            : "bg-surface-container-lowest/80 backdrop-blur-sm border-b border-surface-container-highest/30"
+            : "bg-surface-container-lowest/85 backdrop-blur-sm border-b border-surface-container-highest/30"
         }`}
       >
-        <div className="h-20 max-w-[1440px] mx-auto px-4 md:px-8 lg:px-12 flex items-center justify-between gap-4">
-          {/* Brand Wordmark & Pantheon Emblem */}
+        <div className="h-20 max-w-[1440px] mx-auto px-4 md:px-6 lg:px-10 flex items-center justify-between gap-3">
+          {/* Brand Wordmark & Classical Pantheon SVG Emblem */}
           <div
             onClick={() => scrollTo("01-hero")}
             className="flex items-center gap-3 shrink-0 cursor-pointer group"
           >
-            <div className="w-9 h-9 rounded-full bg-surface-container border border-primary/40 flex items-center justify-center text-primary group-hover:border-primary group-hover:scale-105 transition-all shadow-md">
-              <span className="material-symbols-outlined text-[20px]">account_balance</span>
+            <div className="w-10 h-10 rounded-full bg-surface-container border border-primary/40 flex items-center justify-center text-primary group-hover:border-primary group-hover:scale-105 transition-all shadow-md">
+              {/* Classical Pantheon Temple SVG */}
+              <svg
+                className="w-5 h-5 text-primary drop-shadow-[0_1px_4px_rgba(235,193,102,0.3)]"
+                viewBox="0 0 64 64"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polygon points="32 14, 52 24, 12 24" strokeWidth="2.5" />
+                <line x1="10" y1="26" x2="54" y2="26" strokeWidth="2.5" />
+                <line x1="17" y1="28" x2="17" y2="44" strokeWidth="2.5" />
+                <line x1="27" y1="28" x2="27" y2="44" strokeWidth="2.5" />
+                <line x1="37" y1="28" x2="37" y2="44" strokeWidth="2.5" />
+                <line x1="47" y1="28" x2="47" y2="44" strokeWidth="2.5" />
+                <line x1="13" y1="46" x2="51" y2="46" strokeWidth="2.5" />
+                <line x1="9" y1="49" x2="55" y2="49" strokeWidth="2.5" />
+              </svg>
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
@@ -131,8 +148,8 @@ export default function StitchFolio() {
             </div>
           </div>
 
-          {/* Center Navigation: 9 Folio Panels */}
-          <nav className="hidden xl:flex items-center gap-1 overflow-x-auto py-1 text-[11px] font-mono tracking-wider uppercase">
+          {/* Center Navigation: 9 Folio Panels (Visible on Large/Medium Viewports) */}
+          <nav className="hidden lg:flex items-center gap-1 overflow-x-auto py-1 text-[11px] font-mono tracking-wider uppercase max-w-2xl scrollbar-none">
             {STITCH_PANELS.map((p) => {
               const isActive = viewMode === "interactive" && activePanel === p.id;
               return (
@@ -140,9 +157,9 @@ export default function StitchFolio() {
                   key={p.id}
                   type="button"
                   onClick={() => scrollTo(p.id)}
-                  className={`px-2.5 py-1.5 rounded transition-all whitespace-nowrap ${
+                  className={`px-2 py-1 rounded transition-all whitespace-nowrap ${
                     isActive
-                      ? "bg-primary text-on-primary font-semibold shadow-md"
+                      ? "bg-primary text-on-primary font-semibold shadow-sm"
                       : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container"
                   }`}
                 >
@@ -153,89 +170,83 @@ export default function StitchFolio() {
           </nav>
 
           {/* Right Controls: View Switcher & Gateway Button */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2.5 shrink-0">
             {/* View Mode Toggle */}
-            <div className="hidden sm:flex items-center bg-surface-container p-0.5 rounded-lg border border-surface-container-highest">
+            <div className="flex items-center bg-surface-container p-0.5 rounded-lg border border-surface-container-highest">
               <button
                 type="button"
                 onClick={() => setViewMode("interactive")}
-                className={`px-2.5 py-1 rounded text-xs font-mono tracking-wider transition-colors flex items-center gap-1 ${
+                className={`px-2.5 py-1 rounded text-xs font-mono tracking-wider transition-colors flex items-center gap-1.5 ${
                   viewMode === "interactive"
                     ? "bg-primary/20 text-primary font-medium"
                     : "text-outline hover:text-on-surface"
                 }`}
               >
-                <span className="material-symbols-outlined text-[14px]">view_agenda</span>
-                Canvas
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <line x1="3" y1="9" x2="21" y2="9" />
+                  <line x1="3" y1="15" x2="21" y2="15" />
+                </svg>
+                <span>Canvas</span>
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode("plates")}
-                className={`px-2.5 py-1 rounded text-xs font-mono tracking-wider transition-colors flex items-center gap-1 ${
+                className={`px-2.5 py-1 rounded text-xs font-mono tracking-wider transition-colors flex items-center gap-1.5 ${
                   viewMode === "plates"
                     ? "bg-primary/20 text-primary font-medium"
                     : "text-outline hover:text-on-surface"
                 }`}
               >
-                <span className="material-symbols-outlined text-[14px]">collections</span>
-                Plates (9)
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="2" width="16" height="16" rx="2" />
+                  <path d="M6 18v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2" />
+                </svg>
+                <span>Plates (9)</span>
               </button>
             </div>
 
             {/* Launch App / Login Gateway */}
             <Link
               href="/login"
-              className="px-4 py-2 bg-primary hover:bg-primary-fixed text-on-primary text-xs font-mono font-semibold tracking-wider uppercase rounded shadow hover:shadow-primary/20 transition-all flex items-center gap-1.5"
+              className="px-3.5 py-1.5 bg-primary hover:bg-primary-fixed text-on-primary text-xs font-mono font-semibold tracking-wider uppercase rounded shadow hover:shadow-primary/20 transition-all flex items-center gap-1.5"
             >
-              <span className="material-symbols-outlined text-[16px]">login</span>
-              <span className="hidden md:inline">Access Gateway</span>
-              <span className="md:hidden">Sign In</span>
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                <polyline points="10 17 15 12 10 7" />
+                <line x1="15" y1="12" x2="3" y2="12" />
+              </svg>
+              <span className="hidden sm:inline">Access Gateway</span>
+              <span className="sm:hidden">Sign In</span>
             </Link>
 
-            {/* Mobile Hamburger Toggle */}
+            {/* Mobile / Compact Hamburger Toggle */}
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="xl:hidden p-2 rounded-lg bg-surface-container text-on-surface-variant hover:text-on-surface"
+              aria-label="Toggle navigation menu"
+              className="lg:hidden p-2 rounded-lg bg-surface-container text-on-surface-variant hover:text-on-surface border border-surface-container-highest flex items-center justify-center"
             >
-              <span className="material-symbols-outlined text-[20px]">
-                {mobileMenuOpen ? "close" : "menu"}
-              </span>
+              {mobileMenuOpen ? (
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="4" y1="12" x2="20" y2="12" />
+                  <line x1="4" y1="6" x2="20" y2="6" />
+                  <line x1="4" y1="18" x2="20" y2="18" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
 
         {/* Mobile Dropdown Navigation */}
         {mobileMenuOpen && (
-          <div className="xl:hidden bg-surface-container-lowest/98 border-b border-surface-container-highest px-4 py-4 space-y-2">
-            <div className="flex sm:hidden items-center gap-2 mb-3 pb-2 border-b border-surface-container-highest">
-              <button
-                type="button"
-                onClick={() => {
-                  setViewMode("interactive");
-                  setMobileMenuOpen(false);
-                }}
-                className={`flex-1 py-1.5 text-center text-xs font-mono rounded ${
-                  viewMode === "interactive" ? "bg-primary text-on-primary" : "bg-surface-container"
-                }`}
-              >
-                Live Canvas
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setViewMode("plates");
-                  setMobileMenuOpen(false);
-                }}
-                className={`flex-1 py-1.5 text-center text-xs font-mono rounded ${
-                  viewMode === "plates" ? "bg-primary text-on-primary" : "bg-surface-container"
-                }`}
-              >
-                Stitch Plates (9)
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-1.5 text-xs font-mono">
+          <div className="lg:hidden bg-surface-container-lowest/98 border-b border-surface-container-highest px-4 py-4 space-y-2 shadow-2xl">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 text-xs font-mono">
               {STITCH_PANELS.map((p) => (
                 <button
                   key={p.id}
@@ -287,7 +298,11 @@ export default function StitchFolio() {
                       className="hover:text-primary transition-colors flex items-center gap-1"
                     >
                       <span>Screenshot</span>
-                      <span className="material-symbols-outlined text-[12px]">open_in_new</span>
+                      <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                        <polyline points="15 3 21 3 21 9" />
+                        <line x1="10" y1="14" x2="21" y2="3" />
+                      </svg>
                     </a>
                   </div>
                 </div>
@@ -303,7 +318,7 @@ export default function StitchFolio() {
       </main>
 
       {/* Floating Navigator Bar (Bottom Right) */}
-      <aside aria-label="Folio Quick Navigation" className="fixed bottom-6 right-6 z-40 flex items-center gap-2 bg-surface-container-lowest/90 backdrop-blur-md border border-surface-container-highest/80 rounded-full px-4 py-2 shadow-2xl">
+      <aside aria-label="Folio Quick Navigation" className="fixed bottom-6 right-6 z-40 flex items-center gap-2 bg-surface-container-lowest/95 backdrop-blur-md border border-surface-container-highest/80 rounded-full px-4 py-2 shadow-2xl">
         <div className="flex items-center gap-2 pr-2 border-r border-surface-container-highest text-xs font-mono">
           <span className="text-primary font-bold">
             {currentNum < 10 ? `0${currentNum}` : currentNum}
@@ -316,9 +331,13 @@ export default function StitchFolio() {
           type="button"
           onClick={() => scrollTo(nextPanel.id)}
           title={`Jump to next: ${nextPanel.title}`}
-          className="p-1 rounded-full hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center"
+          aria-label="Next panel"
+          className="p-1.5 rounded-full hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center"
         >
-          <span className="material-symbols-outlined text-[18px]">arrow_downward</span>
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <polyline points="19 12 12 19 5 12" />
+          </svg>
         </button>
 
         {/* Scroll Top */}
@@ -326,9 +345,14 @@ export default function StitchFolio() {
           type="button"
           onClick={() => scrollTo("01-hero")}
           title="Back to Top"
-          className="p-1 rounded-full hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center"
+          aria-label="Back to top"
+          className="p-1.5 rounded-full hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center"
         >
-          <span className="material-symbols-outlined text-[18px]">vertical_align_top</span>
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="19" x2="12" y2="5" />
+            <polyline points="5 12 12 5 19 12" />
+            <line x1="4" y1="2" x2="20" y2="2" />
+          </svg>
         </button>
       </aside>
 
@@ -336,7 +360,23 @@ export default function StitchFolio() {
       <footer className="w-full bg-surface-container-lowest border-t border-surface-container-highest/50 py-12 px-4 md:px-8 lg:px-12 text-center text-on-surface-variant">
         <div className="max-w-4xl mx-auto flex flex-col items-center gap-4">
           <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary border border-primary/30">
-            <span className="material-symbols-outlined text-[24px]">account_balance</span>
+            <svg
+              className="w-5 h-5 text-primary"
+              viewBox="0 0 64 64"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polygon points="32 14, 52 24, 12 24" strokeWidth="2.5" />
+              <line x1="10" y1="26" x2="54" y2="26" strokeWidth="2.5" />
+              <line x1="17" y1="28" x2="17" y2="44" strokeWidth="2.5" />
+              <line x1="27" y1="28" x2="27" y2="44" strokeWidth="2.5" />
+              <line x1="37" y1="28" x2="37" y2="44" strokeWidth="2.5" />
+              <line x1="47" y1="28" x2="47" y2="44" strokeWidth="2.5" />
+              <line x1="13" y1="46" x2="51" y2="46" strokeWidth="2.5" />
+              <line x1="9" y1="49" x2="55" y2="49" strokeWidth="2.5" />
+            </svg>
           </div>
           <h4 className="text-2xl font-serif text-on-surface font-normal">
             Saathi Vyapar · साथी व्यापार
