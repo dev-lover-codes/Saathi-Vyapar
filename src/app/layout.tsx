@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Saathi Vyapar (साथी व्यापार) — AI Financial Advisory & Scheme Matching for Bharat",
+  title: "Saathi Vyapar — AI Business Advisor for Rural Entrepreneurs",
   description:
-    "Pure deterministic financial planning, 15+ Indian government scheme matching, and vernacular advisory for micro-entrepreneurs.",
+    "AI-driven business advisory and financial structuring assistant for rural micro-entrepreneurs, accessible via WhatsApp, SMS, and web. SIH26091.",
 };
 
 export default function RootLayout({
