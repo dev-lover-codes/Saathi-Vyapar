@@ -45,24 +45,31 @@ export default function HomePage() {
   }, [isVoiceModalOpen]);
 
   return (
-    <div className="min-h-screen bg-[#0a1128] text-[#fdfbf7] font-sans flex flex-col selection:bg-[#f5a623] selection:text-[#0a1128]">
+    <div className="min-h-screen bg-[#031610] text-[#fdfcf7] font-sans flex flex-col selection:bg-[#10b981] selection:text-[#022c22]">
+      {/* ── Ambient Background Glows ───────────────────────────────────── */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.18),transparent_70%)] blur-3xl" />
+        <div className="absolute top-[35%] right-[-10%] w-[500px] h-[500px] bg-[radial-gradient(circle_at_center,rgba(249,115,22,0.10),transparent_70%)] blur-3xl" />
+        <div className="absolute bottom-[10%] left-[-10%] w-[600px] h-[600px] bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.12),transparent_70%)] blur-3xl" />
+      </div>
+
       {/* ── Top Navigation Bar ─────────────────────────────────────────── */}
-      <header className="sticky top-0 z-30 bg-[#0a1128]/90 backdrop-blur-md border-b border-[#1c2e56] px-4 sm:px-8 py-3.5 transition-all">
+      <header className="sticky top-0 z-30 bg-[#031610]/85 backdrop-blur-xl border-b border-[#0d382b] px-4 sm:px-8 py-3.5 transition-all">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
-            <span className="text-2xl sm:text-3xl filter drop-shadow-[0_2px_8px_rgba(245,166,35,0.4)] transition-transform group-hover:scale-110">
+            <span className="text-2xl sm:text-3xl filter drop-shadow-[0_2px_12px_rgba(16,185,129,0.5)] transition-transform group-hover:scale-110">
               🤝
             </span>
             <div className="flex flex-col">
               <span className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-1.5">
                 साथी व्यापार
-                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 px-2 py-0.5 rounded-full shadow-sm">
-                  Saathi
+                <span className="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider bg-gradient-to-r from-emerald-400 to-teal-300 text-emerald-950 px-2 py-0.5 rounded-full shadow-sm">
+                  समृद्धि
                 </span>
               </span>
-              <span className="text-[10px] text-amber-200/70 font-medium tracking-wider hidden sm:block">
-                Financial Advisory for Rural Micro-Entrepreneurs
+              <span className="text-[10px] text-emerald-300/80 font-medium tracking-wider hidden sm:block">
+                AI Financial Advisory & Scheme Matching for Micro-Enterprises
               </span>
             </div>
           </Link>
@@ -71,21 +78,21 @@ export default function HomePage() {
           <nav className="flex items-center gap-2 sm:gap-4">
             <Link
               href="/facilitator"
-              className="hidden md:inline-flex items-center gap-1 text-xs font-semibold text-zinc-300 hover:text-amber-300 px-3 py-1.5 rounded-lg border border-transparent hover:border-[#1c2e56] transition-colors"
+              className="hidden md:inline-flex items-center gap-1 text-xs font-semibold text-emerald-200/80 hover:text-emerald-300 px-3 py-1.5 rounded-lg border border-transparent hover:border-[#134e3d] hover:bg-[#072b20]/60 transition-colors"
             >
               🏢 सुविधाकर्ता (Facilitator)
             </Link>
 
             <Link
               href="/login"
-              className="px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-zinc-200 hover:text-white bg-[#162544] hover:bg-[#1f335c] border border-[#233868] transition-all shadow-sm"
+              className="px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-emerald-100 hover:text-white bg-[#072b20] hover:bg-[#0c3a2c] border border-[#134e3d] transition-all shadow-sm"
             >
               लॉगिन / Login
             </Link>
 
             <Link
               href="/onboarding"
-              className="inline-flex items-center gap-1.5 px-4 sm:px-5 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 shadow-[0_2px_15px_rgba(245,166,35,0.35)] hover:shadow-[0_4px_20px_rgba(245,166,35,0.5)] transform hover:-translate-y-0.5 transition-all"
+              className="inline-flex items-center gap-1.5 px-4 sm:px-5 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 hover:from-emerald-300 hover:to-teal-200 text-emerald-950 shadow-[0_2px_18px_rgba(16,185,129,0.35)] hover:shadow-[0_4px_25px_rgba(16,185,129,0.55)] transform hover:-translate-y-0.5 transition-all"
             >
               <span>रजिस्टर करें</span>
               <span className="hidden sm:inline">/ Register</span>
@@ -99,36 +106,32 @@ export default function HomePage() {
       <main className="flex-1 flex flex-col">
         {/* ── Hero Section ────────────────────────────────────────────── */}
         <section className="relative overflow-hidden pt-12 sm:pt-20 pb-16 sm:pb-24 px-4 sm:px-8">
-          {/* Subtle Background Glows */}
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute top-1/3 left-1/4 w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
-
           <div className="relative max-w-5xl mx-auto text-center space-y-6 sm:space-y-8">
             {/* Top Pill Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#162544]/80 border border-amber-400/30 text-amber-300 text-xs sm:text-sm font-medium shadow-inner">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#072b20]/90 border border-emerald-400/40 text-emerald-300 text-xs sm:text-sm font-medium shadow-[0_0_20px_rgba(16,185,129,0.15)]">
               <span className="text-base">🇮🇳</span>
               <span>ग्रामीण व सूक्ष्म उद्यमियों का सच्चा साथी</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse hidden sm:inline-block"></span>
-              <span className="text-amber-200/70 hidden sm:inline">15+ सरकारी योजनाएं व वित्तीय सहायता</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse hidden sm:inline-block"></span>
+              <span className="text-emerald-200/80 hidden sm:inline">15+ सरकारी योजनाएं व वित्तीय सहायता</span>
             </div>
 
             {/* Main Headline */}
             <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-[1.15] sm:leading-[1.12]">
-              अपने व्यवसाय को दें{' '}
-              <span className="bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 bg-clip-text text-transparent underline decoration-amber-400/50 decoration-wavy decoration-2">
-                वित्तीय शक्ति
+              अपने व्यापार को दें{' '}
+              <span className="bg-gradient-to-r from-emerald-300 via-teal-200 to-emerald-400 bg-clip-text text-transparent underline decoration-emerald-400/50 decoration-wavy decoration-2">
+                वित्तीय शक्ति व समृद्धि
               </span>
               <br className="hidden sm:inline" />
-              <span className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-[#f5e7c8] mt-2 block">
+              <span className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-[#d1fae5] mt-2 block">
                 सरल हिसाब • सही योजनाएं • सीधा मुनाफा
               </span>
             </h1>
 
             {/* Hero Subtitle */}
-            <p className="max-w-2xl mx-auto text-base sm:text-lg text-zinc-300 leading-relaxed font-normal">
-              साथी व्यापार ग्रामीण उद्यमियों को ब्रेक-इवन और लाभ का सही गणित समझाता है, 
-              <strong className="text-amber-300 font-semibold"> 15+ सरकारी योजनाओं (PMEGP, Mudra, SVANidhi)</strong> से जोड़ता है,
-              और आवाज़ व WhatsApp के माध्यम से आपकी भाषा में मार्गदर्शन करता है।
+            <p className="max-w-2xl mx-auto text-base sm:text-lg text-emerald-100/80 leading-relaxed font-normal">
+              साथी व्यापार ग्रामीण व छोटे उद्यमियों को ब्रेक-इवन और लाभ का सही गणित समझाता है,{' '}
+              <strong className="text-emerald-300 font-semibold">15+ सरकारी योजनाओं (PMEGP, Mudra, PM SVANidhi)</strong> से जोड़ता है,
+              और आपकी भाषा में WhatsApp व आवाज़ द्वारा सीधा मार्गदर्शन देता है।
             </p>
 
             {/* Prominent CTA Button Group */}
@@ -136,7 +139,7 @@ export default function HomePage() {
               {/* Prominent Register Button */}
               <Link
                 href="/onboarding"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl text-base sm:text-lg font-black bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-slate-950 shadow-[0_10px_25px_rgba(245,166,35,0.4)] hover:shadow-[0_12px_35px_rgba(245,166,35,0.6)] hover:scale-[1.02] active:scale-[0.98] transition-all border-2 border-amber-200"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl text-base sm:text-lg font-black bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 text-emerald-950 shadow-[0_10px_30px_rgba(16,185,129,0.4)] hover:shadow-[0_12px_40px_rgba(16,185,129,0.6)] hover:scale-[1.02] active:scale-[0.98] transition-all border-2 border-emerald-200"
               >
                 <span className="text-xl">🚀</span>
                 <span>रजिस्टर करें / Register Now</span>
@@ -154,7 +157,7 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={() => setIsVoiceModalOpen(true)}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-2xl text-base font-bold bg-[#162544] hover:bg-[#1f335c] text-white border-2 border-amber-400/40 hover:border-amber-300 transition-all shadow-lg active:scale-[0.98]"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-2xl text-base font-bold bg-[#072b20]/90 hover:bg-[#0c3a2c] text-white border-2 border-emerald-400/50 hover:border-emerald-300 transition-all shadow-[0_4px_20px_rgba(4,47,36,0.5)] active:scale-[0.98]"
               >
                 <span className="text-xl animate-pulse">🎙️</span>
                 <span>बोलकर रजिस्टर करें (Voice Flow)</span>
@@ -163,35 +166,35 @@ export default function HomePage() {
 
             {/* Trust Highlights Grid */}
             <div className="pt-8 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto text-left">
-              <div className="p-3.5 rounded-xl bg-[#101b38] border border-[#1d315f] flex items-center gap-3">
-                <span className="text-2xl">⚡</span>
+              <div className="p-3.5 rounded-xl bg-[#06241b] border border-[#134e3d] shadow-sm flex items-center gap-3 hover:border-emerald-400/40 transition-colors">
+                <span className="text-2xl p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400">⚡</span>
                 <div>
                   <h2 className="text-xs font-bold text-white">शुद्ध गणित</h2>
-                  <p className="text-[11px] text-zinc-400">100% पारदर्शी ब्रेक-इवन गणना</p>
+                  <p className="text-[11px] text-emerald-200/70">100% पारदर्शी ब्रेक-इवन गणना</p>
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-[#101b38] border border-[#1d315f] flex items-center gap-3">
-                <span className="text-2xl">🏛️</span>
+              <div className="p-3.5 rounded-xl bg-[#06241b] border border-[#134e3d] shadow-sm flex items-center gap-3 hover:border-emerald-400/40 transition-colors">
+                <span className="text-2xl p-1.5 rounded-lg bg-orange-500/10 text-orange-400">🏛️</span>
                 <div>
                   <h2 className="text-xs font-bold text-white">15+ योजनाएं</h2>
-                  <p className="text-[11px] text-zinc-400">सटीक पात्रता व सब्सिडी लिंक</p>
+                  <p className="text-[11px] text-emerald-200/70">सटीक पात्रता व सब्सिडी लिंक</p>
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-[#101b38] border border-[#1d315f] flex items-center gap-3">
-                <span className="text-2xl">📸</span>
+              <div className="p-3.5 rounded-xl bg-[#06241b] border border-[#134e3d] shadow-sm flex items-center gap-3 hover:border-emerald-400/40 transition-colors">
+                <span className="text-2xl p-1.5 rounded-lg bg-teal-500/10 text-teal-400">📸</span>
                 <div>
                   <h2 className="text-xs font-bold text-white">खाता-बही OCR</h2>
-                  <p className="text-[11px] text-zinc-400">डायरी के पन्नों से हिसाब</p>
+                  <p className="text-[11px] text-emerald-200/70">डायरी के पन्नों से हिसाब</p>
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-[#101b38] border border-[#1d315f] flex items-center gap-3">
-                <span className="text-2xl">💬</span>
+              <div className="p-3.5 rounded-xl bg-[#06241b] border border-[#134e3d] shadow-sm flex items-center gap-3 hover:border-emerald-400/40 transition-colors">
+                <span className="text-2xl p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400">💬</span>
                 <div>
                   <h2 className="text-xs font-bold text-white">WhatsApp & आवाज़</h2>
-                  <p className="text-[11px] text-zinc-400">बिना टाइप किए सरल संवाद</p>
+                  <p className="text-[11px] text-emerald-200/70">बिना टाइप किए सरल संवाद</p>
                 </div>
               </div>
             </div>
@@ -199,60 +202,63 @@ export default function HomePage() {
         </section>
 
         {/* ── Value Pillars Section ──────────────────────────────────── */}
-        <section className="py-14 px-4 sm:px-8 bg-[#070c1e] border-y border-[#18274a]">
+        <section className="py-14 px-4 sm:px-8 bg-[#02110c] border-y border-[#0d382b]">
           <div className="max-w-6xl mx-auto space-y-10">
             <div className="text-center space-y-2">
-              <span className="text-xs font-bold uppercase tracking-widest text-amber-400">
+              <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full inline-block">
                 विशेषताएं / Key Features
               </span>
               <h2 className="text-2xl sm:text-3xl font-black text-white">
                 हर छोटे व्यापारी के लिए संपूर्ण समाधान
               </h2>
-              <p className="text-sm text-zinc-400 max-w-xl mx-auto">
+              <p className="text-sm text-emerald-200/70 max-w-xl mx-auto">
                 चाहे आप किराना दुकान चलाते हों, सिलाई करते हों या डेयरी का काम — साथी व्यापार आपके साथ है।
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Feature 1 */}
-              <div className="p-6 rounded-2xl bg-[#0e1935] border border-[#1f3463] hover:border-amber-400/50 transition-all group">
-                <div className="w-12 h-12 rounded-xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+              <div className="p-6 rounded-2xl bg-[#06241b] border border-[#134e3d] hover:border-emerald-400/60 shadow-lg hover:shadow-[0_12px_35px_-5px_rgba(16,185,129,0.25)] transition-all group">
+                <div className="w-12 h-12 rounded-xl bg-emerald-400/15 border border-emerald-400/30 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
                   📊
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">सटीक वित्तीय विश्लेषण</h3>
-                <p className="text-sm text-zinc-300 leading-relaxed mb-4">
+                <p className="text-sm text-emerald-100/80 leading-relaxed mb-4">
                   अपने मासिक खर्च और बिक्री के आधार पर जानिए कि लाभ कमाने के लिए कितनी बिक्री जरूरी है (Break-even & Margin Analysis)।
                 </p>
-                <div className="text-xs text-amber-300 font-semibold flex items-center gap-1">
-                  ✓ जीरो-हैलुसिनेशन शुद्ध गणित
+                <div className="text-xs text-emerald-300 font-semibold flex items-center gap-1.5">
+                  <span className="text-emerald-400">✓</span>
+                  <span>जीरो-हैलुसिनेशन शुद्ध गणित</span>
                 </div>
               </div>
 
               {/* Feature 2 */}
-              <div className="p-6 rounded-2xl bg-[#0e1935] border border-[#1f3463] hover:border-amber-400/50 transition-all group">
-                <div className="w-12 h-12 rounded-xl bg-emerald-400/10 border border-emerald-400/30 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+              <div className="p-6 rounded-2xl bg-[#06241b] border border-[#134e3d] hover:border-orange-400/60 shadow-lg hover:shadow-[0_12px_35px_-5px_rgba(249,115,22,0.2)] transition-all group">
+                <div className="w-12 h-12 rounded-xl bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
                   🏛️
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">सरकारी योजनाओं का मिलान</h3>
-                <p className="text-sm text-zinc-300 leading-relaxed mb-4">
+                <p className="text-sm text-emerald-100/80 leading-relaxed mb-4">
                   PMEGP, PM मुद्रा योजना, स्टैंड-अप इंडिया और PM स्वनिधि जैसी योजनाओं की पात्रता जांचें और सीधे आवेदन पोर्टल पर जाएं।
                 </p>
-                <div className="text-xs text-emerald-400 font-semibold flex items-center gap-1">
-                  ✓ स्पष्ट पात्रता कारण व सब्सिडी विवरण
+                <div className="text-xs text-orange-300 font-semibold flex items-center gap-1.5">
+                  <span className="text-orange-400">✓</span>
+                  <span>स्पष्ट पात्रता कारण व सब्सिडी विवरण</span>
                 </div>
               </div>
 
               {/* Feature 3 */}
-              <div className="p-6 rounded-2xl bg-[#0e1935] border border-[#1f3463] hover:border-amber-400/50 transition-all group">
-                <div className="w-12 h-12 rounded-xl bg-blue-400/10 border border-blue-400/30 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+              <div className="p-6 rounded-2xl bg-[#06241b] border border-[#134e3d] hover:border-teal-400/60 shadow-lg hover:shadow-[0_12px_35px_-5px_rgba(45,212,191,0.2)] transition-all group">
+                <div className="w-12 h-12 rounded-xl bg-teal-400/15 border border-teal-400/30 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
                   🗣️
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">आवाज़ और व्हाट्सएप पर सहायता</h3>
-                <p className="text-sm text-zinc-300 leading-relaxed mb-4">
+                <p className="text-sm text-emerald-100/80 leading-relaxed mb-4">
                   इंग्लिश या जटिल ऐप सीखने की जरूरत नहीं। व्हाट्सएप पर मैसेज भेजें या अपनी आवाज़ में बोलकर खाता बनाएं।
                 </p>
-                <div className="text-xs text-blue-300 font-semibold flex items-center gap-1">
-                  ✓ हिंदी व स्थानीय भाषाओं में उपलब्ध
+                <div className="text-xs text-teal-300 font-semibold flex items-center gap-1.5">
+                  <span className="text-teal-400">✓</span>
+                  <span>हिंदी व स्थानीय भाषाओं में उपलब्ध</span>
                 </div>
               </div>
             </div>
@@ -262,7 +268,7 @@ export default function HomePage() {
         {/* ── How It Works Section ───────────────────────────────────── */}
         <section className="py-14 px-4 sm:px-8 max-w-5xl mx-auto space-y-10">
           <div className="text-center space-y-2">
-            <span className="text-xs font-bold uppercase tracking-widest text-amber-400">
+            <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full inline-block">
               प्रक्रिया / How It Works
             </span>
             <h2 className="text-2xl sm:text-3xl font-black text-white">
@@ -271,56 +277,56 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
-            <div className="p-6 rounded-2xl bg-[#101b38] border border-[#1c2e56] relative">
-              <div className="w-9 h-9 rounded-full bg-amber-400 text-slate-950 font-black flex items-center justify-center text-sm mb-4">
+            <div className="p-6 rounded-2xl bg-[#06241b] border border-[#134e3d] shadow-md relative">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-teal-400 text-emerald-950 font-black flex items-center justify-center text-sm mb-4 shadow-sm">
                 1
               </div>
               <h3 className="text-base font-bold text-white mb-1.5">रजिस्टर करें</h3>
-              <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
-                वेबसाइट, WhatsApp या वॉइस असिस्टेंट के माध्यम से अपना मोबाइल नंबर दर्ज करें।
+              <p className="text-xs sm:text-sm text-emerald-100/80 leading-relaxed">
+                वेबसाइट, WhatsApp या वॉइस असिस्टेंट के माध्यम से अपना खाता सुरक्षित बनाएं।
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-[#101b38] border border-[#1c2e56] relative">
-              <div className="w-9 h-9 rounded-full bg-amber-400 text-slate-950 font-black flex items-center justify-center text-sm mb-4">
+            <div className="p-6 rounded-2xl bg-[#06241b] border border-[#134e3d] shadow-md relative">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-teal-400 text-emerald-950 font-black flex items-center justify-center text-sm mb-4 shadow-sm">
                 2
               </div>
               <h3 className="text-base font-bold text-white mb-1.5">व्यापार की जानकारी दें</h3>
-              <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+              <p className="text-xs sm:text-sm text-emerald-100/80 leading-relaxed">
                 अपने काम का क्षेत्र, मासिक कमाई और खर्च बताएं या डायरी का फोटो भेजें।
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-[#101b38] border border-[#1c2e56] relative">
-              <div className="w-9 h-9 rounded-full bg-amber-400 text-slate-950 font-black flex items-center justify-center text-sm mb-4">
+            <div className="p-6 rounded-2xl bg-[#06241b] border border-[#134e3d] shadow-md relative">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-teal-400 text-emerald-950 font-black flex items-center justify-center text-sm mb-4 shadow-sm">
                 3
               </div>
               <h3 className="text-base font-bold text-white mb-1.5">प्लान व योजनाएं पाएं</h3>
-              <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+              <p className="text-xs sm:text-sm text-emerald-100/80 leading-relaxed">
                 तुरंत अपना वित्तीय रिपोर्ट कार्ड और उपयुक्त सरकारी सब्सिडी की सूची देखें।
               </p>
             </div>
           </div>
 
           {/* Bottom Register CTA Card */}
-          <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-[#162544] via-[#1b2f57] to-[#162544] border-2 border-amber-400/40 text-center space-y-5 shadow-2xl">
+          <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-[#062c20] via-[#093d2c] to-[#062c20] border-2 border-emerald-400/40 text-center space-y-5 shadow-[0_15px_40px_rgba(4,47,36,0.6)]">
             <h3 className="text-2xl sm:text-3xl font-black text-white">
               आज ही अपने व्यापार को नई दिशा दें
             </h3>
-            <p className="text-zinc-300 text-sm sm:text-base max-w-xl mx-auto">
+            <p className="text-emerald-100/80 text-sm sm:text-base max-w-xl mx-auto">
               हजारों सूक्ष्म उद्यमियों के साथ जुड़ें और अपनी दुकान व व्यवसाय को मुनाफेदार बनाएं।
             </p>
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 href="/onboarding"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl text-base font-black bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 shadow-lg transform hover:-translate-y-0.5 transition-all"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl text-base font-black bg-gradient-to-r from-emerald-400 to-teal-300 hover:from-emerald-300 hover:to-teal-200 text-emerald-950 shadow-lg transform hover:-translate-y-0.5 transition-all"
               >
                 <span>नया खाता खोलें (Register)</span>
                 <span>→</span>
               </Link>
               <Link
                 href="/facilitator"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-sm font-bold bg-[#0a1128] hover:bg-[#0e1935] text-zinc-200 border border-zinc-700 transition-all"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-sm font-bold bg-[#031610] hover:bg-[#072b20] text-emerald-100 border border-[#134e3d] transition-all"
               >
                 <span>सुविधाकर्ता पोर्टल (Facilitator)</span>
               </Link>
@@ -330,21 +336,21 @@ export default function HomePage() {
       </main>
 
       {/* ── Footer ────────────────────────────────────────────────────── */}
-      <footer className="bg-[#060a17] border-t border-[#14203d] py-8 px-4 sm:px-8 text-center text-xs text-zinc-500 space-y-3">
+      <footer className="bg-[#010c08] border-t border-[#092b20] py-8 px-4 sm:px-8 text-center text-xs text-emerald-300/60 space-y-3">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-zinc-400 font-bold">
-            <span>🤝 साथ-व्यापार (Saathi Vyapar)</span>
+          <div className="flex items-center gap-2 text-emerald-200 font-bold">
+            <span>🤝 साथी व्यापार (Saathi Vyapar)</span>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-4 text-zinc-400">
-            <Link href="/login" className="hover:text-amber-300 transition-colors">
+          <div className="flex flex-wrap items-center justify-center gap-4 text-emerald-200/80">
+            <Link href="/login" className="hover:text-emerald-300 transition-colors">
               लॉगिन (Login)
             </Link>
             <span>•</span>
-            <Link href="/onboarding" className="hover:text-amber-300 transition-colors">
+            <Link href="/onboarding" className="hover:text-emerald-300 transition-colors">
               रजिस्टर (Register)
             </Link>
             <span>•</span>
-            <Link href="/facilitator" className="hover:text-amber-300 transition-colors">
+            <Link href="/facilitator" className="hover:text-emerald-300 transition-colors">
               सुविधाकर्ता (Facilitator)
             </Link>
             <span>•</span>
@@ -385,11 +391,11 @@ export default function HomePage() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setIsFabOpen(false)}
-              className="group flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-[#0f1d3a] hover:bg-[#162b55] text-white border-2 border-emerald-500/80 shadow-[0_6px_25px_rgba(0,0,0,0.6)] transform hover:scale-105 transition-all"
+              className="group flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-[#06241b] hover:bg-[#0c382b] text-white border-2 border-emerald-400/80 shadow-[0_6px_25px_rgba(0,0,0,0.6)] transform hover:scale-105 transition-all"
             >
               <span className="text-xs sm:text-sm font-bold text-white whitespace-nowrap">
                 WhatsApp Support
-                <span className="block text-[10px] text-emerald-400 font-normal">
+                <span className="block text-[10px] text-emerald-300 font-normal">
                   व्हाट्सएप पर सहायता लें
                 </span>
               </span>
@@ -407,15 +413,15 @@ export default function HomePage() {
                 setIsFabOpen(false);
                 setIsVoiceModalOpen(true);
               }}
-              className="group flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-[#0f1d3a] hover:bg-[#162b55] text-white border-2 border-amber-400 shadow-[0_6px_25px_rgba(0,0,0,0.6)] transform hover:scale-105 transition-all text-left"
+              className="group flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-[#06241b] hover:bg-[#0c382b] text-white border-2 border-teal-400 shadow-[0_6px_25px_rgba(0,0,0,0.6)] transform hover:scale-105 transition-all text-left"
             >
               <span className="text-xs sm:text-sm font-bold text-white whitespace-nowrap">
                 Voice Assistant
-                <span className="block text-[10px] text-amber-300 font-normal">
+                <span className="block text-[10px] text-teal-300 font-normal">
                   आवाज़ से पंजीकरण शुरू करें
                 </span>
               </span>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-400 text-slate-950 flex items-center justify-center text-xl shadow-md group-hover:from-amber-400 group-hover:to-yellow-300 transition-all shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-300 text-emerald-950 flex items-center justify-center text-xl shadow-md group-hover:from-emerald-400 group-hover:to-teal-200 transition-all shrink-0">
                 <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
                   <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
                   <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
@@ -425,20 +431,20 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Primary Circular Gold FAB Trigger Button */}
+        {/* Primary Circular Emerald/Teal FAB Trigger Button */}
         <button
           type="button"
           onClick={() => setIsFabOpen((prev) => !prev)}
           aria-label={isFabOpen ? 'Close quick action menu' : 'Open WhatsApp and Voice Assistant options'}
           aria-expanded={isFabOpen}
-          className={`relative z-50 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-300 text-slate-950 shadow-[0_6px_25px_rgba(245,166,35,0.45)] hover:shadow-[0_8px_30px_rgba(245,166,35,0.65)] flex items-center justify-center border-2 border-amber-200 transition-all duration-300 transform active:scale-95 focus:outline-none focus:ring-4 focus:ring-amber-400/50 ${
-            isFabOpen ? 'rotate-90 bg-amber-400' : 'hover:scale-105'
+          className={`relative z-50 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-emerald-500 via-teal-400 to-emerald-300 text-emerald-950 shadow-[0_6px_25px_rgba(16,185,129,0.45)] hover:shadow-[0_8px_32px_rgba(16,185,129,0.65)] flex items-center justify-center border-2 border-emerald-200 transition-all duration-300 transform active:scale-95 focus:outline-none focus:ring-4 focus:ring-emerald-400/50 ${
+            isFabOpen ? 'rotate-90 bg-emerald-400' : 'hover:scale-105'
           }`}
         >
           {isFabOpen ? (
             /* Close X Icon */
             <svg
-              className="w-7 h-7 text-slate-950 transition-transform duration-200"
+              className="w-7 h-7 text-emerald-950 transition-transform duration-200"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -449,11 +455,11 @@ export default function HomePage() {
             /* Combined Chat + Mic Icon */
             <div className="relative flex items-center justify-center">
               {/* Chat Bubble Base */}
-              <svg className="w-7 h-7 sm:w-8 sm:h-8 text-slate-950 fill-current" viewBox="0 0 24 24">
+              <svg className="w-7 h-7 sm:w-8 sm:h-8 text-emerald-950 fill-current" viewBox="0 0 24 24">
                 <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
               </svg>
               {/* Microphone Overlay Badge */}
-              <div className="absolute -bottom-1 -right-1 bg-slate-950 text-amber-400 rounded-full p-0.5 border border-amber-300">
+              <div className="absolute -bottom-1 -right-1 bg-emerald-950 text-emerald-300 rounded-full p-0.5 border border-emerald-300">
                 <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
                   <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
                   <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />

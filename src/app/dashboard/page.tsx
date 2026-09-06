@@ -363,295 +363,308 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   // Risk styling helper
   const risk = planJson?.financialMetrics?.cashFlowRisk || 'low';
   const riskConfig = {
-    low: { bg: 'bg-emerald-950', border: 'border-emerald-500', text: 'text-emerald-400', label: 'कम जोखिम (Low Risk)' },
-    medium: { bg: 'bg-amber-950', border: 'border-amber-500', text: 'text-amber-400', label: 'मध्यम जोखिम (Moderate)' },
-    high: { bg: 'bg-rose-950', border: 'border-rose-500', text: 'text-rose-400', label: 'उच्च जोखिम (High Risk)' },
+    low: { bg: 'bg-[#06241b]', border: 'border-emerald-500', text: 'text-emerald-400', label: 'कम जोखिम (Low Risk)' },
+    medium: { bg: 'bg-[#1b1506]', border: 'border-amber-500', text: 'text-amber-400', label: 'मध्यम जोखिम (Moderate)' },
+    high: { bg: 'bg-[#210609]', border: 'border-rose-500', text: 'text-rose-400', label: 'उच्च जोखिम (High Risk)' },
   }[risk];
 
   return (
-    <div className="min-h-screen bg-black text-white p-3 sm:p-6 pb-24 font-sans selection:bg-amber-500 selection:text-slate-950">
-      {/* ── Top Header ────────────────────────────────────────────── */}
-      <header className="max-w-4xl mx-auto flex items-center justify-between border-b border-zinc-800 pb-4 mb-6">
-        <div>
-          <div className="flex items-center gap-2">
-            <Link href="/" className="hover:opacity-80 transition-opacity">
-              <span className="text-3xl">🤝</span>
-            </Link>
-            <h1 className="text-2xl font-black tracking-tight text-white">साथी व्यापार</h1>
-          </div>
-          <p className="text-zinc-400 text-sm mt-0.5">
-            {user.name || 'उद्यमी'} • {user.phone} {profile?.sector ? `(${profile.sector})` : ''}
-          </p>
-        </div>
-        <div className="flex items-center gap-2.5">
-          <Link
-            href={`/dashboard/schemes?user_id=${user.id}`}
-            className="px-3 py-1.5 bg-emerald-950 hover:bg-emerald-900 text-emerald-300 text-xs font-bold rounded-lg border border-emerald-800 transition-all"
-          >
-            🏛️ योजना केंद्र (Yojana Kendra)
-          </Link>
-          <Link
-            href={`/dashboard/business-guide?user_id=${user.id}`}
-            className="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 text-xs font-black rounded-lg shadow-sm transition-all"
-          >
-            🧭 बिजनेस गाइड (Roadmap)
-          </Link>
-          <Link
-            href="/facilitator"
-            className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold rounded-lg border border-zinc-700 transition-colors"
-          >
-            सुविधाकर्ता / Facilitator
-          </Link>
-          <LogoutButton />
-        </div>
-      </header>
+    <div className="min-h-screen bg-[#031610] text-[#fdfcf7] p-3 sm:p-6 pb-24 font-sans selection:bg-[#10b981] selection:text-[#022c22] relative overflow-hidden">
+      {/* Background radial glow */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute -top-32 -right-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/3 -left-32 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl"></div>
+      </div>
 
-      <main className="max-w-4xl mx-auto space-y-6">
-        {/* ── Plain Language AI Advisory Banner ─────────────────────── */}
-        <section className="bg-zinc-900 border-2 border-indigo-500/80 rounded-2xl p-5 shadow-2xl">
-          <div className="flex items-start gap-3">
-            <div className="p-2.5 bg-indigo-950 border border-indigo-500/50 rounded-xl text-2xl shrink-0">
-              💡
+      <div className="relative z-10 max-w-4xl mx-auto space-y-6">
+        {/* ── Top Header ────────────────────────────────────────────── */}
+        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#0d382b] pb-4">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <Link href="/" className="hover:opacity-80 transition-opacity">
+                <span className="text-3xl">🤝</span>
+              </Link>
+              <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-2">
+                साथी व्यापार
+                <span className="text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                  उद्यमी डैशबोर्ड
+                </span>
+              </h1>
             </div>
-            <div className="space-y-1">
-              <h2 className="text-base font-bold text-indigo-300 uppercase tracking-wide">
-                व्यापारिक सलाह / Financial Advisory
-              </h2>
-              <p className="text-white text-base sm:text-lg leading-relaxed font-medium">
-                {latestPlan?.summary_text ||
-                  'आपका वित्तीय विश्लेषण तैयार है। नीचे अपने मुनाफे और सरकारी योजनाओं की जानकारी देखें।'}
-              </p>
-              {latestPlan?.created_at && (
-                <p className="text-xs text-zinc-400 pt-1">
-                  अपडेट: {new Date(latestPlan.created_at).toLocaleDateString('hi-IN', { dateStyle: 'long' })}
-                </p>
-              )}
-              <div className="pt-2">
-                <Link
-                  href={`/dashboard/business-guide?user_id=${user.id}`}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-amber-400 to-yellow-300 hover:from-amber-300 hover:to-yellow-200 text-slate-950 font-extrabold text-xs rounded-lg transition-all shadow-sm"
-                >
-                  <span>🧭 व्यापार सुधार रोडमैप बनाएं (5-Stage Business Guide)</span>
-                  <span>→</span>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Key Metrics Cards (High Contrast Grid) ───────────────── */}
-        <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {/* Card 1: Profit Margin */}
-          <div className="bg-zinc-900 border-2 border-zinc-700 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
-            <span className="text-zinc-400 text-xs font-bold uppercase tracking-wider">
-              लाभ प्रतिशत / Margin %
-            </span>
-            <div className="my-2">
-              <span className={`text-4xl font-black ${Number(latestPlan?.margin_percent || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                {latestPlan?.margin_percent !== undefined ? `${Number(latestPlan.margin_percent).toFixed(1)}%` : '—'}
-              </span>
-            </div>
-            <p className="text-xs text-zinc-300">
-              {Number(latestPlan?.margin_percent || 0) >= 0 ? '✓ लाभ की स्थिति में है' : '⚠️ नुकसान में चल रहा है'}
+            <p className="text-emerald-200/70 text-sm mt-0.5">
+              {user.name || 'उद्यमी'} • {user.phone} {profile?.sector ? `(${profile.sector})` : ''}
             </p>
           </div>
-
-          {/* Card 2: Break-even target */}
-          <div className="bg-zinc-900 border-2 border-zinc-700 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
-            <span className="text-zinc-400 text-xs font-bold uppercase tracking-wider">
-              लागत निकालने का लक्ष्य / Break-Even
-            </span>
-            <div className="my-2">
-              <span className="text-3xl sm:text-4xl font-black text-amber-300">
-                ₹{profile?.monthly_expense_est ? Number(profile.monthly_expense_est).toLocaleString('en-IN') : '28,000'}
-              </span>
-            </div>
-            <p className="text-xs text-zinc-300">खर्च निकालने के लिए न्यूनतम मासिक बिक्री</p>
-          </div>
-
-          {/* Card 3: Cash Flow Risk */}
-          <div className={`${riskConfig.bg} border-2 ${riskConfig.border} rounded-2xl p-5 shadow-lg flex flex-col justify-between`}>
-            <span className="text-zinc-400 text-xs font-bold uppercase tracking-wider">
-              कैश फ्लो स्थिति / Cash Flow Risk
-            </span>
-            <div className="my-2">
-              <span className={`text-2xl sm:text-3xl font-black ${riskConfig.text}`}>
-                {riskConfig.label}
-              </span>
-            </div>
-            <p className="text-xs text-zinc-300">
-              {profile?.existing_loans ? 'ऋण (Loan): सक्रिय है' : 'कोई सक्रिय ऋण नहीं'}
-            </p>
-          </div>
-        </section>
-
-        {/* ── 30-Day Ledger Trend Chart ─────────────────────────────── */}
-        <section className="bg-zinc-900 border-2 border-zinc-700 rounded-2xl p-5 shadow-xl">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-            <div>
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                📊 पिछले 30 दिनों का हिसाब / 30-Day Cash Flow
-              </h3>
-              <p className="text-xs text-zinc-400">दैनिक आय और व्यय का ग्राफ</p>
-            </div>
-            <div className="flex items-center gap-4 text-xs font-bold">
-              <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-emerald-400 inline-block"></span>
-                <span className="text-emerald-300">कुल कमाई: ₹{totalIncome.toLocaleString('en-IN')}</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-rose-400 inline-block"></span>
-                <span className="text-rose-300">कुल खर्च: ₹{totalExpense.toLocaleString('en-IN')}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Visual SVG Line Chart */}
-          <div className="w-full bg-black/60 rounded-xl p-4 border border-zinc-800">
-            <svg viewBox="0 0 500 160" className="w-full h-40 overflow-visible">
-              {/* Grid lines */}
-              <line x1="40" y1="20" x2="480" y2="20" stroke="#333" strokeDasharray="3 3" />
-              <line x1="40" y1="70" x2="480" y2="70" stroke="#333" strokeDasharray="3 3" />
-              <line x1="40" y1="120" x2="480" y2="120" stroke="#333" strokeDasharray="3 3" />
-
-              {/* Income Line (Green) */}
-              <polyline
-                fill="none"
-                stroke="#10b981"
-                strokeWidth="3.5"
-                points="40,110 75,95 110,80 145,100 180,60 215,75 250,45 285,60 320,35 355,50 390,40 425,30 460,25"
-              />
-
-              {/* Expense Line (Red) */}
-              <polyline
-                fill="none"
-                stroke="#f43f5e"
-                strokeWidth="3.5"
-                points="40,120 75,115 110,95 145,90 180,85 215,90 250,75 285,80 320,70 355,65 390,75 425,60 460,55"
-              />
-
-              {/* Data points */}
-              <circle cx="460" cy="25" r="5" fill="#10b981" />
-              <circle cx="460" cy="55" r="5" fill="#f43f5e" />
-            </svg>
-            <div className="flex justify-between text-[10px] text-zinc-500 mt-2 px-2">
-              {days.slice(0, 7).map((d, i) => (
-                <span key={i}>{d}</span>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── Matched Government Schemes ───────────────────────────── */}
-        <section className="bg-zinc-900 border-2 border-zinc-700 rounded-2xl p-5 shadow-xl space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                🏛️ सरकारी योजनाएं / Matched Schemes
-              </h3>
-              <p className="text-xs text-zinc-400">
-                आपके प्रोफाइल के आधार पर {eligibleCount} योजनाएं योग्य पाई गईं
-              </p>
-            </div>
-            <span className="px-3 py-1 bg-emerald-950 border border-emerald-500 text-emerald-400 text-xs font-extrabold rounded-full">
-              {eligibleCount} योग्य (Eligible)
-            </span>
-          </div>
-
-          <div className="space-y-3">
-            {matchedSchemes.length === 0 ? (
-              <p className="text-sm text-zinc-400">कोई योजना डेटा उपलब्ध नहीं है।</p>
-            ) : (
-              matchedSchemes.slice(0, 6).map((item, idx) => (
-                <div
-                  key={idx}
-                  className={`p-4 rounded-xl border-2 ${
-                    item.eligible
-                      ? 'bg-zinc-950 border-emerald-600/80'
-                      : 'bg-zinc-950/60 border-zinc-800 opacity-75'
-                  }`}
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">{item.eligible ? '✅' : 'ℹ️'}</span>
-                        <h4 className="text-base font-bold text-white">{item.schemeName}</h4>
-                      </div>
-                      {item.benefitSummary && (
-                        <p className="text-xs text-emerald-300 font-medium">
-                          {item.benefitSummary}
-                        </p>
-                      )}
-                    </div>
-                    {item.applicationLink && (
-                      <a
-                        href={item.applicationLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-3 py-1.5 bg-emerald-900/60 hover:bg-emerald-800 text-emerald-300 text-xs font-bold rounded-lg border border-emerald-600 shrink-0 text-center"
-                      >
-                        आवेदन लिंक ↗
-                      </a>
-                    )}
-                  </div>
-                  {item.reasons && item.reasons.length > 0 && (
-                    <div className="mt-2 text-xs text-zinc-400 space-y-0.5 border-t border-zinc-800/80 pt-2">
-                      {item.reasons.slice(0, 2).map((r, i) => (
-                        <p key={i}>{r}</p>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
-
-          <div className="pt-2 flex justify-center">
+          <div className="flex flex-wrap items-center gap-2">
             <Link
               href={`/dashboard/schemes?user_id=${user.id}`}
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-300 hover:from-amber-400 hover:to-yellow-200 text-slate-950 font-black text-xs sm:text-sm rounded-xl transition-all shadow-md"
+              className="px-3 py-1.5 bg-[#06241b] hover:bg-[#0b382a] text-emerald-300 text-xs font-bold rounded-xl border border-[#134e3d] shadow-sm transition-all"
             >
-              <span>🏛️ योजना केंद्र खोलें — सभी 15+ योजनाएं, पात्रता व दस्तावेज चेकलिस्ट (Open Yojana Kendra)</span>
-              <span>→</span>
+              🏛️ योजना केंद्र (Yojana Kendra)
             </Link>
+            <Link
+              href={`/dashboard/business-guide?user_id=${user.id}`}
+              className="px-3 py-1.5 bg-gradient-to-r from-orange-500 to-amber-400 hover:from-orange-400 hover:to-amber-300 text-slate-950 text-xs font-black rounded-xl shadow-sm transition-all"
+            >
+              🧭 बिजनेस गाइड (Roadmap)
+            </Link>
+            <Link
+              href="/facilitator"
+              className="px-3 py-1.5 bg-[#06241b] hover:bg-[#0b382a] text-emerald-200 text-xs font-bold rounded-xl border border-[#134e3d] transition-colors"
+            >
+              सुविधाकर्ता / Facilitator
+            </Link>
+            <LogoutButton />
           </div>
-        </section>
+        </header>
 
-        {/* ── Recent Ledger Entries ─────────────────────────────────── */}
-        <section className="bg-zinc-900 border-2 border-zinc-700 rounded-2xl p-5 shadow-xl space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              📝 हाल के लेन-देन / Recent Transactions
-            </h3>
-            <span className="text-xs text-zinc-400 font-mono">
-              {ledgerEntries.length} Records
-            </span>
-          </div>
-
-          <div className="space-y-2">
-            {ledgerEntries.slice(0, 5).map((entry) => (
-              <div
-                key={entry.id}
-                className="flex items-center justify-between p-3 bg-zinc-950 rounded-xl border border-zinc-800"
-              >
-                <div>
-                  <p className="text-sm font-bold text-white">{entry.description}</p>
-                  <p className="text-xs text-zinc-400">
-                    {new Date(entry.created_at).toLocaleDateString('hi-IN')} • {entry.source.toUpperCase()}
+        <main className="space-y-6">
+          {/* ── Plain Language AI Advisory Banner ─────────────────────── */}
+          <section className="bg-[#06241b]/95 border-2 border-emerald-500/50 rounded-3xl p-5 sm:p-6 shadow-[0_15px_45px_rgba(2,44,34,0.7)] backdrop-blur-xl relative overflow-hidden">
+            <div className="flex items-start gap-3.5">
+              <div className="p-3 bg-[#02130e] border border-[#134e3d] rounded-2xl text-2xl shrink-0 shadow-inner">
+                💡
+              </div>
+              <div className="space-y-1.5 flex-1">
+                <h2 className="text-xs sm:text-sm font-black text-emerald-400 uppercase tracking-wider">
+                  व्यापारिक सलाह / Financial Advisory
+                </h2>
+                <p className="text-white text-base sm:text-lg leading-relaxed font-semibold">
+                  {latestPlan?.summary_text ||
+                    'आपका वित्तीय विश्लेषण तैयार है। नीचे अपने मुनाफे और सरकारी योजनाओं की जानकारी देखें।'}
+                </p>
+                {latestPlan?.created_at && (
+                  <p className="text-xs text-emerald-300/60 pt-1">
+                    अपडेट: {new Date(latestPlan.created_at).toLocaleDateString('hi-IN', { dateStyle: 'long' })}
                   </p>
+                )}
+                <div className="pt-2">
+                  <Link
+                    href={`/dashboard/business-guide?user_id=${user.id}`}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-400 hover:from-orange-400 hover:to-amber-300 text-slate-950 font-black text-xs rounded-xl transition-all shadow-md"
+                  >
+                    <span>🧭 व्यापार सुधार रोडमैप बनाएं (5-Stage Business Guide)</span>
+                    <span>→</span>
+                  </Link>
                 </div>
-                <span
-                  className={`text-base font-black ${
-                    entry.entry_type === 'income' ? 'text-emerald-400' : 'text-rose-400'
-                  }`}
-                >
-                  {entry.entry_type === 'income' ? '+' : '-'}₹{entry.amount.toLocaleString('en-IN')}
+              </div>
+            </div>
+          </section>
+
+          {/* ── Key Metrics Cards (High Contrast Grid) ───────────────── */}
+          <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Card 1: Profit Margin */}
+            <div className="bg-[#06241b]/95 border-2 border-[#134e3d] rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+              <span className="text-emerald-300/80 text-xs font-bold uppercase tracking-wider">
+                लाभ प्रतिशत / Margin %
+              </span>
+              <div className="my-2">
+                <span className={`text-4xl font-black ${Number(latestPlan?.margin_percent || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {latestPlan?.margin_percent !== undefined ? `${Number(latestPlan.margin_percent).toFixed(1)}%` : '—'}
                 </span>
               </div>
-            ))}
-          </div>
-        </section>
-      </main>
+              <p className="text-xs text-emerald-200/80">
+                {Number(latestPlan?.margin_percent || 0) >= 0 ? '✓ लाभ की स्थिति में है' : '⚠️ नुकसान में चल रहा है'}
+              </p>
+            </div>
+
+            {/* Card 2: Break-even target */}
+            <div className="bg-[#06241b]/95 border-2 border-[#134e3d] rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+              <span className="text-emerald-300/80 text-xs font-bold uppercase tracking-wider">
+                लागत निकालने का लक्ष्य / Break-Even
+              </span>
+              <div className="my-2">
+                <span className="text-3xl sm:text-4xl font-black text-amber-300">
+                  ₹{profile?.monthly_expense_est ? Number(profile.monthly_expense_est).toLocaleString('en-IN') : '28,000'}
+                </span>
+              </div>
+              <p className="text-xs text-emerald-200/80">खर्च निकालने के लिए न्यूनतम मासिक बिक्री</p>
+            </div>
+
+            {/* Card 3: Cash Flow Risk */}
+            <div className={`${riskConfig.bg} border-2 ${riskConfig.border} rounded-2xl p-5 shadow-lg flex flex-col justify-between`}>
+              <span className="text-emerald-300/80 text-xs font-bold uppercase tracking-wider">
+                कैश फ्लो स्थिति / Cash Flow Risk
+              </span>
+              <div className="my-2">
+                <span className={`text-2xl sm:text-3xl font-black ${riskConfig.text}`}>
+                  {riskConfig.label}
+                </span>
+              </div>
+              <p className="text-xs text-emerald-200/80">
+                {profile?.existing_loans ? 'ऋण (Loan): सक्रिय है' : 'कोई सक्रिय ऋण नहीं'}
+              </p>
+            </div>
+          </section>
+
+          {/* ── 30-Day Ledger Trend Chart ─────────────────────────────── */}
+          <section className="bg-[#06241b]/95 border-2 border-[#134e3d] rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  📊 पिछले 30 दिनों का हिसाब / 30-Day Cash Flow
+                </h3>
+                <p className="text-xs text-emerald-300/70">दैनिक आय और व्यय का ग्राफ</p>
+              </div>
+              <div className="flex items-center gap-4 text-xs font-bold">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-3 h-3 rounded-full bg-emerald-400 inline-block shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
+                  <span className="text-emerald-300">कुल कमाई: ₹{totalIncome.toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-3 h-3 rounded-full bg-rose-400 inline-block shadow-[0_0_8px_rgba(244,63,94,0.8)]"></span>
+                  <span className="text-rose-300">कुल खर्च: ₹{totalExpense.toLocaleString('en-IN')}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Visual SVG Line Chart */}
+            <div className="w-full bg-[#02130e] rounded-2xl p-4 border border-[#0d382b]">
+              <svg viewBox="0 0 500 160" className="w-full h-40 overflow-visible">
+                {/* Grid lines */}
+                <line x1="40" y1="20" x2="480" y2="20" stroke="#0d382b" strokeDasharray="3 3" />
+                <line x1="40" y1="70" x2="480" y2="70" stroke="#0d382b" strokeDasharray="3 3" />
+                <line x1="40" y1="120" x2="480" y2="120" stroke="#0d382b" strokeDasharray="3 3" />
+
+                {/* Income Line (Emerald) */}
+                <polyline
+                  fill="none"
+                  stroke="#10b981"
+                  strokeWidth="3.5"
+                  points="40,110 75,95 110,80 145,100 180,60 215,75 250,45 285,60 320,35 355,50 390,40 425,30 460,25"
+                />
+
+                {/* Expense Line (Terracotta/Red) */}
+                <polyline
+                  fill="none"
+                  stroke="#f43f5e"
+                  strokeWidth="3.5"
+                  points="40,120 75,115 110,95 145,90 180,85 215,90 250,75 285,80 320,70 355,65 390,75 425,60 460,55"
+                />
+
+                {/* Data points */}
+                <circle cx="460" cy="25" r="5" fill="#10b981" />
+                <circle cx="460" cy="55" r="5" fill="#f43f5e" />
+              </svg>
+              <div className="flex justify-between text-[10px] text-emerald-400/60 mt-2 px-2">
+                {days.slice(0, 7).map((d, i) => (
+                  <span key={i}>{d}</span>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ── Matched Government Schemes ───────────────────────────── */}
+          <section className="bg-[#06241b]/95 border-2 border-[#134e3d] rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  🏛️ सरकारी योजनाएं / Matched Schemes
+                </h3>
+                <p className="text-xs text-emerald-300/70">
+                  आपके प्रोफाइल के आधार पर {eligibleCount} योजनाएं योग्य पाई गईं
+                </p>
+              </div>
+              <span className="px-3 py-1 bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 text-xs font-extrabold rounded-full">
+                {eligibleCount} योग्य (Eligible)
+              </span>
+            </div>
+
+            <div className="space-y-3">
+              {matchedSchemes.length === 0 ? (
+                <p className="text-sm text-emerald-300/70">कोई योजना डेटा उपलब्ध नहीं है।</p>
+              ) : (
+                matchedSchemes.slice(0, 6).map((item, idx) => (
+                  <div
+                    key={idx}
+                    className={`p-4 rounded-2xl border-2 transition-all ${
+                      item.eligible
+                        ? 'bg-[#02130e] border-emerald-500/60'
+                        : 'bg-[#02130e]/60 border-[#0d382b] opacity-75'
+                    }`}
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{item.eligible ? '✅' : 'ℹ️'}</span>
+                          <h4 className="text-base font-bold text-white">{item.schemeName}</h4>
+                        </div>
+                        {item.benefitSummary && (
+                          <p className="text-xs text-emerald-300 font-medium">
+                            {item.benefitSummary}
+                          </p>
+                        )}
+                      </div>
+                      {item.applicationLink && (
+                        <a
+                          href={item.applicationLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-bold rounded-xl border border-emerald-500/40 shrink-0 text-center transition-all"
+                        >
+                          आवेदन लिंक ↗
+                        </a>
+                      )}
+                    </div>
+                    {item.reasons && item.reasons.length > 0 && (
+                      <div className="mt-2 text-xs text-emerald-200/60 space-y-0.5 border-t border-[#0d382b] pt-2">
+                        {item.reasons.slice(0, 2).map((r, i) => (
+                          <p key={i}>{r}</p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="pt-2 flex justify-center">
+              <Link
+                href={`/dashboard/schemes?user_id=${user.id}`}
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-orange-500 via-amber-400 to-yellow-300 hover:from-orange-400 hover:to-yellow-200 text-slate-950 font-black text-xs sm:text-sm rounded-xl transition-all shadow-md"
+              >
+                <span>🏛️ योजना केंद्र खोलें — सभी 15+ योजनाएं, पात्रता व दस्तावेज चेकलिस्ट (Open Yojana Kendra)</span>
+                <span>→</span>
+              </Link>
+            </div>
+          </section>
+
+          {/* ── Recent Ledger Entries ─────────────────────────────────── */}
+          <section className="bg-[#06241b]/95 border-2 border-[#134e3d] rounded-3xl p-5 sm:p-6 shadow-xl space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                📝 हाल के लेन-देन / Recent Transactions
+              </h3>
+              <span className="text-xs text-emerald-300/70 font-mono">
+                {ledgerEntries.length} Records
+              </span>
+            </div>
+
+            <div className="space-y-2">
+              {ledgerEntries.slice(0, 5).map((entry) => (
+                <div
+                  key={entry.id}
+                  className="flex items-center justify-between p-3.5 bg-[#02130e] rounded-2xl border border-[#0d382b]"
+                >
+                  <div>
+                    <p className="text-sm font-bold text-white">{entry.description}</p>
+                    <p className="text-xs text-emerald-200/60">
+                      {new Date(entry.created_at).toLocaleDateString('hi-IN')} • {entry.source.toUpperCase()}
+                    </p>
+                  </div>
+                  <span
+                    className={`text-base font-black ${
+                      entry.entry_type === 'income' ? 'text-emerald-400' : 'text-rose-400'
+                    }`}
+                  >
+                    {entry.entry_type === 'income' ? '+' : '-'}₹{entry.amount.toLocaleString('en-IN')}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+        </main>
+      </div>
     </div>
   );
 }

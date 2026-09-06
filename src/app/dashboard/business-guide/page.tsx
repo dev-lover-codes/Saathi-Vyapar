@@ -309,238 +309,246 @@ function BusinessGuideContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#070c1e] text-[#fdfbf7] font-sans p-3 sm:p-6 pb-24 selection:bg-[#f5a623] selection:text-[#0a1128]">
-      {/* ── Top Header Navigation ────────────────────────────────── */}
-      <header className="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1c2e56] pb-4 mb-6">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <span className="text-3xl filter drop-shadow">🧭</span>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
-                व्यापारिक मार्गदर्शन रोडमैप (Business Transformation Guide)
-              </h1>
-              <p className="text-xs sm:text-sm text-zinc-400 mt-0.5">
-                {userName} • {userSector} • AI संचालित 5-चरणीय विकास योजना
-              </p>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-[#031610] text-[#fdfcf7] font-sans p-3 sm:p-6 pb-24 selection:bg-[#10b981] selection:text-[#022c22] relative overflow-hidden">
+      {/* Background radial glow */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute -top-32 -right-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/3 -left-32 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl"></div>
+      </div>
 
-        <div className="flex items-center gap-2.5">
-          <Link
-            href={`/dashboard${userId ? `?user_id=${userId}` : ''}`}
-            className="px-3.5 py-2 bg-[#122040] hover:bg-[#1a2d59] text-amber-300 text-xs font-bold rounded-xl border border-[#233b70] transition-colors"
-          >
-            ← मुख्य डैशबोर्ड (Dashboard)
-          </Link>
-        </div>
-      </header>
-
-      <main className="max-w-5xl mx-auto space-y-8">
-        {/* ── Challenge Input Section ──────────────────────────────── */}
-        <section className="bg-[#0f1d3e] border-2 border-[#1c356e] rounded-3xl p-5 sm:p-7 shadow-2xl space-y-4">
-          <div className="flex items-start gap-3">
-            <div className="p-3 bg-amber-400/10 border border-amber-400/30 rounded-2xl text-2xl shrink-0">
-              💡
-            </div>
-            <div>
-              <h2 className="text-base sm:text-lg font-bold text-white">
-                अपने व्यापार की चुनौतियां बताएं / Describe Your Challenges
-              </h2>
-              <p className="text-xs text-zinc-300 mt-0.5">
-                बोलकर या लिखकर बताएं कि आपको व्यापार में क्या कठिनाई आ रही है (जैसे: कच्चे माल की लागत, बिचौलिये, कम मुनाफा, सरकारी योजनाएं)।
-              </p>
-            </div>
-          </div>
-
-          {/* Quick Preset Buttons */}
-          <div className="space-y-1.5 pt-1">
-            <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">
-              उदाहरण चुनें (Quick Presets):
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {PRESET_CHALLENGES.map((preset, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setChallengeText(preset.text)}
-                  className="px-3 py-1.5 rounded-xl bg-[#091228] hover:bg-[#142347] border border-[#1d3363] hover:border-amber-400/50 text-xs text-zinc-300 font-medium transition-all"
-                >
-                  {preset.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Main Input Form */}
-          <form onSubmit={handleGenerateRoadmap} className="space-y-3 pt-2">
-            <div className="relative">
-              <textarea
-                rows={3}
-                required
-                value={challengeText}
-                onChange={(e) => setChallengeText(e.target.value)}
-                placeholder="उदा. बिचौलिये सारा मुनाफा ले जाते हैं, कच्चा माल बहुत महंगा मिलता है और दुकान का खर्च निकालना मुश्किल हो रहा है..."
-                className="w-full bg-[#081024] text-white placeholder-zinc-500 border border-[#1f376e] rounded-2xl p-4 text-sm sm:text-base focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 shadow-inner"
-              />
-
-              {/* Voice Input Button inside textarea container */}
-              {hasVoiceSupport && (
-                <button
-                  type="button"
-                  onClick={toggleVoiceListening}
-                  className={`absolute right-3.5 bottom-3.5 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-md ${
-                    isListening
-                      ? 'bg-rose-500 text-white animate-pulse'
-                      : 'bg-[#14244a] text-amber-300 border border-amber-400/30 hover:bg-[#1f376e]'
-                  }`}
-                  title={isListening ? 'Stop listening' : 'Speak your challenge'}
-                >
-                  <span>🎙️</span>
-                  <span>{isListening ? 'सुन रहे हैं...' : 'बोलें'}</span>
-                </button>
-              )}
-            </div>
-
-            {errorMessage && (
-              <div className="p-3 rounded-xl bg-rose-950/80 border border-rose-500/60 text-xs text-rose-200 flex items-center gap-2">
-                <span>⚠️</span>
-                <span>{errorMessage}</span>
-              </div>
-            )}
-
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
-              <span className="text-[11px] text-zinc-400">
-                🔒 Gemini AI आपकी जानकारी और प्रोफाइल के आधार पर सटीक 5-चरणीय रोडमैप तैयार करेगा।
-              </span>
-
-              <button
-                type="submit"
-                disabled={isGenerating || !challengeText.trim()}
-                className="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950 text-sm font-extrabold shadow-lg hover:scale-105 active:scale-95 transition-all disabled:opacity-50 shrink-0"
-              >
-                {isGenerating ? '⏳ रोडमैप तैयार हो रहा है...' : '🚀 रोडमैप बनाएं (Generate Roadmap) →'}
-              </button>
-            </div>
-          </form>
-        </section>
-
-        {/* ── Past Guides Revisit Tabs ─────────────────────────────── */}
-        {pastGuides.length > 1 && (
-          <section className="bg-[#0b1633] border border-[#1c356e] rounded-2xl p-4 space-y-2">
-            <span className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
-              <span>📜 पूर्व में बनाए गए रोडमैप (Saved Roadmaps):</span>
-            </span>
-            <div className="flex items-center gap-2 overflow-x-auto pb-1">
-              {pastGuides.map((g, idx) => (
-                <button
-                  key={g.id}
-                  type="button"
-                  onClick={() => {
-                    setCurrentRoadmap(g.roadmap_json);
-                    setSelectedGuideId(g.id);
-                  }}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap border transition-all ${
-                    selectedGuideId === g.id
-                      ? 'bg-amber-400 text-slate-950 border-amber-300 font-bold shadow-sm'
-                      : 'bg-[#0f1d3e] text-zinc-300 border-[#1f376e] hover:border-zinc-500'
-                  }`}
-                >
-                  योजना {pastGuides.length - idx} (
-                  {new Date(g.created_at).toLocaleDateString('hi-IN', {
-                    month: 'short',
-                    day: 'numeric',
-                  })}
-                  )
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* ── 5 Numbered Roadmap Cards Display ─────────────────────── */}
-        {currentRoadmap && currentRoadmap.length === 5 && (
-          <section className="space-y-5 animate-in fade-in duration-300">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#1c2e56] pb-3">
+      <div className="relative z-10 max-w-5xl mx-auto space-y-8">
+        {/* ── Top Header Navigation ────────────────────────────────── */}
+        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#0d382b] pb-4">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <span className="text-3xl filter drop-shadow">🧭</span>
               <div>
-                <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
-                  🗺️ 5-चरणीय व्यवसाय परिवर्तन रोडमैप
-                </h3>
-                <p className="text-xs text-zinc-400">
-                  हर चरण को क्रमिक रूप से पूरा करें और अपने व्यापार को सुरक्षित लाभ की ओर ले जाएं।
+                <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+                  व्यापारिक मार्गदर्शन रोडमैप (Business Transformation Guide)
+                </h1>
+                <p className="text-xs sm:text-sm text-emerald-200/70 mt-0.5">
+                  {userName} • {userSector} • AI संचालित 5-चरणीय विकास योजना
                 </p>
               </div>
+            </div>
+          </div>
 
-              <span className="px-3 py-1 bg-emerald-950 border border-emerald-500 text-emerald-400 text-xs font-extrabold rounded-full w-fit">
-                ✓ 5 चरण सक्रिय
-              </span>
+          <div className="flex items-center gap-2.5">
+            <Link
+              href={`/dashboard${userId ? `?user_id=${userId}` : ''}`}
+              className="px-3.5 py-2 bg-[#06241b] hover:bg-[#0b382a] text-emerald-300 text-xs font-bold rounded-xl border border-[#134e3d] shadow-sm transition-all"
+            >
+              ← मुख्य डैशबोर्ड (Dashboard)
+            </Link>
+          </div>
+        </header>
+
+        <main className="space-y-8">
+          {/* ── Challenge Input Section ──────────────────────────────── */}
+          <section className="bg-[#06241b]/95 border-2 border-[#134e3d] rounded-3xl p-5 sm:p-7 shadow-[0_15px_45px_rgba(2,44,34,0.7)] backdrop-blur-xl space-y-4">
+            <div className="flex items-start gap-3.5">
+              <div className="p-3 bg-[#02130e] border border-[#134e3d] rounded-2xl text-2xl shrink-0 shadow-inner">
+                💡
+              </div>
+              <div>
+                <h2 className="text-base sm:text-lg font-bold text-white">
+                  अपने व्यापार की चुनौतियां बताएं / Describe Your Challenges
+                </h2>
+                <p className="text-xs text-emerald-300/70 mt-0.5">
+                  बोलकर या लिखकर बताएं कि आपको व्यापार में क्या कठिनाई आ रही है (जैसे: कच्चे माल की लागत, बिचौलिये, कम मुनाफा, सरकारी योजनाएं)।
+                </p>
+              </div>
             </div>
 
-            {/* The 5 Cards Grid */}
-            <div className="space-y-4">
-              {currentRoadmap.map((item, index) => {
-                const stepNum = index + 1;
-                const icon = STAGE_ICONS[item.stage] || '📌';
-
-                return (
-                  <div
-                    key={item.stage}
-                    className="bg-[#0f1d3e] border-2 border-[#1c356e] hover:border-amber-400/50 rounded-2xl p-5 sm:p-6 shadow-xl transition-all space-y-3"
+            {/* Quick Preset Buttons */}
+            <div className="space-y-1.5 pt-1">
+              <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">
+                उदाहरण चुनें (Quick Presets):
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {PRESET_CHALLENGES.map((preset, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setChallengeText(preset.text)}
+                    className="px-3 py-1.5 rounded-xl bg-[#02130e] hover:bg-[#0b382a] border border-[#134e3d] hover:border-emerald-400/50 text-xs text-emerald-200 font-medium transition-all"
                   >
-                    {/* Card Header */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#1b2d56] pb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-950 font-black text-base flex items-center justify-center shadow-md shrink-0">
-                          {stepNum}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-lg">{icon}</span>
-                            <h4 className="text-base sm:text-lg font-black text-white">
-                              {item.title_hi}
-                            </h4>
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Main Input Form */}
+            <form onSubmit={handleGenerateRoadmap} className="space-y-3 pt-2">
+              <div className="relative">
+                <textarea
+                  rows={3}
+                  required
+                  value={challengeText}
+                  onChange={(e) => setChallengeText(e.target.value)}
+                  placeholder="उदा. बिचौलिये सारा मुनाफा ले जाते हैं, कच्चा माल बहुत महंगा मिलता है और दुकान का खर्च निकालना मुश्किल हो रहा है..."
+                  className="w-full bg-[#02130e] text-white placeholder-emerald-700/60 border border-[#134e3d] rounded-2xl p-4 text-sm sm:text-base focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/40 shadow-inner"
+                />
+
+                {/* Voice Input Button inside textarea container */}
+                {hasVoiceSupport && (
+                  <button
+                    type="button"
+                    onClick={toggleVoiceListening}
+                    className={`absolute right-3.5 bottom-3.5 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-md ${
+                      isListening
+                        ? 'bg-rose-500 text-white animate-pulse'
+                        : 'bg-[#06241b] text-emerald-300 border border-[#134e3d] hover:bg-[#0c3a2c]'
+                    }`}
+                    title={isListening ? 'Stop listening' : 'Speak your challenge'}
+                  >
+                    <span>🎙️</span>
+                    <span>{isListening ? 'सुन रहे हैं...' : 'बोलें'}</span>
+                  </button>
+                )}
+              </div>
+
+              {errorMessage && (
+                <div className="p-3 rounded-xl bg-rose-950/80 border border-rose-500/60 text-xs text-rose-200 flex items-center gap-2">
+                  <span>⚠️</span>
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
+                <span className="text-[11px] text-emerald-300/60">
+                  🔒 Gemini AI आपकी जानकारी और प्रोफाइल के आधार पर सटीक 5-चरणीय रोडमैप तैयार करेगा।
+                </span>
+
+                <button
+                  type="submit"
+                  disabled={isGenerating || !challengeText.trim()}
+                  className="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-orange-500 via-amber-400 to-yellow-300 text-slate-950 text-sm font-black shadow-lg hover:scale-105 active:scale-95 transition-all disabled:opacity-50 shrink-0"
+                >
+                  {isGenerating ? '⏳ रोडमैप तैयार हो रहा है...' : '🚀 रोडमैप बनाएं (Generate Roadmap) →'}
+                </button>
+              </div>
+            </form>
+          </section>
+
+          {/* ── Past Guides Revisit Tabs ─────────────────────────────── */}
+          {pastGuides.length > 1 && (
+            <section className="bg-[#06241b] border border-[#134e3d] rounded-2xl p-4 space-y-2">
+              <span className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                <span>📜 पूर्व में बनाए गए रोडमैप (Saved Roadmaps):</span>
+              </span>
+              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                {pastGuides.map((g, idx) => (
+                  <button
+                    key={g.id}
+                    type="button"
+                    onClick={() => {
+                      setCurrentRoadmap(g.roadmap_json);
+                      setSelectedGuideId(g.id);
+                    }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap border transition-all ${
+                      selectedGuideId === g.id
+                        ? 'bg-amber-400 text-slate-950 border-amber-300 font-bold shadow-sm'
+                        : 'bg-[#02130e] text-emerald-200/80 border-[#134e3d] hover:border-emerald-400/50'
+                    }`}
+                  >
+                    योजना {pastGuides.length - idx} (
+                    {new Date(g.created_at).toLocaleDateString('hi-IN', {
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                    )
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* ── 5 Numbered Roadmap Cards Display ─────────────────────── */}
+          {currentRoadmap && currentRoadmap.length === 5 && (
+            <section className="space-y-5 animate-in fade-in duration-300">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#0d382b] pb-3">
+                <div>
+                  <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+                    🗺️ 5-चरणीय व्यवसाय परिवर्तन रोडमैप
+                  </h3>
+                  <p className="text-xs text-emerald-300/70">
+                    हर चरण को क्रमिक रूप से पूरा करें और अपने व्यापार को सुरक्षित लाभ की ओर ले जाएं।
+                  </p>
+                </div>
+
+                <span className="px-3 py-1 bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-extrabold rounded-full w-fit">
+                  ✓ 5 चरण सक्रिय
+                </span>
+              </div>
+
+              {/* The 5 Cards Grid */}
+              <div className="space-y-4">
+                {currentRoadmap.map((item, index) => {
+                  const stepNum = index + 1;
+                  const icon = STAGE_ICONS[item.stage] || '📌';
+
+                  return (
+                    <div
+                      key={item.stage}
+                      className="bg-[#06241b]/95 border-2 border-[#134e3d] hover:border-emerald-400/60 rounded-2xl p-5 sm:p-6 shadow-xl transition-all space-y-3"
+                    >
+                      {/* Card Header */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#0d382b] pb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-950 font-black text-base flex items-center justify-center shadow-md shrink-0">
+                            {stepNum}
                           </div>
-                          <span className="text-[11px] font-bold text-amber-300 uppercase tracking-widest">
-                            Stage {stepNum}: {item.stage}
-                          </span>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg">{icon}</span>
+                              <h4 className="text-base sm:text-lg font-black text-white">
+                                {item.title_hi}
+                              </h4>
+                            </div>
+                            <span className="text-[11px] font-bold text-amber-300 uppercase tracking-widest">
+                              Stage {stepNum}: {item.stage}
+                            </span>
+                          </div>
                         </div>
+
+                        {item.impact_milestone && (
+                          <span className="px-3 py-1 rounded-xl bg-[#02130e] border border-amber-400/40 text-amber-300 text-xs font-bold w-fit">
+                            🎯 लक्ष्य: {item.impact_milestone}
+                          </span>
+                        )}
                       </div>
 
-                      {item.impact_milestone && (
-                        <span className="px-3 py-1 rounded-xl bg-[#091228] border border-amber-400/40 text-amber-300 text-xs font-bold w-fit">
-                          🎯 लक्ष्य: {item.impact_milestone}
-                        </span>
+                      {/* Description */}
+                      <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed font-medium">
+                        {item.description}
+                      </p>
+
+                      {/* Action Items Checklist */}
+                      {item.action_items && item.action_items.length > 0 && (
+                        <div className="pt-2 space-y-1.5 bg-[#02130e] rounded-xl p-3.5 border border-[#0d382b]">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">
+                            कार्रवाई के कदम (Action Checklist):
+                          </span>
+                          <div className="space-y-1.5 pt-1">
+                            {item.action_items.map((act, actIdx) => (
+                              <div key={actIdx} className="flex items-start gap-2 text-xs text-emerald-100/80">
+                                <span className="text-emerald-400 font-bold shrink-0">✓</span>
+                                <span className="leading-snug">{act}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       )}
                     </div>
-
-                    {/* Description */}
-                    <p className="text-xs sm:text-sm text-zinc-200 leading-relaxed font-medium">
-                      {item.description}
-                    </p>
-
-                    {/* Action Items Checklist */}
-                    {item.action_items && item.action_items.length > 0 && (
-                      <div className="pt-2 space-y-1.5 bg-[#081024]/70 rounded-xl p-3.5 border border-[#182a52]">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">
-                          कार्रवाई के कदम (Action Checklist):
-                        </span>
-                        <div className="space-y-1.5 pt-1">
-                          {item.action_items.map((act, actIdx) => (
-                            <div key={actIdx} className="flex items-start gap-2 text-xs text-zinc-300">
-                              <span className="text-emerald-400 font-bold shrink-0">✓</span>
-                              <span className="leading-snug">{act}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        )}
-      </main>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+        </main>
+      </div>
     </div>
   );
 }
@@ -549,10 +557,10 @@ export default function BusinessGuidePage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#070D1D] flex items-center justify-center text-white">
+        <div className="min-h-screen bg-[#031610] flex items-center justify-center text-white">
           <div className="text-center space-y-2">
             <span className="text-3xl animate-spin block">🧭</span>
-            <p className="text-sm font-bold text-amber-300">व्यापार मार्गदर्शिका लोड हो रही है...</p>
+            <p className="text-sm font-bold text-emerald-300">व्यापार मार्गदर्शिका लोड हो रही है...</p>
           </div>
         </div>
       }

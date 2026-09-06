@@ -311,19 +311,26 @@ export default function LoginForm() {
   const isAnyLoading = isSignInLoading || isSignUpLoading || isGoogleLoading;
 
   return (
-    <div className="min-h-screen bg-[#070D1D] text-slate-100 flex flex-col justify-between selection:bg-amber-400 selection:text-slate-950">
-      {/* ── Top Header matching image copy.png ── */}
+    <div className="min-h-screen bg-[#031610] text-[#fdfcf7] flex flex-col justify-between selection:bg-[#10b981] selection:text-[#022c22] relative overflow-hidden">
+      {/* ── Ambient Background Glows ── */}
+      <div className="absolute top-[-15%] left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.18),transparent_70%)] blur-3xl pointer-events-none -z-10" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-[radial-gradient(circle_at_center,rgba(249,115,22,0.12),transparent_70%)] blur-3xl pointer-events-none -z-10" />
+
+      {/* ── Top Header ── */}
       <header className="w-full max-w-7xl mx-auto px-4 sm:px-8 py-5 flex items-center justify-between">
         {/* Left: Handshake + साथी व्यापार + उद्यमी पंजीकरण */}
         <Link href="/" className="flex items-center gap-3 group">
-          <span className="text-3xl sm:text-4xl filter drop-shadow-md transition-transform group-hover:scale-105">
+          <span className="text-3xl sm:text-4xl filter drop-shadow-[0_2px_12px_rgba(16,185,129,0.5)] transition-transform group-hover:scale-105">
             🤝
           </span>
           <div>
-            <h1 className="text-white text-xl sm:text-2xl font-bold tracking-tight leading-tight">
+            <h1 className="text-white text-xl sm:text-2xl font-black tracking-tight leading-tight flex items-center gap-2">
               साथी व्यापार
+              <span className="text-[10px] font-extrabold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                समृद्धि
+              </span>
             </h1>
-            <p className="text-amber-400 text-xs sm:text-sm font-semibold tracking-normal">
+            <p className="text-emerald-300/80 text-xs sm:text-sm font-semibold tracking-normal">
               उद्यमी पंजीकरण (Entrepreneur Registration)
             </p>
           </div>
@@ -335,10 +342,10 @@ export default function LoginForm() {
           <button
             type="button"
             onClick={handleToggleVoiceMode}
-            className={`cursor-pointer px-4 sm:px-5 py-2 rounded-full font-bold text-xs sm:text-sm transition-all duration-200 flex items-center gap-1.5 shadow-md active:scale-95 ${
+            className={`cursor-pointer px-4 sm:px-5 py-2 rounded-full font-bold text-xs sm:text-sm transition-all duration-200 flex items-center gap-1.5 shadow-[0_2px_15px_rgba(16,185,129,0.3)] active:scale-95 ${
               isSpeaking
-                ? 'bg-amber-300 text-slate-950 ring-4 ring-amber-400/40 animate-pulse'
-                : 'bg-amber-400 hover:bg-amber-300 text-slate-950'
+                ? 'bg-teal-300 text-emerald-950 ring-4 ring-emerald-400/40 animate-pulse'
+                : 'bg-gradient-to-r from-emerald-400 to-teal-300 hover:from-emerald-300 hover:to-teal-200 text-emerald-950'
             }`}
             title="क्लिक करके वॉइस गाइड सुनें (Listen to voice guide)"
           >
@@ -354,45 +361,45 @@ export default function LoginForm() {
               setError('');
               setSuccessMessage('');
             }}
-            className="cursor-pointer bg-[#0B1528] hover:bg-[#112244] border border-[#1b3464] hover:border-slate-400 text-white font-semibold text-xs sm:text-sm px-4 sm:px-5 py-2 rounded-xl transition-all shadow-sm active:scale-95"
+            className="cursor-pointer bg-[#072b20] hover:bg-[#0c3a2c] border border-[#134e3d] hover:border-emerald-400 text-white font-semibold text-xs sm:text-sm px-4 sm:px-5 py-2 rounded-xl transition-all shadow-sm active:scale-95"
           >
             {mode === 'login' ? 'नया खाता / Register' : 'लॉगिन / Login'}
           </button>
         </div>
       </header>
 
-      {/* ── Main Center Panel matching image copy.png ── */}
+      {/* ── Main Center Panel ── */}
       <main className="flex-1 flex items-center justify-center px-4 py-6 sm:py-10">
-        <div className="w-full max-w-2xl bg-[#0B1528] border-2 border-[#162D59] rounded-2xl p-6 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative backdrop-blur-md">
-          {/* Eyebrow step tag matching image copy.png */}
-          <div className="text-amber-400 text-xs sm:text-sm font-extrabold uppercase tracking-wider mb-2">
+        <div className="w-full max-w-2xl bg-[#06241b]/95 border-2 border-[#134e3d] rounded-2xl p-6 sm:p-10 shadow-[0_20px_60px_-15px_rgba(2,44,34,0.8)] relative backdrop-blur-xl">
+          {/* Eyebrow step tag */}
+          <div className="text-emerald-400 text-xs sm:text-sm font-extrabold uppercase tracking-wider mb-2">
             {mode === 'login'
               ? 'चरण 1 / 1 • STEP 1 OF 1 • LOGIN'
               : 'चरण 1 / 1 • STEP 1 OF 1 • SIGN UP'}
           </div>
 
           {/* Heading */}
-          <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight leading-snug">
+          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-snug">
             {mode === 'login'
               ? '1. अपना ईमेल और पासवर्ड दर्ज करें'
               : '1. नया खाता बनाने के लिए विवरण दर्ज करें'}
           </h2>
 
           {/* Subtitle */}
-          <p className="text-slate-400 text-xs sm:text-sm mt-1 mb-5">
+          <p className="text-emerald-200/70 text-xs sm:text-sm mt-1 mb-5">
             {mode === 'login'
               ? 'Enter your email & password or sign in with Google'
               : 'Enter your email & password to register your account'}
           </p>
 
-          {/* Golden Progress Bar matching image copy.png */}
-          <div className="w-full bg-[#132244] h-1.5 rounded-full overflow-hidden mb-6">
-            <div className="bg-amber-400 h-full rounded-full transition-all duration-500 w-full" />
+          {/* Luminous Emerald Progress Bar */}
+          <div className="w-full bg-[#0a3527] h-1.5 rounded-full overflow-hidden mb-6">
+            <div className="bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 h-full rounded-full transition-all duration-500 w-full shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
           </div>
 
           {/* Interactive Voice Mode Notification */}
           {isSpeaking && (
-            <div className="mb-4 p-3 rounded-xl bg-amber-400/15 border border-amber-400/40 text-amber-300 text-xs flex items-center justify-between gap-2 shadow-inner">
+            <div className="mb-4 p-3 rounded-xl bg-emerald-500/15 border border-emerald-400/40 text-emerald-300 text-xs flex items-center justify-between gap-2 shadow-inner">
               <div className="flex items-center gap-2">
                 <span className="text-base animate-bounce">🎙️</span>
                 <span>
@@ -402,7 +409,7 @@ export default function LoginForm() {
               <button
                 type="button"
                 onClick={handleToggleVoiceMode}
-                className="text-slate-300 hover:text-white font-bold text-xs underline cursor-pointer shrink-0"
+                className="text-emerald-100 hover:text-white font-bold text-xs underline cursor-pointer shrink-0"
               >
                 बंद करें
               </button>
@@ -419,14 +426,14 @@ export default function LoginForm() {
 
           {/* Success Alert */}
           {activeSuccess && (
-            <div className="mb-5 p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-700 text-emerald-300 text-xs flex items-start gap-2.5 shadow-sm">
+            <div className="mb-5 p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-500 text-emerald-200 text-xs flex items-start gap-2.5 shadow-sm">
               <span className="text-base shrink-0">✉️</span>
               <div className="flex-1 leading-relaxed font-medium">{activeSuccess}</div>
             </div>
           )}
 
           {/* Mode Switcher Tabs */}
-          <div className="grid grid-cols-2 gap-2 p-1.5 bg-[#070E1E] border border-[#162D59] rounded-xl mb-6">
+          <div className="grid grid-cols-2 gap-2 p-1.5 bg-[#031610] border border-[#134e3d] rounded-xl mb-6">
             <button
               type="button"
               onClick={() => {
@@ -436,8 +443,8 @@ export default function LoginForm() {
               }}
               className={`py-2 rounded-lg font-bold text-xs sm:text-sm transition-all cursor-pointer ${
                 mode === 'login'
-                  ? 'bg-amber-400 text-slate-950 shadow-md'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+                  ? 'bg-gradient-to-r from-emerald-400 to-teal-300 text-emerald-950 shadow-md'
+                  : 'text-emerald-200/70 hover:text-white hover:bg-[#072b20]'
               }`}
             >
               लॉगिन (Sign In)
@@ -451,8 +458,8 @@ export default function LoginForm() {
               }}
               className={`py-2 rounded-lg font-bold text-xs sm:text-sm transition-all cursor-pointer ${
                 mode === 'signup'
-                  ? 'bg-amber-400 text-slate-950 shadow-md'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+                  ? 'bg-gradient-to-r from-emerald-400 to-teal-300 text-emerald-950 shadow-md'
+                  : 'text-emerald-200/70 hover:text-white hover:bg-[#072b20]'
               }`}
             >
               नया खाता (Create Account)
@@ -465,9 +472,9 @@ export default function LoginForm() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-xs sm:text-sm font-bold text-slate-200 mb-1.5"
+                className="block text-xs sm:text-sm font-bold text-emerald-100 mb-1.5"
               >
-                ईमेल पता / Email Address <span className="text-amber-400">*</span>
+                ईमेल पता / Email Address <span className="text-emerald-400">*</span>
               </label>
               <input
                 id="email"
@@ -478,7 +485,7 @@ export default function LoginForm() {
                 placeholder="name@example.com"
                 autoComplete="email"
                 disabled={isAnyLoading}
-                className="w-full bg-[#060C1C] border border-[#1B3464] text-white placeholder-slate-500 rounded-xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all shadow-inner disabled:opacity-50"
+                className="w-full bg-[#02130e] border border-[#134e3d] text-white placeholder-emerald-700 rounded-xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/40 transition-all shadow-inner disabled:opacity-50"
               />
             </div>
 
@@ -487,15 +494,15 @@ export default function LoginForm() {
               <div className="flex items-center justify-between mb-1.5">
                 <label
                   htmlFor="password"
-                  className="block text-xs sm:text-sm font-bold text-slate-200"
+                  className="block text-xs sm:text-sm font-bold text-emerald-100"
                 >
-                  पासवर्ड / Password <span className="text-amber-400">*</span>
+                  पासवर्ड / Password <span className="text-emerald-400">*</span>
                 </label>
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={isAnyLoading}
-                  className="text-xs text-amber-400 hover:text-amber-300 font-medium cursor-pointer"
+                  className="text-xs text-emerald-400 hover:text-emerald-300 font-medium cursor-pointer"
                 >
                   {showPassword ? 'छुपाएं (Hide)' : 'दिखाएं (Show)'}
                 </button>
@@ -509,23 +516,23 @@ export default function LoginForm() {
                 placeholder="••••••••"
                 autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                 disabled={isAnyLoading}
-                className="w-full bg-[#060C1C] border border-[#1B3464] text-white placeholder-slate-500 rounded-xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all shadow-inner disabled:opacity-50"
+                className="w-full bg-[#02130e] border border-[#134e3d] text-white placeholder-emerald-700 rounded-xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/40 transition-all shadow-inner disabled:opacity-50"
               />
             </div>
 
-            {/* Helper text matching image copy.png */}
-            <p className="text-slate-400 text-xs pt-1">
+            {/* Helper text */}
+            <p className="text-emerald-200/60 text-xs pt-1">
               {mode === 'login'
                 ? 'इस ईमेल से आप भविष्य में पासवर्ड अथवा Google द्वारा कभी भी लॉगिन कर सकेंगे।'
                 : 'न्यूनतम 6 अक्षर। खाता बनाने के बाद ईमेल सत्यापन लिंक भेजा जाएगा।'}
             </p>
 
-            {/* Action Buttons Row matching image copy.png */}
+            {/* Action Buttons Row */}
             <div className="flex items-center justify-between gap-4 pt-4">
               {/* Left Button: "← पिछला (Back)" */}
               <Link
                 href="/"
-                className="px-5 py-3 rounded-xl border border-[#1B3464] bg-[#070E1E] text-slate-300 hover:text-white hover:border-slate-400 hover:bg-slate-800/40 text-xs sm:text-sm font-medium transition-all text-center"
+                className="px-5 py-3 rounded-xl border border-[#134e3d] bg-[#031610] text-emerald-200/80 hover:text-white hover:border-emerald-400 hover:bg-[#072b20] text-xs sm:text-sm font-medium transition-all text-center"
               >
                 ← पिछला (Back)
               </Link>
@@ -534,12 +541,12 @@ export default function LoginForm() {
               <button
                 type="submit"
                 disabled={isAnyLoading}
-                className="cursor-pointer px-6 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-slate-950 font-black text-xs sm:text-base transition-all shadow-lg hover:shadow-amber-500/20 disabled:opacity-60 flex items-center justify-center gap-2"
+                className="cursor-pointer px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 hover:from-emerald-300 hover:to-teal-200 active:scale-[0.98] text-emerald-950 font-black text-xs sm:text-base transition-all shadow-[0_4px_20px_rgba(16,185,129,0.4)] disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {isSignInLoading || isSignUpLoading ? (
                   <>
                     <svg
-                      className="animate-spin h-4 w-4 text-slate-950"
+                      className="animate-spin h-4 w-4 text-emerald-950"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -572,9 +579,9 @@ export default function LoginForm() {
           {/* Visual Divider ("या / OR") */}
           <div className="relative my-6 text-center">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-[#1B3464]" />
+              <div className="w-full border-t border-[#134e3d]" />
             </div>
-            <span className="relative bg-[#0B1528] px-3.5 text-xs text-slate-400 font-bold uppercase tracking-wider">
+            <span className="relative bg-[#06241b] px-3.5 text-xs text-emerald-300/70 font-bold uppercase tracking-wider">
               या / OR
             </span>
           </div>
@@ -584,7 +591,7 @@ export default function LoginForm() {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={isAnyLoading}
-            className="w-full cursor-pointer bg-white hover:bg-slate-100 active:scale-[0.99] text-slate-800 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-3 transition-all shadow-md disabled:opacity-60"
+            className="w-full cursor-pointer bg-white hover:bg-emerald-50 active:scale-[0.99] text-slate-800 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-3 transition-all shadow-md disabled:opacity-60 border border-emerald-200"
           >
             {isGoogleLoading ? (
               <>
@@ -638,7 +645,7 @@ export default function LoginForm() {
           </button>
 
           {/* Switch mode footer link */}
-          <div className="mt-5 text-center text-xs text-slate-400">
+          <div className="mt-5 text-center text-xs text-emerald-200/70">
             {mode === 'login' ? (
               <span>
                 नया खाता बनाना चाहते हैं?{' '}
@@ -649,7 +656,7 @@ export default function LoginForm() {
                     setError('');
                     setSuccessMessage('');
                   }}
-                  className="text-amber-400 font-bold hover:underline cursor-pointer ml-1"
+                  className="text-emerald-400 font-bold hover:underline cursor-pointer ml-1"
                 >
                   यहाँ रजिस्टर करें (Create Account)
                 </button>
@@ -664,7 +671,7 @@ export default function LoginForm() {
                     setError('');
                     setSuccessMessage('');
                   }}
-                  className="text-amber-400 font-bold hover:underline cursor-pointer ml-1"
+                  className="text-emerald-400 font-bold hover:underline cursor-pointer ml-1"
                 >
                   लॉगिन करें (Sign In)
                 </button>
@@ -674,8 +681,8 @@ export default function LoginForm() {
         </div>
       </main>
 
-      {/* ── Bottom Footer matching image copy.png ── */}
-      <footer className="py-5 text-center text-xs text-slate-400 tracking-wide border-t border-[#112244]/40">
+      {/* ── Bottom Footer ── */}
+      <footer className="py-5 text-center text-xs text-emerald-300/60 tracking-wide border-t border-[#092b20]">
         साथी व्यापार • सुरक्षित एवं पारदर्शी ग्रामीण वित्तीय प्रणाली
       </footer>
     </div>
