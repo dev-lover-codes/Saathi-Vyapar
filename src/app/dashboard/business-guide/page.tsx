@@ -309,24 +309,24 @@ function BusinessGuideContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#031610] text-[#fdfcf7] font-sans p-3 sm:p-6 pb-24 selection:bg-[#10b981] selection:text-[#022c22] relative overflow-hidden">
+    <div className="min-h-screen bg-[#FAF9F5] text-[#1B1B1B] font-['Poppins',sans-serif] p-3 sm:p-6 pb-24 selection:bg-[#151515] selection:text-white relative overflow-hidden">
       {/* Background radial glow */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-32 -right-32 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/3 -left-32 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[radial-gradient(ellipse_at_center,rgba(255,65,108,0.06),transparent_70%)] blur-3xl"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-[radial-gradient(circle_at_center,rgba(255,75,43,0.04),transparent_70%)] blur-3xl"></div>
       </div>
 
       <div className="relative z-10 max-w-5xl mx-auto space-y-8">
         {/* ── Top Header Navigation ────────────────────────────────── */}
-        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#0d382b] pb-4">
+        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E5E2E1] pb-4">
           <div>
             <div className="flex items-center gap-2.5">
-              <span className="text-3xl filter drop-shadow">🧭</span>
+              <span className="text-3xl filter drop-shadow-sm">🧭</span>
               <div>
-                <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-black text-[#151515] flex items-center gap-2">
                   व्यापारिक मार्गदर्शन रोडमैप (Business Transformation Guide)
                 </h1>
-                <p className="text-xs sm:text-sm text-emerald-200/70 mt-0.5">
+                <p className="text-xs sm:text-sm text-[#8C8880] mt-0.5">
                   {userName} • {userSector} • AI संचालित 5-चरणीय विकास योजना
                 </p>
               </div>
@@ -336,7 +336,7 @@ function BusinessGuideContent() {
           <div className="flex items-center gap-2.5">
             <Link
               href={`/dashboard${userId ? `?user_id=${userId}` : ''}`}
-              className="px-3.5 py-2 bg-[#06241b] hover:bg-[#0b382a] text-emerald-300 text-xs font-bold rounded-xl border border-[#134e3d] shadow-sm transition-all"
+              className="px-4 py-2 bg-white hover:bg-[#F0EFEB] text-[#151515] text-xs font-semibold rounded-full border border-[#E5E2E1] shadow-xs transition-all"
             >
               ← मुख्य डैशबोर्ड (Dashboard)
             </Link>
@@ -345,16 +345,16 @@ function BusinessGuideContent() {
 
         <main className="space-y-8">
           {/* ── Challenge Input Section ──────────────────────────────── */}
-          <section className="bg-[#06241b]/95 border-2 border-[#134e3d] rounded-3xl p-5 sm:p-7 shadow-[0_15px_45px_rgba(2,44,34,0.7)] backdrop-blur-xl space-y-4">
+          <section className="bg-white/95 border border-[#E5E2E1] rounded-[24px] p-5 sm:p-7 shadow-[0_10px_30px_rgba(27,27,27,0.05)] backdrop-blur-xl space-y-4">
             <div className="flex items-start gap-3.5">
-              <div className="p-3 bg-[#02130e] border border-[#134e3d] rounded-2xl text-2xl shrink-0 shadow-inner">
+              <div className="p-3 bg-[#F0EFEB] border border-[#E5E2E1] rounded-2xl text-2xl shrink-0 shadow-xs">
                 💡
               </div>
               <div>
-                <h2 className="text-base sm:text-lg font-bold text-white">
+                <h2 className="text-base sm:text-lg font-bold text-[#151515]">
                   अपने व्यापार की चुनौतियां बताएं / Describe Your Challenges
                 </h2>
-                <p className="text-xs text-emerald-300/70 mt-0.5">
+                <p className="text-xs text-[#8C8880] mt-0.5">
                   बोलकर या लिखकर बताएं कि आपको व्यापार में क्या कठिनाई आ रही है (जैसे: कच्चे माल की लागत, बिचौलिये, कम मुनाफा, सरकारी योजनाएं)।
                 </p>
               </div>
@@ -362,7 +362,7 @@ function BusinessGuideContent() {
 
             {/* Quick Preset Buttons */}
             <div className="space-y-1.5 pt-1">
-              <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">
+              <span className="text-[11px] font-bold text-[#8C8880] uppercase tracking-wider">
                 उदाहरण चुनें (Quick Presets):
               </span>
               <div className="flex flex-wrap gap-2">
@@ -371,7 +371,7 @@ function BusinessGuideContent() {
                     key={idx}
                     type="button"
                     onClick={() => setChallengeText(preset.text)}
-                    className="px-3 py-1.5 rounded-xl bg-[#02130e] hover:bg-[#0b382a] border border-[#134e3d] hover:border-emerald-400/50 text-xs text-emerald-200 font-medium transition-all"
+                    className="px-3.5 py-1.5 rounded-full bg-[#F0EFEB] hover:bg-[#E9E8E4] border border-[#E5E2E1] text-xs text-[#151515] font-medium transition-all cursor-pointer"
                   >
                     {preset.label}
                   </button>
@@ -388,7 +388,7 @@ function BusinessGuideContent() {
                   value={challengeText}
                   onChange={(e) => setChallengeText(e.target.value)}
                   placeholder="उदा. बिचौलिये सारा मुनाफा ले जाते हैं, कच्चा माल बहुत महंगा मिलता है और दुकान का खर्च निकालना मुश्किल हो रहा है..."
-                  className="w-full bg-[#02130e] text-white placeholder-emerald-700/60 border border-[#134e3d] rounded-2xl p-4 text-sm sm:text-base focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/40 shadow-inner"
+                  className="w-full bg-[#F4F3EF] text-[#151515] placeholder-[#8C8880] border border-[#E5E2E1] rounded-2xl p-4 text-sm sm:text-base focus:outline-none focus:bg-white focus:border-[#151515] transition-all"
                 />
 
                 {/* Voice Input Button inside textarea container */}
@@ -396,10 +396,10 @@ function BusinessGuideContent() {
                   <button
                     type="button"
                     onClick={toggleVoiceListening}
-                    className={`absolute right-3.5 bottom-3.5 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-md ${
+                    className={`absolute right-3.5 bottom-3.5 px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer ${
                       isListening
                         ? 'bg-rose-500 text-white animate-pulse'
-                        : 'bg-[#06241b] text-emerald-300 border border-[#134e3d] hover:bg-[#0c3a2c]'
+                        : 'bg-white text-[#151515] border border-[#E5E2E1] hover:bg-[#F0EFEB]'
                     }`}
                     title={isListening ? 'Stop listening' : 'Speak your challenge'}
                   >
@@ -410,21 +410,21 @@ function BusinessGuideContent() {
               </div>
 
               {errorMessage && (
-                <div className="p-3 rounded-xl bg-rose-950/80 border border-rose-500/60 text-xs text-rose-200 flex items-center gap-2">
+                <div className="p-3.5 rounded-2xl bg-[#FFDAD6] border border-[#FF897D] text-xs text-[#93000A] flex items-center gap-2">
                   <span>⚠️</span>
                   <span>{errorMessage}</span>
                 </div>
               )}
 
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
-                <span className="text-[11px] text-emerald-300/60">
+                <span className="text-[11px] text-[#8C8880]">
                   🔒 Gemini AI आपकी जानकारी और प्रोफाइल के आधार पर सटीक 5-चरणीय रोडमैप तैयार करेगा।
                 </span>
 
                 <button
                   type="submit"
                   disabled={isGenerating || !challengeText.trim()}
-                  className="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-orange-500 via-amber-400 to-yellow-300 text-slate-950 text-sm font-black shadow-lg hover:scale-105 active:scale-95 transition-all disabled:opacity-50 shrink-0"
+                  className="w-full sm:w-auto px-7 py-3 rounded-full bg-gradient-to-r from-[#FF416C] to-[#FF4B2B] text-white text-sm font-bold shadow-sm hover:opacity-95 active:scale-95 transition-all disabled:opacity-50 shrink-0 cursor-pointer"
                 >
                   {isGenerating ? '⏳ रोडमैप तैयार हो रहा है...' : '🚀 रोडमैप बनाएं (Generate Roadmap) →'}
                 </button>
@@ -434,8 +434,8 @@ function BusinessGuideContent() {
 
           {/* ── Past Guides Revisit Tabs ─────────────────────────────── */}
           {pastGuides.length > 1 && (
-            <section className="bg-[#06241b] border border-[#134e3d] rounded-2xl p-4 space-y-2">
-              <span className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+            <section className="bg-white border border-[#E5E2E1] rounded-2xl p-4 space-y-2">
+              <span className="text-xs font-bold text-[#151515] uppercase tracking-wider flex items-center gap-1.5">
                 <span>📜 पूर्व में बनाए गए रोडमैप (Saved Roadmaps):</span>
               </span>
               <div className="flex items-center gap-2 overflow-x-auto pb-1">
@@ -447,10 +447,10 @@ function BusinessGuideContent() {
                       setCurrentRoadmap(g.roadmap_json);
                       setSelectedGuideId(g.id);
                     }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap border transition-all ${
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border transition-all cursor-pointer ${
                       selectedGuideId === g.id
-                        ? 'bg-amber-400 text-slate-950 border-amber-300 font-bold shadow-sm'
-                        : 'bg-[#02130e] text-emerald-200/80 border-[#134e3d] hover:border-emerald-400/50'
+                        ? 'bg-[#151515] text-white border-[#151515] font-bold shadow-xs'
+                        : 'bg-[#F0EFEB] text-[#615E57] border-[#E5E2E1] hover:bg-[#E9E8E4]'
                     }`}
                   >
                     योजना {pastGuides.length - idx} (
@@ -468,17 +468,17 @@ function BusinessGuideContent() {
           {/* ── 5 Numbered Roadmap Cards Display ─────────────────────── */}
           {currentRoadmap && currentRoadmap.length === 5 && (
             <section className="space-y-5 animate-in fade-in duration-300">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#0d382b] pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#E5E2E1] pb-3">
                 <div>
-                  <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+                  <h3 className="text-lg sm:text-xl font-extrabold text-[#151515] flex items-center gap-2">
                     🗺️ 5-चरणीय व्यवसाय परिवर्तन रोडमैप
                   </h3>
-                  <p className="text-xs text-emerald-300/70">
+                  <p className="text-xs text-[#8C8880]">
                     हर चरण को क्रमिक रूप से पूरा करें और अपने व्यापार को सुरक्षित लाभ की ओर ले जाएं।
                   </p>
                 </div>
 
-                <span className="px-3 py-1 bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-extrabold rounded-full w-fit">
+                <span className="px-3 py-1 bg-[#F0EFEB] border border-[#E5E2E1] text-[#151515] text-xs font-bold rounded-full w-fit">
                   ✓ 5 चरण सक्रिय
                 </span>
               </div>
@@ -492,49 +492,49 @@ function BusinessGuideContent() {
                   return (
                     <div
                       key={item.stage}
-                      className="bg-[#06241b]/95 border-2 border-[#134e3d] hover:border-emerald-400/60 rounded-2xl p-5 sm:p-6 shadow-xl transition-all space-y-3"
+                      className="bg-white/95 border border-[#E5E2E1] hover:border-[#151515] rounded-[24px] p-5 sm:p-6 shadow-[0_8px_24px_rgba(27,27,27,0.04)] transition-all space-y-3"
                     >
                       {/* Card Header */}
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#0d382b] pb-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#E5E2E1] pb-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-950 font-black text-base flex items-center justify-center shadow-md shrink-0">
+                          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#FF416C] to-[#FF4B2B] text-white font-black text-sm flex items-center justify-center shadow-xs shrink-0">
                             {stepNum}
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
                               <span className="text-lg">{icon}</span>
-                              <h4 className="text-base sm:text-lg font-black text-white">
+                              <h4 className="text-base sm:text-lg font-extrabold text-[#151515]">
                                 {item.title_hi}
                               </h4>
                             </div>
-                            <span className="text-[11px] font-bold text-amber-300 uppercase tracking-widest">
+                            <span className="text-[11px] font-bold text-[#FF416C] uppercase tracking-widest">
                               Stage {stepNum}: {item.stage}
                             </span>
                           </div>
                         </div>
 
                         {item.impact_milestone && (
-                          <span className="px-3 py-1 rounded-xl bg-[#02130e] border border-amber-400/40 text-amber-300 text-xs font-bold w-fit">
+                          <span className="px-3 py-1 rounded-full bg-[#FFF8F0] border border-[#FFE8D6] text-[#A64200] text-xs font-bold w-fit">
                             🎯 लक्ष्य: {item.impact_milestone}
                           </span>
                         )}
                       </div>
 
                       {/* Description */}
-                      <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed font-medium">
+                      <p className="text-xs sm:text-sm text-[#615E57] leading-relaxed font-medium">
                         {item.description}
                       </p>
 
                       {/* Action Items Checklist */}
                       {item.action_items && item.action_items.length > 0 && (
-                        <div className="pt-2 space-y-1.5 bg-[#02130e] rounded-xl p-3.5 border border-[#0d382b]">
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">
+                        <div className="pt-2 space-y-1.5 bg-[#F4F3EF] rounded-2xl p-3.5 border border-[#E5E2E1]">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-[#151515]">
                             कार्रवाई के कदम (Action Checklist):
                           </span>
                           <div className="space-y-1.5 pt-1">
                             {item.action_items.map((act, actIdx) => (
-                              <div key={actIdx} className="flex items-start gap-2 text-xs text-emerald-100/80">
-                                <span className="text-emerald-400 font-bold shrink-0">✓</span>
+                              <div key={actIdx} className="flex items-start gap-2 text-xs text-[#151515]">
+                                <span className="text-emerald-700 font-bold shrink-0">✓</span>
                                 <span className="leading-snug">{act}</span>
                               </div>
                             ))}
@@ -557,10 +557,10 @@ export default function BusinessGuidePage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#031610] flex items-center justify-center text-white">
+        <div className="min-h-screen bg-[#FAF9F5] flex items-center justify-center text-[#151515]">
           <div className="text-center space-y-2">
             <span className="text-3xl animate-spin block">🧭</span>
-            <p className="text-sm font-bold text-emerald-300">व्यापार मार्गदर्शिका लोड हो रही है...</p>
+            <p className="text-sm font-bold text-[#151515]">व्यापार मार्गदर्शिका लोड हो रही है...</p>
           </div>
         </div>
       }

@@ -311,46 +311,47 @@ export default function LoginForm() {
   const isAnyLoading = isSignInLoading || isSignUpLoading || isGoogleLoading;
 
   return (
-    <div className="min-h-screen bg-[#031610] text-[#fdfcf7] flex flex-col justify-between selection:bg-[#10b981] selection:text-[#022c22] relative overflow-hidden">
+    <div className="min-h-screen bg-[#FAF9F5] text-[#1B1B1B] font-['Poppins',sans-serif] flex flex-col justify-between selection:bg-[#151515] selection:text-white relative overflow-hidden">
       {/* ── Ambient Background Glows ── */}
-      <div className="absolute top-[-15%] left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.18),transparent_70%)] blur-3xl pointer-events-none -z-10" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-[radial-gradient(circle_at_center,rgba(249,115,22,0.12),transparent_70%)] blur-3xl pointer-events-none -z-10" />
+      <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[radial-gradient(ellipse_at_center,rgba(255,65,108,0.06),transparent_70%)] blur-3xl pointer-events-none -z-10" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-[radial-gradient(circle_at_center,rgba(255,75,43,0.04),transparent_70%)] blur-3xl pointer-events-none -z-10" />
 
       {/* ── Top Header ── */}
       <header className="w-full max-w-7xl mx-auto px-4 sm:px-8 py-5 flex items-center justify-between">
         {/* Left: Handshake + साथी व्यापार + उद्यमी पंजीकरण */}
         <Link href="/" className="flex items-center gap-3 group">
-          <span className="text-3xl sm:text-4xl filter drop-shadow-[0_2px_12px_rgba(16,185,129,0.5)] transition-transform group-hover:scale-105">
+          <span className="text-3xl sm:text-4xl filter drop-shadow-sm transition-transform group-hover:scale-105">
             🤝
           </span>
           <div>
-            <h1 className="text-white text-xl sm:text-2xl font-black tracking-tight leading-tight flex items-center gap-2">
+            <h1 className="text-[#151515] text-xl sm:text-2xl font-black tracking-tight leading-tight flex items-center gap-2">
               साथी व्यापार
-              <span className="text-[10px] font-extrabold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full">
-                समृद्धि
+              <span className="text-[10px] font-extrabold uppercase bg-gradient-to-r from-[#FF416C] to-[#FF4B2B] text-white px-2.5 py-0.5 rounded-full shadow-xs">
+                LUMIO
               </span>
             </h1>
-            <p className="text-emerald-300/80 text-xs sm:text-sm font-semibold tracking-normal">
+            <p className="text-[#8C8880] text-xs sm:text-sm font-medium tracking-normal">
               उद्यमी पंजीकरण (Entrepreneur Registration)
             </p>
           </div>
         </Link>
 
         {/* Right: Voice Mode pill + Login / Register switch button */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3">
           {/* Voice Mode Button */}
           <button
             type="button"
             onClick={handleToggleVoiceMode}
-            className={`cursor-pointer px-4 sm:px-5 py-2 rounded-full font-bold text-xs sm:text-sm transition-all duration-200 flex items-center gap-1.5 shadow-[0_2px_15px_rgba(16,185,129,0.3)] active:scale-95 ${
+            className={`cursor-pointer px-4 sm:px-5 py-2 rounded-full font-bold text-xs sm:text-sm transition-all duration-200 flex items-center gap-1.5 shadow-sm active:scale-95 ${
               isSpeaking
-                ? 'bg-teal-300 text-emerald-950 ring-4 ring-emerald-400/40 animate-pulse'
-                : 'bg-gradient-to-r from-emerald-400 to-teal-300 hover:from-emerald-300 hover:to-teal-200 text-emerald-950'
+                ? 'bg-[#FF416C] text-white ring-4 ring-[#FF416C]/30 animate-pulse'
+                : 'bg-white hover:bg-[#F0EFEB] text-[#151515] border border-[#E5E2E1]'
             }`}
             title="क्लिक करके वॉइस गाइड सुनें (Listen to voice guide)"
           >
             <span>🎤</span>
-            <span>बोलकर भरें (Voice Mode)</span>
+            <span className="hidden sm:inline">बोलकर भरें (Voice Mode)</span>
+            <span className="sm:hidden">वॉइस</span>
           </button>
 
           {/* Login / Sign Up Switcher */}
@@ -361,7 +362,7 @@ export default function LoginForm() {
               setError('');
               setSuccessMessage('');
             }}
-            className="cursor-pointer bg-[#072b20] hover:bg-[#0c3a2c] border border-[#134e3d] hover:border-emerald-400 text-white font-semibold text-xs sm:text-sm px-4 sm:px-5 py-2 rounded-xl transition-all shadow-sm active:scale-95"
+            className="cursor-pointer bg-[#151515] hover:bg-[#2A2A2A] text-white font-semibold text-xs sm:text-sm px-4 sm:px-5 py-2 rounded-full transition-all shadow-sm active:scale-95"
           >
             {mode === 'login' ? 'नया खाता / Register' : 'लॉगिन / Login'}
           </button>
@@ -370,46 +371,51 @@ export default function LoginForm() {
 
       {/* ── Main Center Panel ── */}
       <main className="flex-1 flex items-center justify-center px-4 py-6 sm:py-10">
-        <div className="w-full max-w-2xl bg-[#06241b]/95 border-2 border-[#134e3d] rounded-2xl p-6 sm:p-10 shadow-[0_20px_60px_-15px_rgba(2,44,34,0.8)] relative backdrop-blur-xl">
+        <div className="w-full max-w-xl bg-white/95 border border-[#E5E2E1] rounded-[28px] p-6 sm:p-10 shadow-[0_12px_40px_rgba(27,27,27,0.06)] relative backdrop-blur-xl">
           {/* Eyebrow step tag */}
-          <div className="text-emerald-400 text-xs sm:text-sm font-extrabold uppercase tracking-wider mb-2">
-            {mode === 'login'
-              ? 'चरण 1 / 1 • STEP 1 OF 1 • LOGIN'
-              : 'चरण 1 / 1 • STEP 1 OF 1 • SIGN UP'}
+          <div className="text-[#8C8880] text-xs font-bold uppercase tracking-[0.1em] mb-2 flex items-center justify-between">
+            <span>
+              {mode === 'login'
+                ? 'चरण 1 / 1 • STEP 1 OF 1 • LOGIN'
+                : 'चरण 1 / 1 • STEP 1 OF 1 • SIGN UP'}
+            </span>
+            <span className="text-[10px] bg-[#F0EFEB] text-[#615E57] px-2.5 py-0.5 rounded-full font-semibold">
+              सुरक्षित पोर्टल
+            </span>
           </div>
 
           {/* Heading */}
-          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-snug">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#151515] tracking-tight leading-snug">
             {mode === 'login'
               ? '1. अपना ईमेल और पासवर्ड दर्ज करें'
               : '1. नया खाता बनाने के लिए विवरण दर्ज करें'}
           </h2>
 
           {/* Subtitle */}
-          <p className="text-emerald-200/70 text-xs sm:text-sm mt-1 mb-5">
+          <p className="text-[#8C8880] text-xs sm:text-sm mt-1 mb-5 leading-relaxed">
             {mode === 'login'
               ? 'Enter your email & password or sign in with Google'
               : 'Enter your email & password to register your account'}
           </p>
 
-          {/* Luminous Emerald Progress Bar */}
-          <div className="w-full bg-[#0a3527] h-1.5 rounded-full overflow-hidden mb-6">
-            <div className="bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 h-full rounded-full transition-all duration-500 w-full shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+          {/* Warm Minimalist Gradient Progress Bar */}
+          <div className="w-full bg-[#E5E2E1] h-1.5 rounded-full overflow-hidden mb-6">
+            <div className="bg-gradient-to-r from-[#FF416C] to-[#FF4B2B] h-full rounded-full transition-all duration-500 w-full" />
           </div>
 
           {/* Interactive Voice Mode Notification */}
           {isSpeaking && (
-            <div className="mb-4 p-3 rounded-xl bg-emerald-500/15 border border-emerald-400/40 text-emerald-300 text-xs flex items-center justify-between gap-2 shadow-inner">
+            <div className="mb-4 p-3.5 rounded-2xl bg-[#FFF0F3] border border-[#FFCCD5] text-[#C92A2A] text-xs flex items-center justify-between gap-2 shadow-sm">
               <div className="flex items-center gap-2">
                 <span className="text-base animate-bounce">🎙️</span>
-                <span>
+                <span className="font-medium leading-relaxed">
                   वॉइस गाइड सक्रिय: कृपया नीचे अपना ईमेल व पासवर्ड दर्ज करें अथवा सीधे Google बटन का उपयोग करें।
                 </span>
               </div>
               <button
                 type="button"
                 onClick={handleToggleVoiceMode}
-                className="text-emerald-100 hover:text-white font-bold text-xs underline cursor-pointer shrink-0"
+                className="text-[#C92A2A] hover:text-[#A61E1E] font-bold text-xs underline cursor-pointer shrink-0"
               >
                 बंद करें
               </button>
@@ -418,22 +424,22 @@ export default function LoginForm() {
 
           {/* Error Alert */}
           {activeError && (
-            <div className="mb-5 p-3.5 rounded-xl bg-rose-950/60 border border-rose-800 text-rose-300 text-xs flex items-start gap-2.5 shadow-sm">
+            <div className="mb-5 p-3.5 rounded-2xl bg-[#FFDAD6] border border-[#FF897D] text-[#93000A] text-xs flex items-start gap-2.5 shadow-sm">
               <span className="text-base shrink-0">⚠️</span>
-              <div className="flex-1 leading-relaxed">{activeError}</div>
+              <div className="flex-1 leading-relaxed font-medium">{activeError}</div>
             </div>
           )}
 
           {/* Success Alert */}
           {activeSuccess && (
-            <div className="mb-5 p-3.5 rounded-xl bg-emerald-950/60 border border-emerald-500 text-emerald-200 text-xs flex items-start gap-2.5 shadow-sm">
+            <div className="mb-5 p-3.5 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs flex items-start gap-2.5 shadow-sm">
               <span className="text-base shrink-0">✉️</span>
               <div className="flex-1 leading-relaxed font-medium">{activeSuccess}</div>
             </div>
           )}
 
-          {/* Mode Switcher Tabs */}
-          <div className="grid grid-cols-2 gap-2 p-1.5 bg-[#031610] border border-[#134e3d] rounded-xl mb-6">
+          {/* Mode Switcher Pill Tabs */}
+          <div className="grid grid-cols-2 gap-1.5 p-1.5 bg-[#F0EFEB] border border-[#E5E2E1] rounded-full mb-6">
             <button
               type="button"
               onClick={() => {
@@ -441,10 +447,10 @@ export default function LoginForm() {
                 setError('');
                 setSuccessMessage('');
               }}
-              className={`py-2 rounded-lg font-bold text-xs sm:text-sm transition-all cursor-pointer ${
+              className={`py-2 rounded-full font-bold text-xs sm:text-sm transition-all cursor-pointer ${
                 mode === 'login'
-                  ? 'bg-gradient-to-r from-emerald-400 to-teal-300 text-emerald-950 shadow-md'
-                  : 'text-emerald-200/70 hover:text-white hover:bg-[#072b20]'
+                  ? 'bg-[#151515] text-white shadow-sm'
+                  : 'text-[#615E57] hover:text-[#151515]'
               }`}
             >
               लॉगिन (Sign In)
@@ -456,10 +462,10 @@ export default function LoginForm() {
                 setError('');
                 setSuccessMessage('');
               }}
-              className={`py-2 rounded-lg font-bold text-xs sm:text-sm transition-all cursor-pointer ${
+              className={`py-2 rounded-full font-bold text-xs sm:text-sm transition-all cursor-pointer ${
                 mode === 'signup'
-                  ? 'bg-gradient-to-r from-emerald-400 to-teal-300 text-emerald-950 shadow-md'
-                  : 'text-emerald-200/70 hover:text-white hover:bg-[#072b20]'
+                  ? 'bg-[#151515] text-white shadow-sm'
+                  : 'text-[#615E57] hover:text-[#151515]'
               }`}
             >
               नया खाता (Create Account)
@@ -472,9 +478,9 @@ export default function LoginForm() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-xs sm:text-sm font-bold text-emerald-100 mb-1.5"
+                className="block text-xs sm:text-sm font-bold text-[#151515] mb-1.5"
               >
-                ईमेल पता / Email Address <span className="text-emerald-400">*</span>
+                ईमेल पता / Email Address <span className="text-[#FF416C]">*</span>
               </label>
               <input
                 id="email"
@@ -485,7 +491,7 @@ export default function LoginForm() {
                 placeholder="name@example.com"
                 autoComplete="email"
                 disabled={isAnyLoading}
-                className="w-full bg-[#02130e] border border-[#134e3d] text-white placeholder-emerald-700 rounded-xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/40 transition-all shadow-inner disabled:opacity-50"
+                className="w-full bg-[#F4F3EF] border border-[#E5E2E1] text-[#151515] placeholder-[#8C8880] rounded-2xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:bg-white focus:border-[#151515] focus:ring-2 focus:ring-[#151515]/10 transition-all shadow-inner disabled:opacity-50"
               />
             </div>
 
@@ -494,15 +500,15 @@ export default function LoginForm() {
               <div className="flex items-center justify-between mb-1.5">
                 <label
                   htmlFor="password"
-                  className="block text-xs sm:text-sm font-bold text-emerald-100"
+                  className="block text-xs sm:text-sm font-bold text-[#151515]"
                 >
-                  पासवर्ड / Password <span className="text-emerald-400">*</span>
+                  पासवर्ड / Password <span className="text-[#FF416C]">*</span>
                 </label>
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={isAnyLoading}
-                  className="text-xs text-emerald-400 hover:text-emerald-300 font-medium cursor-pointer"
+                  className="text-xs text-[#8C8880] hover:text-[#151515] font-medium cursor-pointer"
                 >
                   {showPassword ? 'छुपाएं (Hide)' : 'दिखाएं (Show)'}
                 </button>
@@ -516,23 +522,23 @@ export default function LoginForm() {
                 placeholder="••••••••"
                 autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                 disabled={isAnyLoading}
-                className="w-full bg-[#02130e] border border-[#134e3d] text-white placeholder-emerald-700 rounded-xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/40 transition-all shadow-inner disabled:opacity-50"
+                className="w-full bg-[#F4F3EF] border border-[#E5E2E1] text-[#151515] placeholder-[#8C8880] rounded-2xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:bg-white focus:border-[#151515] focus:ring-2 focus:ring-[#151515]/10 transition-all shadow-inner disabled:opacity-50"
               />
             </div>
 
             {/* Helper text */}
-            <p className="text-emerald-200/60 text-xs pt-1">
+            <p className="text-[#8C8880] text-xs pt-1">
               {mode === 'login'
                 ? 'इस ईमेल से आप भविष्य में पासवर्ड अथवा Google द्वारा कभी भी लॉगिन कर सकेंगे।'
                 : 'न्यूनतम 6 अक्षर। खाता बनाने के बाद ईमेल सत्यापन लिंक भेजा जाएगा।'}
             </p>
 
             {/* Action Buttons Row */}
-            <div className="flex items-center justify-between gap-4 pt-4">
+            <div className="flex items-center justify-between gap-3 pt-3">
               {/* Left Button: "← पिछला (Back)" */}
               <Link
                 href="/"
-                className="px-5 py-3 rounded-xl border border-[#134e3d] bg-[#031610] text-emerald-200/80 hover:text-white hover:border-emerald-400 hover:bg-[#072b20] text-xs sm:text-sm font-medium transition-all text-center"
+                className="px-5 py-3 rounded-full border border-[#E5E2E1] bg-[#F0EFEB] hover:bg-[#E9E8E4] text-[#151515] text-xs sm:text-sm font-semibold transition-all text-center"
               >
                 ← पिछला (Back)
               </Link>
@@ -541,12 +547,12 @@ export default function LoginForm() {
               <button
                 type="submit"
                 disabled={isAnyLoading}
-                className="cursor-pointer px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 hover:from-emerald-300 hover:to-teal-200 active:scale-[0.98] text-emerald-950 font-black text-xs sm:text-base transition-all shadow-[0_4px_20px_rgba(16,185,129,0.4)] disabled:opacity-60 flex items-center justify-center gap-2"
+                className="cursor-pointer px-7 py-3 rounded-full bg-gradient-to-r from-[#FF416C] to-[#FF4B2B] hover:opacity-95 active:scale-[0.98] text-white font-bold text-xs sm:text-sm transition-all shadow-[0_4px_20px_rgba(255,65,108,0.25)] disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {isSignInLoading || isSignUpLoading ? (
                   <>
                     <svg
-                      className="animate-spin h-4 w-4 text-emerald-950"
+                      className="animate-spin h-4 w-4 text-white"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -579,9 +585,9 @@ export default function LoginForm() {
           {/* Visual Divider ("या / OR") */}
           <div className="relative my-6 text-center">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-[#134e3d]" />
+              <div className="w-full border-t border-[#E5E2E1]" />
             </div>
-            <span className="relative bg-[#06241b] px-3.5 text-xs text-emerald-300/70 font-bold uppercase tracking-wider">
+            <span className="relative bg-white px-3.5 text-xs text-[#8C8880] font-bold uppercase tracking-wider">
               या / OR
             </span>
           </div>
@@ -591,12 +597,12 @@ export default function LoginForm() {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={isAnyLoading}
-            className="w-full cursor-pointer bg-white hover:bg-emerald-50 active:scale-[0.99] text-slate-800 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-3 transition-all shadow-md disabled:opacity-60 border border-emerald-200"
+            className="w-full cursor-pointer bg-white hover:bg-[#F9F9F8] active:scale-[0.99] text-[#151515] font-semibold py-3 px-4 rounded-full flex items-center justify-center gap-3 transition-all shadow-sm disabled:opacity-60 border border-[#E5E2E1]"
           >
             {isGoogleLoading ? (
               <>
                 <svg
-                  className="animate-spin h-5 w-5 text-slate-700"
+                  className="animate-spin h-5 w-5 text-[#151515]"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -615,7 +621,7 @@ export default function LoginForm() {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   />
                 </svg>
-                <span className="text-sm font-semibold text-slate-700">Connecting to Google...</span>
+                <span className="text-sm font-semibold text-[#151515]">Connecting to Google...</span>
               </>
             ) : (
               <>
@@ -637,7 +643,7 @@ export default function LoginForm() {
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                   />
                 </svg>
-                <span className="text-sm font-bold text-slate-800">
+                <span className="text-sm font-bold text-[#151515]">
                   Google से लॉगिन करें (Sign in with Google)
                 </span>
               </>
@@ -645,7 +651,7 @@ export default function LoginForm() {
           </button>
 
           {/* Switch mode footer link */}
-          <div className="mt-5 text-center text-xs text-emerald-200/70">
+          <div className="mt-5 text-center text-xs text-[#8C8880]">
             {mode === 'login' ? (
               <span>
                 नया खाता बनाना चाहते हैं?{' '}
@@ -656,7 +662,7 @@ export default function LoginForm() {
                     setError('');
                     setSuccessMessage('');
                   }}
-                  className="text-emerald-400 font-bold hover:underline cursor-pointer ml-1"
+                  className="text-[#FF416C] font-bold hover:underline cursor-pointer ml-1"
                 >
                   यहाँ रजिस्टर करें (Create Account)
                 </button>
@@ -671,7 +677,7 @@ export default function LoginForm() {
                     setError('');
                     setSuccessMessage('');
                   }}
-                  className="text-emerald-400 font-bold hover:underline cursor-pointer ml-1"
+                  className="text-[#FF416C] font-bold hover:underline cursor-pointer ml-1"
                 >
                   लॉगिन करें (Sign In)
                 </button>
@@ -682,7 +688,7 @@ export default function LoginForm() {
       </main>
 
       {/* ── Bottom Footer ── */}
-      <footer className="py-5 text-center text-xs text-emerald-300/60 tracking-wide border-t border-[#092b20]">
+      <footer className="py-5 text-center text-xs text-[#8C8880] tracking-wide border-t border-[#E5E2E1]">
         साथी व्यापार • सुरक्षित एवं पारदर्शी ग्रामीण वित्तीय प्रणाली
       </footer>
     </div>

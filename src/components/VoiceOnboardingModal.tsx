@@ -547,22 +547,22 @@ export default function VoiceOnboardingModal({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 bg-[#02130e]/95 backdrop-blur-2xl flex flex-col justify-between p-4 sm:p-6 text-white animate-in fade-in duration-200 selection:bg-[#10b981] selection:text-[#022c22]"
+      className="fixed inset-0 z-50 bg-[#FAF9F5]/96 backdrop-blur-2xl flex flex-col justify-between p-4 sm:p-6 text-[#1B1B1B] font-['Poppins',sans-serif] animate-in fade-in duration-200 selection:bg-[#151515] selection:text-white"
     >
       {/* ── Top Header ────────────────────────────────────────────── */}
-      <div className="max-w-4xl w-full mx-auto flex items-center justify-between border-b border-[#0d382b] pb-3.5">
+      <div className="max-w-4xl w-full mx-auto flex items-center justify-between border-b border-[#E5E2E1] pb-3.5">
         <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-400 to-teal-300 text-emerald-950 flex items-center justify-center font-black text-xl shadow-[0_2px_12px_rgba(16,185,129,0.4)]">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#FF416C] to-[#FF4B2B] text-white flex items-center justify-center font-black text-xl shadow-sm">
             🎙️
           </div>
           <div>
-            <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+            <h2 className="text-base sm:text-lg font-extrabold text-[#151515] flex items-center gap-2">
               वॉइस ऑनबोर्डिंग (Voice Registration)
-              <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30">
+              <span className="text-[10px] font-bold bg-[#F0EFEB] text-[#615E57] px-2.5 py-0.5 rounded-full border border-[#E5E2E1]">
                 DPDP Compliant
               </span>
             </h2>
-            <p className="text-xs text-emerald-200/70">
+            <p className="text-xs text-[#8C8880]">
               चरण: {currentPrompt?.short || 'पंजीकरण'}
             </p>
           </div>
@@ -579,7 +579,7 @@ export default function VoiceOnboardingModal({
                 stopListening();
                 onSwitchToText();
               }}
-              className="text-xs text-emerald-300 hover:text-white font-semibold px-3 py-1.5 rounded-lg bg-[#06241b] border border-[#134e3d] hover:border-emerald-400 transition-colors"
+              className="text-xs text-[#151515] hover:text-black font-semibold px-4 py-2 rounded-full bg-white border border-[#E5E2E1] hover:bg-[#F0EFEB] transition-colors cursor-pointer"
             >
               ✍️ टेक्स्ट फॉर्म (Text Mode)
             </button>
@@ -594,7 +594,7 @@ export default function VoiceOnboardingModal({
               stopListening();
               onClose();
             }}
-            className="p-2 rounded-full bg-[#06241b] hover:bg-[#0c3a2c] text-emerald-200 hover:text-white border border-[#134e3d] transition-colors"
+            className="p-2 rounded-full bg-white hover:bg-[#F0EFEB] text-[#151515] border border-[#E5E2E1] transition-colors cursor-pointer"
             aria-label="Close"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -615,21 +615,21 @@ export default function VoiceOnboardingModal({
               key={s}
               className={`h-1.5 rounded-full transition-all ${
                 s === step
-                  ? 'w-8 bg-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.8)]'
+                  ? 'w-8 bg-[#151515]'
                   : idx < ['auth', 'name', 'district', 'sector', 'finances', 'loans', 'confirmation', 'consent'].indexOf(step)
-                  ? 'w-4 bg-teal-400'
-                  : 'w-3 bg-[#0a3527]'
+                  ? 'w-4 bg-gradient-to-r from-[#FF416C] to-[#FF4B2B]'
+                  : 'w-3 bg-[#E5E2E1]'
               }`}
             />
           ))}
         </div>
 
         {/* Assistant Speaking / Status Banner */}
-        <div className="bg-[#06241b]/95 border-2 border-[#134e3d] rounded-2xl p-5 shadow-[0_15px_45px_rgba(2,44,34,0.7)] space-y-2">
-          <div className="flex items-center justify-center gap-2 text-emerald-300 text-xs sm:text-sm font-bold uppercase tracking-wider">
-            {isSpeaking && <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>}
+        <div className="bg-white/95 border border-[#E5E2E1] rounded-[24px] p-5 sm:p-6 shadow-[0_12px_36px_rgba(27,27,27,0.06)] space-y-2">
+          <div className="flex items-center justify-center gap-2 text-[#8C8880] text-xs font-bold uppercase tracking-wider">
+            {isSpeaking && <span className="w-2.5 h-2.5 rounded-full bg-[#FF416C] animate-ping"></span>}
             {isListening && <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>}
-            {isProcessing && <span className="w-2.5 h-2.5 rounded-full bg-teal-400 animate-spin"></span>}
+            {isProcessing && <span className="w-2.5 h-2.5 rounded-full bg-[#151515] animate-spin"></span>}
             <span>
               {isSpeaking
                 ? '🔊 साथी बोल रहा है (Assistant Speaking)...'
@@ -641,47 +641,47 @@ export default function VoiceOnboardingModal({
             </span>
           </div>
 
-          <h3 className="text-base sm:text-lg md:text-xl font-bold text-white leading-relaxed">
+          <h3 className="text-base sm:text-lg md:text-xl font-extrabold text-[#151515] leading-relaxed">
             {currentPrompt?.hi}
           </h3>
-          <p className="text-xs text-emerald-200/70 font-normal">
+          <p className="text-xs text-[#8C8880] font-normal">
             {currentPrompt?.en}
           </p>
         </div>
 
         {/* Dynamic Summary Card on Step 6 (Confirmation) or Step 7 (Consent) */}
         {(step === 'confirmation' || step === 'consent' || step === 'complete') && (
-          <div className="bg-[#031b14] border border-emerald-400/40 rounded-2xl p-4 text-left space-y-2 text-xs sm:text-sm shadow-xl">
-            <h4 className="font-black text-emerald-300 text-xs uppercase tracking-wider border-b border-[#0d382b] pb-1.5 flex items-center justify-between">
+          <div className="bg-[#F4F3EF] border border-[#E5E2E1] rounded-2xl p-4 text-left space-y-2 text-xs sm:text-sm shadow-xs">
+            <h4 className="font-bold text-[#151515] text-xs uppercase tracking-wider border-b border-[#E5E2E1] pb-1.5 flex items-center justify-between">
               <span>📋 आपका व्यवसाय प्रोफाइल (Summary)</span>
-              <span className="text-[11px] text-emerald-400">सत्यापित करने के लिए तैयार</span>
+              <span className="text-[11px] text-[#FF416C] font-semibold">सत्यापित करने के लिए तैयार</span>
             </h4>
-            <div className="grid grid-cols-2 gap-2 text-emerald-100/90 pt-1">
+            <div className="grid grid-cols-2 gap-2 text-[#151515] pt-1">
               <div>
-                <span className="text-emerald-300/60 block text-[11px]">नाम:</span>
-                <strong className="text-white">{formData.name || '—'}</strong>
+                <span className="text-[#8C8880] block text-[11px]">नाम:</span>
+                <strong className="text-[#151515]">{formData.name || '—'}</strong>
               </div>
               <div>
-                <span className="text-emerald-300/60 block text-[11px]">स्थान (जिला):</span>
-                <strong className="text-white">{formData.district || '—'}</strong>
+                <span className="text-[#8C8880] block text-[11px]">स्थान (जिला):</span>
+                <strong className="text-[#151515]">{formData.district || '—'}</strong>
               </div>
               <div>
-                <span className="text-emerald-300/60 block text-[11px]">व्यवसाय का क्षेत्र:</span>
-                <strong className="text-white">{formData.sector || '—'}</strong>
+                <span className="text-[#8C8880] block text-[11px]">व्यवसाय का क्षेत्र:</span>
+                <strong className="text-[#151515] capitalize">{formData.sector || '—'}</strong>
               </div>
               <div>
-                <span className="text-emerald-300/60 block text-[11px]">पुराना ऋण (Loan):</span>
-                <strong className={formData.existing_loans ? 'text-orange-300' : 'text-emerald-400'}>
+                <span className="text-[#8C8880] block text-[11px]">पुराना ऋण (Loan):</span>
+                <strong className={formData.existing_loans ? 'text-[#FF416C]' : 'text-emerald-700'}>
                   {formData.existing_loans ? 'हाँ (सक्रिय)' : 'नहीं'}
                 </strong>
               </div>
               <div>
-                <span className="text-emerald-300/60 block text-[11px]">मासिक कमाई:</span>
-                <strong className="text-emerald-400">₹{formData.monthly_revenue_est.toLocaleString('en-IN')}</strong>
+                <span className="text-[#8C8880] block text-[11px]">मासिक कमाई:</span>
+                <strong className="text-[#151515]">₹{formData.monthly_revenue_est.toLocaleString('en-IN')}</strong>
               </div>
               <div>
-                <span className="text-emerald-300/60 block text-[11px]">मासिक खर्च:</span>
-                <strong className="text-orange-400">₹{formData.monthly_expense_est.toLocaleString('en-IN')}</strong>
+                <span className="text-[#8C8880] block text-[11px]">मासिक खर्च:</span>
+                <strong className="text-[#FF416C]">₹{formData.monthly_expense_est.toLocaleString('en-IN')}</strong>
               </div>
             </div>
           </div>
@@ -689,11 +689,11 @@ export default function VoiceOnboardingModal({
 
         {/* DPDP Act Consent Explicit Box */}
         {step === 'consent' && (
-          <div className="p-4 rounded-xl bg-emerald-950/50 border-2 border-emerald-400/60 text-left space-y-2 text-xs">
-            <div className="flex items-center gap-2 text-emerald-300 font-bold">
+          <div className="p-4 rounded-2xl bg-[#F4F3EF] border border-[#E5E2E1] text-left space-y-2 text-xs">
+            <div className="flex items-center gap-2 text-[#151515] font-bold">
               <span>🛡️ DPDP Act 2023 डेटा संरक्षण सहमति</span>
             </div>
-            <p className="text-emerald-100/90 leading-relaxed">
+            <p className="text-[#615E57] leading-relaxed">
               हम आपके डेटा का उपयोग केवल वित्तीय विश्लेषण (Break-even, Margin) और सरकारी योजनाओं (PMEGP, Mudra) की पात्रता जांचने के लिए करते हैं। आपकी जानकारी सुरक्षित है।
             </p>
           </div>
@@ -721,10 +721,10 @@ export default function VoiceOnboardingModal({
                   }
                 }}
                 disabled={isProcessing}
-                className={`relative z-10 w-24 h-24 sm:w-28 sm:h-28 rounded-full flex flex-col items-center justify-center gap-1 font-black shadow-2xl transition-all transform active:scale-95 ${
+                className={`relative z-10 w-24 h-24 sm:w-28 sm:h-28 rounded-full flex flex-col items-center justify-center gap-1 font-black shadow-xl transition-all transform active:scale-95 cursor-pointer ${
                   isListening
-                    ? 'bg-rose-500 text-white animate-pulse shadow-[0_0_35px_rgba(244,63,94,0.6)]'
-                    : 'bg-gradient-to-tr from-emerald-500 via-teal-400 to-emerald-300 text-emerald-950 hover:scale-105 shadow-[0_0_30px_rgba(16,185,129,0.45)]'
+                    ? 'bg-rose-500 text-white animate-pulse shadow-[0_0_35px_rgba(244,63,94,0.5)]'
+                    : 'bg-gradient-to-tr from-[#FF416C] to-[#FF4B2B] text-white hover:scale-105 shadow-[0_4px_25px_rgba(255,65,108,0.35)]'
                 }`}
               >
                 <svg className="w-8 h-8 sm:w-10 sm:h-10 fill-current" viewBox="0 0 24 24">
@@ -757,13 +757,13 @@ export default function VoiceOnboardingModal({
                     ? 'उदा. कमाई 25000 खर्च 15000'
                     : 'बोलें या यहाँ टाइप करें...')
                 }
-                className="flex-1 bg-[#02130e] text-white placeholder-emerald-700 border border-[#134e3d] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/40 shadow-inner"
+                className="flex-1 bg-white text-[#151515] placeholder-[#8C8880] border border-[#E5E2E1] rounded-full px-4 py-2.5 text-sm focus:outline-none focus:border-[#151515] shadow-xs"
               />
               <button
                 type="button"
                 onClick={() => processUserAnswer(manualInput)}
                 disabled={isProcessing || !manualInput.trim()}
-                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-300 disabled:opacity-40 text-emerald-950 font-bold text-sm shadow-md transition-all hover:scale-105 active:scale-95 shrink-0"
+                className="px-5 py-2.5 rounded-full bg-[#151515] hover:bg-[#2A2A2A] disabled:opacity-40 text-white font-bold text-xs sm:text-sm shadow-sm transition-all hover:scale-105 active:scale-95 shrink-0 cursor-pointer"
               >
                 {isProcessing ? '⏳...' : 'आगे बढ़ें →'}
               </button>
@@ -773,7 +773,7 @@ export default function VoiceOnboardingModal({
 
         {/* Error Alert */}
         {errorMessage && (
-          <div className="p-3 rounded-xl bg-rose-950/80 border border-rose-500/60 text-xs text-rose-200 flex items-center justify-center gap-2">
+          <div className="p-3 rounded-2xl bg-[#FFDAD6] border border-[#FF897D] text-xs text-[#93000A] flex items-center justify-center gap-2">
             <span>⚠️</span>
             <span>{errorMessage}</span>
           </div>
@@ -781,7 +781,7 @@ export default function VoiceOnboardingModal({
       </div>
 
       {/* ── Modal Footer Controls ─────────────────────────────────── */}
-      <div className="max-w-4xl w-full mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[#0d382b] pt-3.5 text-xs text-emerald-300/60">
+      <div className="max-w-4xl w-full mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[#E5E2E1] pt-3.5 text-xs text-[#8C8880]">
         <div className="flex items-center gap-2">
           <span>🔒 जीरो-हैलुसिनेशन • शुद्ध वित्तीय गणना</span>
         </div>
@@ -806,7 +806,7 @@ export default function VoiceOnboardingModal({
                   changeStep(stepOrder[currentIndex - 1]);
                 }
               }}
-              className="text-emerald-300/80 hover:text-white underline font-medium"
+              className="text-[#151515] hover:underline font-semibold cursor-pointer"
             >
               ← पिछला चरण (Back)
             </button>
@@ -821,7 +821,7 @@ export default function VoiceOnboardingModal({
               stopListening();
               onClose();
             }}
-            className="px-4 py-2 rounded-xl bg-[#06241b] hover:bg-[#0c3a2c] text-emerald-100 text-xs font-bold border border-[#134e3d] transition-colors"
+            className="px-5 py-2 rounded-full bg-[#F0EFEB] hover:bg-[#E9E8E4] text-[#151515] text-xs font-semibold border border-[#E5E2E1] transition-colors cursor-pointer"
           >
             बंद करें (Close)
           </button>

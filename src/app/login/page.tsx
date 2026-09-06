@@ -19,7 +19,7 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#031610] flex items-center justify-center text-emerald-400 font-mono text-sm">
+        <div className="min-h-screen bg-[#FAF9F5] flex items-center justify-center text-[#151515] font-sans text-sm">
           लोड हो रहा है (Loading authentication portal)...
         </div>
       }

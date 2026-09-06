@@ -256,30 +256,30 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#031610] text-[#fdfcf7] font-sans flex flex-col justify-between selection:bg-[#10b981] selection:text-[#022c22] relative overflow-hidden">
+    <div className="min-h-screen bg-[#FAF9F5] text-[#1B1B1B] font-['Poppins',sans-serif] flex flex-col justify-between selection:bg-[#151515] selection:text-white relative overflow-hidden">
       {/* ── Ambient Background Glows ── */}
-      <div className="absolute top-[-15%] left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-[radial-gradient(ellipse_at_center,rgba(16,185,129,0.18),transparent_70%)] blur-3xl pointer-events-none -z-10" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-[radial-gradient(circle_at_center,rgba(249,115,22,0.12),transparent_70%)] blur-3xl pointer-events-none -z-10" />
+      <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[radial-gradient(ellipse_at_center,rgba(255,65,108,0.06),transparent_70%)] blur-3xl pointer-events-none -z-10" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-[radial-gradient(circle_at_center,rgba(255,75,43,0.04),transparent_70%)] blur-3xl pointer-events-none -z-10" />
 
       {/* ── Top Header ────────────────────────────────────────────── */}
-      <header className="border-b border-[#0d382b] bg-[#031610]/90 backdrop-blur-xl px-4 sm:px-8 py-3.5 sticky top-0 z-20">
+      <header className="border-b border-[#E5E2E1] bg-white/85 backdrop-blur-xl px-4 sm:px-8 py-3.5 sticky top-0 z-20">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-2xl sm:text-3xl filter drop-shadow-[0_2px_10px_rgba(16,185,129,0.5)]">🤝</span>
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <span className="text-2xl sm:text-3xl filter drop-shadow-sm">🤝</span>
             <div>
-              <span className="text-lg sm:text-xl font-black text-white">साथी व्यापार</span>
-              <span className="text-[10px] text-emerald-300 block -mt-1 font-semibold">
+              <span className="text-lg sm:text-xl font-black text-[#151515]">साथी व्यापार</span>
+              <span className="text-[10px] text-[#8C8880] block -mt-1 font-semibold">
                 उद्यमी पंजीकरण (Entrepreneur Registration)
               </span>
             </div>
           </Link>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3">
             {hasVoiceSupport && (
               <button
                 type="button"
                 onClick={() => setIsVoiceModalOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-300 hover:from-emerald-300 hover:to-teal-200 text-emerald-950 text-xs font-black shadow-md hover:scale-105 transition-all"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-[#FF416C] to-[#FF4B2B] hover:opacity-95 text-white text-xs font-bold shadow-sm hover:scale-105 transition-all cursor-pointer"
               >
                 <span>🎙️ बोलकर भरें</span>
                 <span className="hidden sm:inline">(Voice Mode)</span>
@@ -288,7 +288,7 @@ export default function OnboardingPage() {
 
             <Link
               href="/login"
-              className="text-xs font-semibold text-emerald-100 hover:text-white px-3 py-1.5 rounded-lg border border-[#134e3d] bg-[#072b20] hover:bg-[#0c3a2c] transition-all"
+              className="text-xs font-semibold text-[#151515] px-4 py-2 rounded-full border border-[#E5E2E1] bg-[#F0EFEB] hover:bg-[#E9E8E4] transition-all"
             >
               लॉगिन / Login
             </Link>
@@ -305,21 +305,21 @@ export default function OnboardingPage() {
 
       {/* ── Main Container (Text Form Fallback & Direct Flow) ─────── */}
       <main className="flex-1 max-w-2xl w-full mx-auto px-4 py-8 flex flex-col justify-center">
-        <div className="bg-[#06241b]/95 border-2 border-[#134e3d] rounded-3xl p-6 sm:p-8 shadow-[0_20px_60px_-15px_rgba(2,44,34,0.8)] backdrop-blur-xl space-y-6">
+        <div className="bg-white/95 border border-[#E5E2E1] rounded-[28px] p-6 sm:p-8 shadow-[0_12px_40px_rgba(27,27,27,0.06)] backdrop-blur-xl space-y-6">
           {/* Header Banner */}
-          <div className="space-y-1 text-center sm:text-left border-b border-[#0d382b] pb-4">
+          <div className="space-y-1 text-center sm:text-left border-b border-[#E5E2E1] pb-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#8C8880]">
                 चरण {currentStep} / 8 • Step {currentStep} of 8
               </span>
               {hasVoiceSupport === false && (
-                <span className="text-[11px] bg-[#072b20] text-emerald-300 px-2.5 py-0.5 rounded-md border border-[#134e3d]">
+                <span className="text-[11px] bg-[#F0EFEB] text-[#615E57] px-2.5 py-0.5 rounded-full border border-[#E5E2E1] font-medium">
                   टेक्स्ट मोड (Standard Mode)
                 </span>
               )}
             </div>
 
-            <h1 className="text-xl sm:text-2xl font-black text-white">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-[#151515]">
               {currentStep === 1 && '1. आपका शुभ नाम क्या है?'}
               {currentStep === 2 && '2. आपका गांव या जिला कौन सा है?'}
               {currentStep === 3 && '3. आप क्या काम या व्यापार करते हैं?'}
@@ -329,7 +329,7 @@ export default function OnboardingPage() {
               {currentStep === 7 && '7. अपना ईमेल और पासवर्ड दर्ज करें'}
               {currentStep === 8 && '8. डेटा सुरक्षा सहमति (DPDP Act)'}
             </h1>
-            <p className="text-xs text-emerald-200/70">
+            <p className="text-xs text-[#8C8880] leading-relaxed">
               {currentStep === 1 && 'What is your full name?'}
               {currentStep === 2 && 'Which village or district are you located in?'}
               {currentStep === 3 && 'What trade or work do you do? (e.g. Kirana, Tailoring, Dairy...)'}
@@ -342,9 +342,9 @@ export default function OnboardingPage() {
           </div>
 
           {/* Progress Bar */}
-          <div className="w-full bg-[#0a3527] h-2 rounded-full overflow-hidden border border-[#134e3d]">
+          <div className="w-full bg-[#E5E2E1] h-1.5 rounded-full overflow-hidden">
             <div
-              className="bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 h-full transition-all duration-300 shadow-[0_0_12px_rgba(16,185,129,0.5)]"
+              className="bg-gradient-to-r from-[#FF416C] to-[#FF4B2B] h-full transition-all duration-300"
               style={{ width: `${(currentStep / 8) * 100}%` }}
             />
           </div>
@@ -354,8 +354,8 @@ export default function OnboardingPage() {
             {/* Step 1: Name */}
             {currentStep === 1 && (
               <div className="space-y-2">
-                <label htmlFor="name" className="block text-sm font-semibold text-white">
-                  उद्यमी का नाम / Full Name <span className="text-emerald-400">*</span>
+                <label htmlFor="name" className="block text-sm font-bold text-[#151515]">
+                  उद्यमी का नाम / Full Name <span className="text-[#FF416C]">*</span>
                 </label>
                 <input
                   id="name"
@@ -364,7 +364,7 @@ export default function OnboardingPage() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="उदा. रमेश कुमार (e.g. Ramesh Kumar)"
-                  className="w-full bg-[#02130e] text-white border border-[#134e3d] rounded-xl px-4 py-3 text-base focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/40"
+                  className="w-full bg-[#F4F3EF] text-[#151515] placeholder-[#8C8880] border border-[#E5E2E1] rounded-2xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:bg-white focus:border-[#151515] focus:ring-2 focus:ring-[#151515]/10"
                   autoFocus
                 />
               </div>
@@ -373,8 +373,8 @@ export default function OnboardingPage() {
             {/* Step 2: District */}
             {currentStep === 2 && (
               <div className="space-y-2">
-                <label htmlFor="district" className="block text-sm font-semibold text-white">
-                  गांव / जिला / Village or District <span className="text-emerald-400">*</span>
+                <label htmlFor="district" className="block text-sm font-bold text-[#151515]">
+                  गांव / जिला / Village or District <span className="text-[#FF416C]">*</span>
                 </label>
                 <input
                   id="district"
@@ -383,7 +383,7 @@ export default function OnboardingPage() {
                   value={formData.district}
                   onChange={(e) => setFormData({ ...formData, district: e.target.value })}
                   placeholder="उदा. वाराणसी, उत्तर प्रदेश (e.g. Varanasi)"
-                  className="w-full bg-[#02130e] text-white border border-[#134e3d] rounded-xl px-4 py-3 text-base focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/40"
+                  className="w-full bg-[#F4F3EF] text-[#151515] placeholder-[#8C8880] border border-[#E5E2E1] rounded-2xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:bg-white focus:border-[#151515] focus:ring-2 focus:ring-[#151515]/10"
                   autoFocus
                 />
               </div>
@@ -392,8 +392,8 @@ export default function OnboardingPage() {
             {/* Step 3: Sector */}
             {currentStep === 3 && (
               <div className="space-y-3">
-                <label htmlFor="sector" className="block text-sm font-semibold text-white">
-                  व्यापार का क्षेत्र / Business Sector <span className="text-emerald-400">*</span>
+                <label htmlFor="sector" className="block text-sm font-bold text-[#151515]">
+                  व्यापार का क्षेत्र / Business Sector <span className="text-[#FF416C]">*</span>
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
                   {[
@@ -410,10 +410,10 @@ export default function OnboardingPage() {
                       key={s.id}
                       type="button"
                       onClick={() => setFormData({ ...formData, sector: s.id, business_name: s.label })}
-                      className={`p-3 rounded-xl border text-left font-semibold transition-all ${
+                      className={`p-3 rounded-2xl border text-left font-semibold transition-all cursor-pointer ${
                         formData.sector === s.id
-                          ? 'bg-emerald-400/20 border-emerald-400 text-emerald-200'
-                          : 'bg-[#02130e] border-[#134e3d] text-emerald-100/70 hover:border-emerald-500/50'
+                          ? 'bg-[#151515] text-white border-[#151515] shadow-sm'
+                          : 'bg-[#F4F3EF] border-[#E5E2E1] text-[#151515] hover:bg-[#E9E8E4]'
                       }`}
                     >
                       {s.label}
@@ -422,7 +422,7 @@ export default function OnboardingPage() {
                 </div>
 
                 <div className="pt-2">
-                  <label htmlFor="customSector" className="block text-xs text-emerald-200/70 mb-1">
+                  <label htmlFor="customSector" className="block text-xs text-[#8C8880] mb-1">
                     या विवरण खुद लिखें (Or type custom trade):
                   </label>
                   <input
@@ -431,7 +431,7 @@ export default function OnboardingPage() {
                     value={formData.sector}
                     onChange={(e) => setFormData({ ...formData, sector: e.target.value })}
                     placeholder="उदा. स्टेशनरी और फोटोकॉपी दुकान"
-                    className="w-full bg-[#02130e] text-white border border-[#134e3d] rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400"
+                    className="w-full bg-[#F4F3EF] text-[#151515] placeholder-[#8C8880] border border-[#E5E2E1] rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:bg-white focus:border-[#151515]"
                   />
                 </div>
               </div>
@@ -441,11 +441,11 @@ export default function OnboardingPage() {
             {currentStep === 4 && (
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <label htmlFor="rev" className="block text-sm font-semibold text-white">
-                    औसत मासिक कमाई (बिक्री) / Monthly Revenue (₹) <span className="text-emerald-400">*</span>
+                  <label htmlFor="rev" className="block text-sm font-bold text-[#151515]">
+                    औसत मासिक कमाई (बिक्री) / Monthly Revenue (₹) <span className="text-[#FF416C]">*</span>
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3.5 top-3 text-emerald-400 font-bold">₹</span>
+                    <span className="absolute left-3.5 top-3 text-[#151515] font-bold">₹</span>
                     <input
                       id="rev"
                       type="number"
@@ -456,18 +456,18 @@ export default function OnboardingPage() {
                         setFormData({ ...formData, monthly_revenue_est: parseFloat(e.target.value) || 0 })
                       }
                       placeholder="उदा. 25000"
-                      className="w-full bg-[#02130e] text-white pl-8 pr-4 py-3 border border-[#134e3d] rounded-xl text-base focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/40"
+                      className="w-full bg-[#F4F3EF] text-[#151515] placeholder-[#8C8880] pl-8 pr-4 py-3 border border-[#E5E2E1] rounded-2xl text-sm sm:text-base focus:outline-none focus:bg-white focus:border-[#151515]"
                       autoFocus
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="exp" className="block text-sm font-semibold text-white">
-                    औसत मासिक खर्च / Monthly Expenses (₹) <span className="text-emerald-400">*</span>
+                  <label htmlFor="exp" className="block text-sm font-bold text-[#151515]">
+                    औसत मासिक खर्च / Monthly Expenses (₹) <span className="text-[#FF416C]">*</span>
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3.5 top-3 text-orange-400 font-bold">₹</span>
+                    <span className="absolute left-3.5 top-3 text-[#FF416C] font-bold">₹</span>
                     <input
                       id="exp"
                       type="number"
@@ -477,7 +477,7 @@ export default function OnboardingPage() {
                         setFormData({ ...formData, monthly_expense_est: parseFloat(e.target.value) || 0 })
                       }
                       placeholder="उदा. 15000"
-                      className="w-full bg-[#02130e] text-white pl-8 pr-4 py-3 border border-[#134e3d] rounded-xl text-base focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/40"
+                      className="w-full bg-[#F4F3EF] text-[#151515] placeholder-[#8C8880] pl-8 pr-4 py-3 border border-[#E5E2E1] rounded-2xl text-sm sm:text-base focus:outline-none focus:bg-white focus:border-[#151515]"
                     />
                   </div>
                 </div>
@@ -487,17 +487,17 @@ export default function OnboardingPage() {
             {/* Step 5: Loans */}
             {currentStep === 5 && (
               <div className="space-y-3">
-                <label className="block text-sm font-semibold text-white">
+                <label className="block text-sm font-bold text-[#151515]">
                   क्या आपके ऊपर कोई सक्रिय बैंक या समूह का लोन है? / Any Existing Loans?
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, existing_loans: true })}
-                    className={`p-4 rounded-xl border text-center font-bold text-base transition-all ${
+                    className={`p-4 rounded-2xl border text-center font-bold text-sm sm:text-base transition-all cursor-pointer ${
                       formData.existing_loans === true
-                        ? 'bg-orange-500/20 border-orange-400 text-orange-200 shadow-sm'
-                        : 'bg-[#02130e] border-[#134e3d] text-emerald-100/70 hover:border-emerald-500/40'
+                        ? 'bg-[#151515] text-white border-[#151515] shadow-sm'
+                        : 'bg-[#F4F3EF] border-[#E5E2E1] text-[#151515] hover:bg-[#E9E8E4]'
                     }`}
                   >
                     हाँ (Yes, have loans)
@@ -505,10 +505,10 @@ export default function OnboardingPage() {
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, existing_loans: false })}
-                    className={`p-4 rounded-xl border text-center font-bold text-base transition-all ${
+                    className={`p-4 rounded-2xl border text-center font-bold text-sm sm:text-base transition-all cursor-pointer ${
                       formData.existing_loans === false
-                        ? 'bg-emerald-500/20 border-emerald-400 text-emerald-200 shadow-sm'
-                        : 'bg-[#02130e] border-[#134e3d] text-emerald-100/70 hover:border-emerald-500/40'
+                        ? 'bg-[#151515] text-white border-[#151515] shadow-sm'
+                        : 'bg-[#F4F3EF] border-[#E5E2E1] text-[#151515] hover:bg-[#E9E8E4]'
                     }`}
                   >
                     नहीं (No loans)
@@ -519,38 +519,38 @@ export default function OnboardingPage() {
 
             {/* Step 6: Confirmation Summary */}
             {currentStep === 6 && (
-              <div className="bg-[#031b14] border border-emerald-400/40 rounded-2xl p-5 space-y-3 text-sm">
-                <h3 className="font-bold text-emerald-300 text-xs uppercase tracking-wider border-b border-[#0d382b] pb-2">
+              <div className="bg-[#F4F3EF] border border-[#E5E2E1] rounded-2xl p-5 space-y-3 text-sm">
+                <h3 className="font-bold text-[#151515] text-xs uppercase tracking-wider border-b border-[#E5E2E1] pb-2">
                   📋 आपके व्यापार का सारांश (Profile Summary)
                 </h3>
-                <div className="grid grid-cols-2 gap-3 text-emerald-100/90">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <span className="text-emerald-300/60 block text-xs">उद्यमी का नाम:</span>
-                    <strong className="text-white text-base">{formData.name}</strong>
+                    <span className="text-[#8C8880] block text-xs">उद्यमी का नाम:</span>
+                    <strong className="text-[#151515] text-base">{formData.name}</strong>
                   </div>
                   <div>
-                    <span className="text-emerald-300/60 block text-xs">स्थान (जिला):</span>
-                    <strong className="text-white text-base">{formData.district}</strong>
+                    <span className="text-[#8C8880] block text-xs">स्थान (जिला):</span>
+                    <strong className="text-[#151515] text-base">{formData.district}</strong>
                   </div>
                   <div>
-                    <span className="text-emerald-300/60 block text-xs">व्यवसाय का क्षेत्र:</span>
-                    <strong className="text-white text-base">{formData.sector}</strong>
+                    <span className="text-[#8C8880] block text-xs">व्यवसाय का क्षेत्र:</span>
+                    <strong className="text-[#151515] text-base capitalize">{formData.sector}</strong>
                   </div>
                   <div>
-                    <span className="text-emerald-300/60 block text-xs">सक्रिय लोन:</span>
-                    <strong className={formData.existing_loans ? 'text-orange-300' : 'text-emerald-400'}>
+                    <span className="text-[#8C8880] block text-xs">सक्रिय लोन:</span>
+                    <strong className={formData.existing_loans ? 'text-[#FF416C]' : 'text-emerald-700'}>
                       {formData.existing_loans ? 'हाँ (Active Loan)' : 'नहीं (No Loans)'}
                     </strong>
                   </div>
                   <div>
-                    <span className="text-emerald-300/60 block text-xs">मासिक बिक्री (कमाई):</span>
-                    <strong className="text-emerald-400 text-base font-bold">
+                    <span className="text-[#8C8880] block text-xs">मासिक बिक्री (कमाई):</span>
+                    <strong className="text-[#151515] text-base font-bold">
                       ₹{formData.monthly_revenue_est.toLocaleString('en-IN')}
                     </strong>
                   </div>
                   <div>
-                    <span className="text-emerald-300/60 block text-xs">मासिक खर्च:</span>
-                    <strong className="text-orange-400 text-base font-bold">
+                    <span className="text-[#8C8880] block text-xs">मासिक खर्च:</span>
+                    <strong className="text-[#FF416C] text-base font-bold">
                       ₹{formData.monthly_expense_est.toLocaleString('en-IN')}
                     </strong>
                   </div>
@@ -562,23 +562,23 @@ export default function OnboardingPage() {
             {currentStep === 7 && (
               <div className="space-y-4">
                 {authUserEmail ? (
-                  <div className="p-4 rounded-xl bg-emerald-950/70 border border-emerald-400 text-emerald-200 text-sm flex items-center justify-between shadow-inner">
+                  <div className="p-4 rounded-2xl bg-[#F0EFEB] border border-[#E5E2E1] text-[#151515] text-sm flex items-center justify-between shadow-xs">
                     <div className="flex items-center gap-2.5">
                       <span className="text-xl">✅</span>
                       <div>
-                        <p className="font-bold text-white">खाता लिंक हो चुका है (Account Linked)</p>
-                        <p className="text-xs text-emerald-300 font-mono">{authUserEmail}</p>
+                        <p className="font-bold text-[#151515]">खाता लिंक हो चुका है (Account Linked)</p>
+                        <p className="text-xs text-[#8C8880] font-mono">{authUserEmail}</p>
                       </div>
                     </div>
-                    <span className="text-[11px] bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider border border-emerald-500/30">
+                    <span className="text-[11px] bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider border border-emerald-200">
                       सत्यापित / Linked
                     </span>
                   </div>
                 ) : (
                   <>
                     <div>
-                      <label htmlFor="email" className="block text-sm font-semibold text-white mb-1.5">
-                        ईमेल पता / Email Address <span className="text-emerald-400">*</span>
+                      <label htmlFor="email" className="block text-sm font-bold text-[#151515] mb-1.5">
+                        ईमेल पता / Email Address <span className="text-[#FF416C]">*</span>
                       </label>
                       <input
                         id="email"
@@ -587,20 +587,20 @@ export default function OnboardingPage() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="name@example.com"
-                        className="w-full bg-[#02130e] text-white border border-[#134e3d] rounded-xl px-4 py-3 text-base focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/40"
+                        className="w-full bg-[#F4F3EF] text-[#151515] placeholder-[#8C8880] border border-[#E5E2E1] rounded-2xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:bg-white focus:border-[#151515]"
                         autoFocus
                       />
                     </div>
 
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
-                        <label htmlFor="password" className="block text-sm font-semibold text-white">
-                          पासवर्ड / Password <span className="text-emerald-400">*</span>
+                        <label htmlFor="password" className="block text-sm font-bold text-[#151515]">
+                          पासवर्ड / Password <span className="text-[#FF416C]">*</span>
                         </label>
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="text-xs text-emerald-400 hover:text-emerald-300 font-medium cursor-pointer"
+                          className="text-xs text-[#8C8880] hover:text-[#151515] font-medium cursor-pointer"
                         >
                           {showPassword ? 'छुपाएं (Hide)' : 'दिखाएं (Show)'}
                         </button>
@@ -612,22 +612,22 @@ export default function OnboardingPage() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="••••••••"
-                        className="w-full bg-[#02130e] text-white border border-[#134e3d] rounded-xl px-4 py-3 text-base focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/40"
+                        className="w-full bg-[#F4F3EF] text-[#151515] placeholder-[#8C8880] border border-[#E5E2E1] rounded-2xl px-4 py-3 text-sm sm:text-base focus:outline-none focus:bg-white focus:border-[#151515]"
                       />
-                      <p className="text-xs text-emerald-300/70 mt-1">
+                      <p className="text-xs text-[#8C8880] mt-1">
                         न्यूनतम 6 अक्षर (Minimum 6 characters)
                       </p>
                     </div>
 
-                    <p className="text-xs text-emerald-200/70">
+                    <p className="text-xs text-[#8C8880]">
                       इस ईमेल व पासवर्ड अथवा Google खाते से आप भविष्य में कभी भी सुरक्षित रूप से लॉगिन कर सकेंगे।
                     </p>
 
                     <div className="relative my-3 text-center">
                       <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-[#134e3d]" />
+                        <div className="w-full border-t border-[#E5E2E1]" />
                       </div>
-                      <span className="relative bg-[#06241b] px-3 text-xs text-emerald-300/70 font-bold uppercase">
+                      <span className="relative bg-white px-3 text-xs text-[#8C8880] font-bold uppercase">
                         या / OR
                       </span>
                     </div>
@@ -636,10 +636,10 @@ export default function OnboardingPage() {
                       type="button"
                       onClick={handleGoogleSignIn}
                       disabled={isGoogleLoading}
-                      className="w-full cursor-pointer bg-white hover:bg-emerald-50 active:scale-[0.99] text-slate-800 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-3 transition-all shadow-md disabled:opacity-60 border border-emerald-200"
+                      className="w-full cursor-pointer bg-white hover:bg-[#F9F9F8] active:scale-[0.99] text-[#151515] font-bold py-3 px-4 rounded-full flex items-center justify-center gap-3 transition-all shadow-sm disabled:opacity-60 border border-[#E5E2E1]"
                     >
                       {isGoogleLoading ? (
-                        <span className="text-sm font-semibold text-slate-700">Connecting to Google...</span>
+                        <span className="text-sm font-semibold text-[#151515]">Connecting to Google...</span>
                       ) : (
                         <>
                           <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
@@ -648,7 +648,7 @@ export default function OnboardingPage() {
                             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
                             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
                           </svg>
-                          <span className="text-sm font-bold text-slate-800">
+                          <span className="text-sm font-bold text-[#151515]">
                             Google से लिंक करें (Continue with Google)
                           </span>
                         </>
@@ -662,27 +662,27 @@ export default function OnboardingPage() {
             {/* Step 8: DPDP Act Consent */}
             {currentStep === 8 && (
               <div className="space-y-4">
-                <div className="p-4 rounded-2xl bg-emerald-950/50 border-2 border-emerald-400/60 space-y-3">
-                  <div className="flex items-center gap-2 text-emerald-300 font-bold text-sm">
+                <div className="p-4 rounded-2xl bg-[#F4F3EF] border border-[#E5E2E1] space-y-2.5">
+                  <div className="flex items-center gap-2 text-[#151515] font-bold text-sm">
                     <span className="text-lg">🛡️</span>
                     <span>डेटा सुरक्षा एवं गोपनीयता सहमति (DPDP Act 2023)</span>
                   </div>
-                  <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-[#615E57] leading-relaxed">
                     &quot;Do you agree to let us store this information to give you advice?&quot;
                     <br />
                     क्या आप हमें व्यापारिक सलाह (Break-even, Margin) और सरकारी सब्सिडी योजनाएं (PMEGP, Mudra) ढूंढने के लिए यह जानकारी सुरक्षित रूप से सेव करने की अनुमति देते हैं?
                   </p>
                 </div>
 
-                <label className="flex items-start gap-3 p-3 rounded-xl bg-[#02130e] border border-[#134e3d] cursor-pointer hover:border-emerald-400 transition-colors">
+                <label className="flex items-start gap-3 p-3.5 rounded-2xl bg-white border border-[#E5E2E1] cursor-pointer hover:border-[#151515] transition-colors shadow-xs">
                   <input
                     type="checkbox"
                     required
                     checked={formData.consent_given}
                     onChange={(e) => setFormData({ ...formData, consent_given: e.target.checked })}
-                    className="w-5 h-5 mt-0.5 rounded text-emerald-500 focus:ring-emerald-400 border-emerald-800 bg-[#06241b]"
+                    className="w-5 h-5 mt-0.5 rounded text-[#151515] focus:ring-[#151515]/20 border-[#E5E2E1]"
                   />
-                  <span className="text-xs sm:text-sm text-white font-medium">
+                  <span className="text-xs sm:text-sm text-[#151515] font-medium leading-relaxed">
                     हाँ, मैं अपनी जानकारी सुरक्षित रूप से सेव करने की अनुमति देता/देती हूँ। (I give consent to store my data)
                   </span>
                 </label>
@@ -691,14 +691,14 @@ export default function OnboardingPage() {
 
             {/* Error Message Display */}
             {errorMessage && (
-              <div className="p-3 rounded-xl bg-rose-950 border border-rose-500 text-xs text-rose-200 flex items-center gap-2">
+              <div className="p-3.5 rounded-2xl bg-[#FFDAD6] border border-[#FF897D] text-xs text-[#93000A] flex items-center gap-2">
                 <span>⚠️</span>
                 <span>{errorMessage}</span>
               </div>
             )}
 
             {/* Button Controls */}
-            <div className="flex items-center justify-between pt-4 border-t border-[#0d382b]">
+            <div className="flex items-center justify-between pt-4 border-t border-[#E5E2E1]">
               {currentStep > 1 ? (
                 <button
                   type="button"
@@ -706,14 +706,14 @@ export default function OnboardingPage() {
                     setErrorMessage(null);
                     setCurrentStep((prev) => prev - 1);
                   }}
-                  className="px-4 py-2.5 rounded-xl bg-[#031610] hover:bg-[#072b20] text-emerald-100 text-xs sm:text-sm font-semibold border border-[#134e3d] transition-all"
+                  className="px-5 py-2.5 rounded-full bg-[#F0EFEB] hover:bg-[#E9E8E4] text-[#151515] text-xs sm:text-sm font-semibold border border-[#E5E2E1] transition-all cursor-pointer"
                 >
                   ← पिछला (Back)
                 </button>
               ) : (
                 <Link
                   href="/"
-                  className="text-xs text-emerald-300/70 hover:text-white underline"
+                  className="text-xs text-[#8C8880] hover:text-[#151515] underline"
                 >
                   होमपेज (Home)
                 </Link>
@@ -722,7 +722,7 @@ export default function OnboardingPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-6 sm:px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 text-emerald-950 text-sm font-black shadow-[0_4px_20px_rgba(16,185,129,0.4)] hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+                className="px-7 sm:px-9 py-3 rounded-full bg-gradient-to-r from-[#FF416C] to-[#FF4B2B] text-white text-xs sm:text-sm font-bold shadow-[0_4px_20px_rgba(255,65,108,0.25)] hover:opacity-95 active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
               >
                 {isSubmitting
                   ? '⏳ खाता तैयार हो रहा है...'
@@ -736,7 +736,7 @@ export default function OnboardingPage() {
       </main>
 
       {/* ── Footer ────────────────────────────────────────────────── */}
-      <footer className="border-t border-[#092b20] py-4 text-center text-xs text-emerald-300/60">
+      <footer className="border-t border-[#E5E2E1] py-4 text-center text-xs text-[#8C8880]">
         साथी व्यापार • सुरक्षित एवं पारदर्शी ग्रामीण वित्तीय प्रणाली
       </footer>
     </div>
