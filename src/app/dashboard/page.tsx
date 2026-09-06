@@ -1,4 +1,4 @@
-﻿/**
+/**
  * src/app/dashboard/page.tsx
  *
  * Entrepreneur Financial Dashboard
@@ -164,6 +164,18 @@ export default async function DashboardPage({ searchParams }: PageProps) {
         </div>
         <div className="flex items-center gap-2">
           <Link
+            href={`/dashboard/schemes?user_id=${user.id}`}
+            className="px-3 py-1.5 bg-emerald-950 hover:bg-emerald-900 text-emerald-300 text-xs font-bold rounded-lg border border-emerald-800 transition-all"
+          >
+            🏛️ योजना केंद्र (Yojana Kendra)
+          </Link>
+          <Link
+            href={`/dashboard/business-guide?user_id=${user.id}`}
+            className="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 text-xs font-black rounded-lg shadow-sm transition-all"
+          >
+            🧭 बिजनेस गाइड (Roadmap)
+          </Link>
+          <Link
             href="/facilitator"
             className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold rounded-lg border border-zinc-700"
           >
@@ -198,6 +210,15 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                   अपडेट: {new Date(latestPlan.created_at).toLocaleDateString('hi-IN', { dateStyle: 'long' })}
                 </p>
               )}
+              <div className="pt-2">
+                <Link
+                  href={`/dashboard/business-guide?user_id=${user.id}`}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-amber-400 to-yellow-300 hover:from-amber-300 hover:to-yellow-200 text-slate-950 font-extrabold text-xs rounded-lg transition-all shadow-sm"
+                >
+                  <span>🧭 व्यापार सुधार रोडमैप बनाएं (5-Stage Business Guide)</span>
+                  <span>→</span>
+                </Link>
+              </div>
             </div>
           </div>
         </section>
@@ -374,6 +395,16 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                 </div>
               ))
             )}
+          </div>
+
+          <div className="pt-2 flex justify-center">
+            <Link
+              href={`/dashboard/schemes?user_id=${user.id}`}
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-300 hover:from-amber-400 hover:to-yellow-200 text-slate-950 font-black text-xs sm:text-sm rounded-xl transition-all shadow-md"
+            >
+              <span>🏛️ योजना केंद्र खोलें — सभी 15+ योजनाएं, पात्रता व दस्तावेज चेकलिस्ट (Open Yojana Kendra)</span>
+              <span>→</span>
+            </Link>
           </div>
         </section>
 

@@ -1,0 +1,291 @@
+/**
+ * src/app/api/business-guide/generate/route.ts
+ * POST /api/business-guide/generate
+ *
+ * Generates a structured 5-stage transformation roadmap for micro-entrepreneurs
+ * based on their business profile and self-described challenges using Google Gemini Flash.
+ *
+ * Fixed 5 Stages (names are strictly enforced):
+ * 1. Cost Optimization
+ * 2. Value Addition
+ * 3. Direct Market Access
+ * 4. Formal Registration
+ * 5. Scale
+ *
+ * Saves generated roadmap to business_guides table in Supabase.
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import { GoogleGenAI } from '@google/genai';
+import { supabaseServer } from '@/lib/supabase/server';
+
+const FIXED_STAGES = [
+  'Cost Optimization',
+  'Value Addition',
+  'Direct Market Access',
+  'Formal Registration',
+  'Scale',
+] as const;
+
+export interface RoadmapStageItem {
+  stage: typeof FIXED_STAGES[number];
+  title_hi: string;
+  description: string;
+  action_items: string[];
+  impact_milestone: string;
+}
+
+const GenerateGuideSchema = z.object({
+  user_id: z.string().uuid('user_id must be a valid UUID'),
+  challenge_text: z.string().min(3, 'Please describe your business challenge'),
+});
+
+function getGeminiClient() {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return null;
+  return new GoogleGenAI({ apiKey });
+}
+
+// Deterministic fallback generator if Gemini is unavailable
+function generateFallbackRoadmap(
+  sector: string,
+  revenue: number,
+  expense: number,
+  challenge: string
+): RoadmapStageItem[] {
+  const monthlySavingsTarget = Math.max(2000, Math.round(revenue * 0.15));
+
+  return [
+    {
+      stage: 'Cost Optimization',
+      title_hi: 'लागत में कमी एवं कच्चा माल सुधार (Cost Optimization)',
+      description: `अपने ${sector || 'व्यवसाय'} में कच्चे माल और दैनिक खर्चों को 10-15% तक कम करने के लिए समूह खरीद और सीधे थोक व्यापारियों से संपर्क करें।`,
+      action_items: [
+        'स्थानीय व्यापारियों या स्वयं सहायता समूह (SHG) के साथ मिलकर थोक में कच्चा माल खरीदें।',
+        'दुकान/काम में होने वाले दैनिक अपव्यय (waste) का हर शाम हिसाब रखें।',
+        'कच्चे माल के लिए कम से कम 2 नए सप्लायर्स से कोटेशन लें।',
+      ],
+      impact_milestone: `मासिक खर्च में ₹${Math.round(expense * 0.1).toLocaleString('en-IN')} की बचत`,
+    },
+    {
+      stage: 'Value Addition',
+      title_hi: 'उत्पाद का मूल्य और गुणवत्ता संवर्धन (Value Addition)',
+      description: 'समान उत्पाद को बेहतर पैकेजिंग, ग्रेडिंग या बंडल बनाकर अधिक मुनाफे (15-25% अधिक मार्जिन) पर बेचें।',
+      action_items: [
+        'उत्पाद की साफ-सुथरी पैकेजिंग और सरल लेबलिंग शुरू करें।',
+        'छोटे और बड़े पैक का विकल्प दें ताकि ग्राहक अपनी सुविधा से खरीद सकें।',
+        'नियमित ग्राहकों को कॉम्बो ऑफर या लॉयल्टी छूट दें।',
+      ],
+      impact_milestone: 'प्रति इकाई मुनाफे (Margin) में 20% की वृद्धि',
+    },
+    {
+      stage: 'Direct Market Access',
+      title_hi: 'सीधी बाज़ार पहुंच व बिचौलियों से मुक्ति (Direct Market Access)',
+      description: 'बिचौलियों (middlemen) को बीच से हटाकर सीधे ग्राहकों, स्थानीय साप्ताहिक हाटों और WhatsApp कैटलॉग से बिक्री करें।',
+      action_items: [
+        'अपने स्थानीय ग्राहकों का WhatsApp ब्रॉडकास्ट ग्रुप और कैटलॉग बनाएं।',
+        'सप्ताह में 1-2 दिन नजदीकी बड़े हाट या बाजार में स्टॉल लगाएं।',
+        'आस-पास के 50 नए परिवारों या संस्थानों से सीधा संपर्क बनाएं।',
+      ],
+      impact_milestone: 'बिचौलियों का कमीशन बचाकर 25% अतिरिक्त बिक्री',
+    },
+    {
+      stage: 'Formal Registration',
+      title_hi: 'औपचारिक सरकारी पंजीकरण व पहचान (Formal Registration)',
+      description: 'मुफ्त उद्यम आधार (Udyam Registration) कराएं जिससे आप सरकारी सब्सिडी और कम ब्याज वाले बैंक लोन के पात्र बन सकें।',
+      action_items: [
+        'udyamregistration.gov.in पर मुफ्त MSME उद्यम पंजीकरण पूरा करें।',
+        'खाद्य व्यवसाय होने पर ₹100 में FSSAI बेसिक रजिस्ट्रेशन प्राप्त करें।',
+        'व्यापार के नाम से अलग बैंक चालू खाता (Current Account) या जन-धन खाता लिंक करें।',
+      ],
+      impact_milestone: 'PMEGP एवं PM मुद्रा योजना के लिए औपचारिक पात्रता',
+    },
+    {
+      stage: 'Scale',
+      title_hi: 'व्यापार का विस्तार व बचत लक्ष्य (Scale & Growth)',
+      description: 'बिना अत्यधिक कर्ज के, अगले 6 महीनों में तय बचत राशि जमा करके कार्यशील पूंजी (working capital) तैयार करें।',
+      action_items: [
+        `हर महीने कम से कम ₹${monthlySavingsTarget.toLocaleString('en-IN')} आपातकालीन व्यापारिक फंड में अलग रखें।`,
+        '6 महीने की नियमित बचत के बाद ही PM मुद्रा योजना (शिशु/किशोर) के लिए आवेदन करें।',
+        'व्यापार में नए सहायक उपकरण या स्टॉक के लिए लाभ का 40% पुनर्निवेश (reinvest) करें।',
+      ],
+      impact_milestone: `6 माह में ₹${(monthlySavingsTarget * 6).toLocaleString('en-IN')} का सुरक्षित कार्यशील फंड`,
+    },
+  ];
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON request body' }, { status: 400 });
+    }
+
+    const parsed = GenerateGuideSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Validation failed', details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const { user_id, challenge_text } = parsed.data;
+
+    // 1. Fetch user & business profile from Supabase
+    const { data: user } = await supabaseServer
+      .from('users')
+      .select('id, name, language, phone')
+      .eq('id', user_id)
+      .single();
+
+    const { data: profile } = await supabaseServer
+      .from('business_profiles')
+      .select('*')
+      .eq('user_id', user_id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    const sector = profile?.sector || 'General Micro-Enterprise';
+    const district = profile?.district || 'Rural India';
+    const revenue = Number(profile?.monthly_revenue_est) || 20000;
+    const expense = Number(profile?.monthly_expense_est) || 12000;
+
+    const ai = getGeminiClient();
+    let roadmap: RoadmapStageItem[];
+
+    if (!ai) {
+      roadmap = generateFallbackRoadmap(sector, revenue, expense, challenge_text);
+    } else {
+      const systemInstruction = `You are an expert rural enterprise growth strategist for Saathi Vyapar in India.
+Your goal is to provide actionable, realistic, jargon-free business transformation roadmaps for micro-entrepreneurs (e.g. kirana shops, tailors, dairy farmers, artisans).
+
+STRICT RULES:
+1. You MUST output a 5-stage transformation roadmap using PRECISELY these 5 stage names in this exact order:
+   Stage 1: "Cost Optimization"
+   Stage 2: "Value Addition"
+   Stage 3: "Direct Market Access"
+   Stage 4: "Formal Registration"
+   Stage 5: "Scale"
+2. Do NOT invent, rename, or reorder the stage names.
+3. Tailor every action item and milestone to the user's specific business sector, location, financials, and stated challenges.
+4. Keep the language simple, respectful, and culturally grounded in Indian vernacular business realities.
+5. In "Formal Registration", mention real Indian portals (e.g., Udyam Registration, FSSAI, PMFME, PM SVANidhi, Mudra).
+6. In "Scale", calculate a concrete, achievable numeric savings milestone in ₹ before seeking formal credit.
+7. Return strictly a JSON array matching the RoadmapStageItem schema.`;
+
+      const prompt = `User Business Profile:
+- Sector / Trade: ${sector}
+- Business Name: ${profile?.business_name || sector}
+- Location (District/State): ${district}, ${profile?.state || 'India'}
+- Monthly Revenue: ₹${revenue.toLocaleString('en-IN')}
+- Monthly Expenses: ₹${expense.toLocaleString('en-IN')}
+- Existing Loans: ${profile?.existing_loans ? 'Yes' : 'No'}
+
+User's Described Challenge:
+"${challenge_text}"
+
+Generate the 5-stage transformation roadmap in JSON format matching this schema:
+[
+  {
+    "stage": "Cost Optimization",
+    "title_hi": "लागत में कमी (Cost Optimization)",
+    "description": "Clear explanation of how to optimize costs...",
+    "action_items": ["Specific action 1", "Specific action 2", "Specific action 3"],
+    "impact_milestone": "e.g. ₹2,000 monthly cost reduction"
+  },
+  {
+    "stage": "Value Addition",
+    "title_hi": "मूल्य संवर्धन (Value Addition)",
+    "description": "...",
+    "action_items": ["..."],
+    "impact_milestone": "..."
+  },
+  {
+    "stage": "Direct Market Access",
+    "title_hi": "सीधी बाज़ार पहुंच (Direct Market Access)",
+    "description": "...",
+    "action_items": ["..."],
+    "impact_milestone": "..."
+  },
+  {
+    "stage": "Formal Registration",
+    "title_hi": "औपचारिक पंजीकरण (Formal Registration)",
+    "description": "...",
+    "action_items": ["..."],
+    "impact_milestone": "..."
+  },
+  {
+    "stage": "Scale",
+    "title_hi": "विस्तार व बचत लक्ष्य (Scale & Growth)",
+    "description": "...",
+    "action_items": ["..."],
+    "impact_milestone": "..."
+  }
+]`;
+
+      try {
+        const response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: prompt,
+          config: {
+            systemInstruction,
+            responseMimeType: 'application/json',
+            temperature: 0.2,
+          },
+        });
+
+        const rawJson = response.text?.trim() || '[]';
+        const parsedRoadmap: RoadmapStageItem[] = JSON.parse(rawJson);
+
+        // Ensure 5 fixed stages are present and validated
+        if (Array.isArray(parsedRoadmap) && parsedRoadmap.length === 5) {
+          roadmap = parsedRoadmap.map((item, idx) => ({
+            stage: FIXED_STAGES[idx],
+            title_hi: item.title_hi || `${FIXED_STAGES[idx]}`,
+            description: item.description || '',
+            action_items: Array.isArray(item.action_items) ? item.action_items : [],
+            impact_milestone: item.impact_milestone || '',
+          }));
+        } else {
+          roadmap = generateFallbackRoadmap(sector, revenue, expense, challenge_text);
+        }
+      } catch (llmErr) {
+        console.warn('Gemini roadmap generation error, using fallback:', llmErr);
+        roadmap = generateFallbackRoadmap(sector, revenue, expense, challenge_text);
+      }
+    }
+
+    // 2. Save roadmap into business_guides table
+    const { data: savedGuide, error: guideError } = await supabaseServer
+      .from('business_guides')
+      .insert({
+        user_id,
+        input_text: challenge_text,
+        roadmap_json: roadmap,
+      })
+      .select('id, created_at')
+      .single();
+
+    if (guideError) {
+      console.error('Failed to save business guide:', guideError);
+      // Still return the generated roadmap even if db insert has an issue
+    }
+
+    return NextResponse.json({
+      success: true,
+      guideId: savedGuide?.id || null,
+      roadmap,
+      createdAt: savedGuide?.created_at || new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('Business guide generate error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', details: String(error) },
+      { status: 500 }
+    );
+  }
+}
