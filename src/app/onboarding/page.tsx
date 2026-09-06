@@ -132,7 +132,7 @@ export default function OnboardingPage() {
     }
 
     if (currentStep === 2 && !formData.district.trim()) {
-      setErrorMessage('कृपया अपना गांव या जिला दर्ज करें (Please enter district)');
+      setErrorMessage('कृपया अपना Village or District दर्ज करें (Please enter district)');
       return;
     }
 
@@ -267,7 +267,7 @@ export default function OnboardingPage() {
           <Link href="/" className="flex items-center gap-2.5 group">
             <span className="text-2xl sm:text-3xl filter drop-shadow-sm">🤝</span>
             <div>
-              <span className="font-['Playfair_Display',Georgia,serif] text-lg sm:text-xl font-bold text-[#0B1E33]">साथी व्यापार</span>
+              <span className="font-['Playfair_Display',Georgia,serif] text-lg sm:text-xl font-bold text-[#0B1E33]">Saathi Vyapar</span>
               <span className="text-[10px] text-[#0B1E33]/50 block -mt-1 font-semibold">
                 उद्यमी पंजीकरण (Entrepreneur Registration)
               </span>
@@ -290,7 +290,7 @@ export default function OnboardingPage() {
               href="/login"
               className="text-xs font-semibold text-[#0B1E33] px-4 py-2 rounded-full border border-[#C9A24B]/40 bg-white hover:bg-[#F5F1E6] transition-all"
             >
-              लॉगिन / Login
+              Sign In
             </Link>
           </div>
         </div>
@@ -321,7 +321,7 @@ export default function OnboardingPage() {
 
             <h1 className="font-['Playfair_Display',Georgia,serif] text-xl sm:text-2xl font-bold text-[#0B1E33]">
               {currentStep === 1 && '1. आपका शुभ नाम क्या है?'}
-              {currentStep === 2 && '2. आपका गांव या जिला कौन सा है?'}
+              {currentStep === 2 && '2. आपका Village or District कौन सा है?'}
               {currentStep === 3 && '3. आप क्या काम या व्यापार करते हैं?'}
               {currentStep === 4 && '4. मासिक कमाई और खर्च का विवरण'}
               {currentStep === 5 && '5. क्या आपके ऊपर कोई पुराना लोन या कर्ज है?'}
@@ -374,7 +374,7 @@ export default function OnboardingPage() {
             {currentStep === 2 && (
               <div className="space-y-2">
                 <label htmlFor="district" className="block text-sm font-bold text-[#0B1E33]">
-                  गांव / जिला / Village or District <span className="text-[#FF416C]">*</span>
+                  Village / District / Village or District <span className="text-[#FF416C]">*</span>
                 </label>
                 <input
                   id="district"
@@ -464,7 +464,7 @@ export default function OnboardingPage() {
 
                 <div className="space-y-1.5">
                   <label htmlFor="exp" className="block text-sm font-bold text-[#0B1E33]">
-                    औसत मासिक खर्च / Monthly Expenses (₹) <span className="text-[#FF416C]">*</span>
+                    औसत Monthly Expense / Monthly Expenses (₹) <span className="text-[#FF416C]">*</span>
                   </label>
                   <div className="relative">
                     <span className="absolute left-3.5 top-3 text-[#C9A24B] font-bold">₹</span>
@@ -549,7 +549,7 @@ export default function OnboardingPage() {
                     </strong>
                   </div>
                   <div>
-                    <span className="text-[#0B1E33]/50 block text-xs">मासिक खर्च:</span>
+                    <span className="text-[#0B1E33]/50 block text-xs">Monthly Expense:</span>
                     <strong className="text-[#C9A24B] text-base font-bold">
                       ₹{formData.monthly_expense_est.toLocaleString('en-IN')}
                     </strong>
@@ -578,7 +578,7 @@ export default function OnboardingPage() {
                   <>
                     <div>
                       <label htmlFor="email" className="block text-sm font-bold text-[#0B1E33] mb-1.5">
-                        ईमेल पता / Email Address <span className="text-[#FF416C]">*</span>
+                        Email Address <span className="text-[#FF416C]">*</span>
                       </label>
                       <input
                         id="email"
@@ -595,7 +595,7 @@ export default function OnboardingPage() {
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
                         <label htmlFor="password" className="block text-sm font-bold text-[#0B1E33]">
-                          पासवर्ड / Password <span className="text-[#FF416C]">*</span>
+                          Password <span className="text-[#FF416C]">*</span>
                         </label>
                         <button
                           type="button"
@@ -737,7 +737,7 @@ export default function OnboardingPage() {
 
       {/* ── Footer ────────────────────────────────────────────────── */}
       <footer className="border-t border-[#E5E2E1] py-4 text-center text-xs text-[#0B1E33]/50">
-        साथी व्यापार • सुरक्षित एवं पारदर्शी ग्रामीण वित्तीय प्रणाली
+        Saathi Vyapar • सुरक्षित एवं पारदर्शी ग्रामीण वित्तीय प्रणाली
       </footer>
     </div>
   );

@@ -141,7 +141,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           authUser.user_metadata?.full_name ||
           authUser.user_metadata?.name ||
           authUser.email?.split('@')[0] ||
-          'उद्यमी';
+          'Entrepreneur';
         const userContact =
           authUser.phone ||
           authUser.email ||
@@ -213,7 +213,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   if (!user) {
     user = {
       id: 'demo-entrepreneur-001',
-      name: 'रमेश कुमार (Ramesh Kumar)',
+      name: 'Ramesh Kumar',
       phone: '+91 98765 43210',
       language: 'hi',
     };
@@ -230,10 +230,10 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
   const profile = profileData || {
     user_id: user.id,
-    business_name: `${user.name || 'उद्यमी'} का व्यापार`,
+    business_name: `${user.name || 'Entrepreneur'}'s Business`,
     sector: 'retail',
-    district: 'वाराणसी',
-    state: 'उत्तर प्रदेश',
+    district: 'Varanasi',
+    state: 'Uttar Pradesh',
     monthly_revenue_est: 45000,
     monthly_expense_est: 28000,
     existing_loans: false,
@@ -290,7 +290,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       user_id: user.id,
       margin_percent: margin,
       break_even_units: exp,
-      summary_text: `आपके व्यापार का शुद्ध लाभ मार्जिन ${margin.toFixed(1)}% है। मासिक खर्च (₹${exp.toLocaleString('en-IN')}) निकालने के बाद आपका कैश फ्लो ${cashRisk === 'low' ? 'मजबूत' : 'स्थिर'} स्थिति में है। सरकारी ऋण और सब्सिडी के विकल्प नीचे देखें।`,
+      summary_text: `Your net profit margin is ${margin.toFixed(1)}%. After monthly expenses (₹${exp.toLocaleString("en-IN")}), your cash flow is ${cashRisk === "low" ? "strong" : "stable"}. Explore government loan & subsidy options below.`,
       created_at: new Date().toISOString(),
       plan_json: {
         financialMetrics: {
@@ -315,10 +315,10 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     .order('created_at', { ascending: true });
 
   const rawEntries = ledgerEntriesRaw && ledgerEntriesRaw.length > 0 ? ledgerEntriesRaw : [
-    { id: '1', amount: 1500, entry_type: 'income', description: 'दैनिक बिक्री (Daily Sales)', source: 'whatsapp', confirmed: true, created_at: '2026-09-01T10:00:00.000Z' },
-    { id: '2', amount: 800, entry_type: 'expense', description: 'सब्जी खरीद (Stock Purchase)', source: 'ocr', confirmed: true, created_at: '2026-09-02T11:30:00.000Z' },
-    { id: '3', amount: 2200, entry_type: 'income', description: 'थोक ऑर्डर (Bulk Order)', source: 'whatsapp', confirmed: true, created_at: '2026-09-03T15:45:00.000Z' },
-    { id: '4', amount: 450, entry_type: 'expense', description: 'दुकान बिजली बिल (Electricity)', source: 'sms', confirmed: true, created_at: '2026-09-04T09:15:00.000Z' },
+    { id: '1', amount: 1500, entry_type: 'income', description: 'Daily Sales', source: 'whatsapp', confirmed: true, created_at: '2026-09-01T10:00:00.000Z' },
+    { id: '2', amount: 800, entry_type: 'expense', description: 'Stock Purchase', source: 'ocr', confirmed: true, created_at: '2026-09-02T11:30:00.000Z' },
+    { id: '3', amount: 2200, entry_type: 'income', description: 'Bulk Order', source: 'whatsapp', confirmed: true, created_at: '2026-09-03T15:45:00.000Z' },
+    { id: '4', amount: 450, entry_type: 'expense', description: 'Electricity Bill', source: 'sms', confirmed: true, created_at: '2026-09-04T09:15:00.000Z' },
   ];
 
   const ledgerEntries: LedgerRow[] = rawEntries.map((e) => ({
@@ -363,9 +363,9 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   // Risk styling helper
   const risk = planJson?.financialMetrics?.cashFlowRisk || 'low';
   const riskConfig = {
-    low: { bg: 'bg-white/95', border: 'border-emerald-200', text: 'text-emerald-700', label: 'कम जोखिम (Low Risk)' },
-    medium: { bg: 'bg-white/95', border: 'border-amber-200', text: 'text-amber-700', label: 'मध्यम जोखिम (Moderate)' },
-    high: { bg: 'bg-white/95', border: 'border-rose-200', text: 'text-rose-700', label: 'उच्च जोखिम (High Risk)' },
+    low: { bg: 'bg-white/95', border: 'border-emerald-200', text: 'text-emerald-700', label: 'Low Risk' },
+    medium: { bg: 'bg-white/95', border: 'border-amber-200', text: 'text-amber-700', label: 'Moderate Risk' },
+    high: { bg: 'bg-white/95', border: 'border-rose-200', text: 'text-rose-700', label: 'High Risk' },
   }[risk];
 
   return (
@@ -385,14 +385,14 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                 <span className="text-3xl">🤝</span>
               </Link>
               <h1 className="font-['Playfair_Display',Georgia,serif] text-2xl font-bold tracking-tight text-[#0B1E33] flex items-center gap-2">
-                साथी व्यापार
+                Saathi Vyapar
                 <span className="text-[11px] font-bold bg-[#F5F1E6] text-[#0B1E33] border border-[#C9A24B]/30 px-2.5 py-0.5 rounded-full font-['Inter',sans-serif]">
-                  उद्यमी डैशबोर्ड
+                  Dashboard
                 </span>
               </h1>
             </div>
             <p className="text-[#0B1E33]/50 text-sm mt-0.5">
-              {user.name || 'उद्यमी'} • {user.phone} {profile?.sector ? `(${profile.sector})` : ''}
+              {user.name || 'Entrepreneur'} • {user.phone} {profile?.sector ? `(${profile.sector})` : ''}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -400,19 +400,19 @@ export default async function DashboardPage({ searchParams }: PageProps) {
               href={`/dashboard/schemes?user_id=${user.id}`}
               className="px-4 py-2 bg-white hover:bg-[#F5F1E6] text-[#0B1E33] text-xs font-semibold rounded-full border border-[#C9A24B]/30 transition-all"
             >
-              🏛️ योजना केंद्र (Yojana Kendra)
+              🏛️ Yojana Kendra
             </Link>
             <Link
               href={`/dashboard/business-guide?user_id=${user.id}`}
               className="px-4 py-2 bg-[#0B1E33] hover:bg-[#162D59] text-[#F5F1E6] text-xs font-bold rounded-full shadow-sm transition-all"
             >
-              🧭 बिजनेस गाइड (Roadmap)
+              🧭 Business Roadmap
             </Link>
             <Link
               href="/facilitator"
               className="px-4 py-2 bg-white hover:bg-[#F5F1E6] text-[#0B1E33] text-xs font-semibold rounded-full border border-[#C9A24B]/30 transition-colors"
             >
-              सुविधाकर्ता / Facilitator
+              Facilitator
             </Link>
             <LogoutButton />
           </div>
@@ -427,15 +427,15 @@ export default async function DashboardPage({ searchParams }: PageProps) {
               </div>
               <div className="space-y-1.5 flex-1">
                 <h2 className="text-xs sm:text-sm font-bold text-[#C9A24B] uppercase tracking-wider">
-                  व्यापारिक सलाह / Financial Advisory
+                  Financial Advisory
                 </h2>
                 <p className="text-[#0B1E33] text-base sm:text-lg leading-relaxed font-semibold">
                   {latestPlan?.summary_text ||
-                    'आपका वित्तीय विश्लेषण तैयार है। नीचे अपने मुनाफे और सरकारी योजनाओं की जानकारी देखें।'}
+                    'Your financial analysis is ready. View your profit margins and government schemes below.'}
                 </p>
                 {latestPlan?.created_at && (
                   <p className="text-xs text-[#0B1E33]/50 pt-1">
-                    अपडेट: {new Date(latestPlan.created_at).toLocaleDateString('hi-IN', { dateStyle: 'long' })}
+                    Updated: {new Date(latestPlan.created_at).toLocaleDateString('en-IN', { dateStyle: 'medium' })}
                   </p>
                 )}
                 <div className="pt-2">
@@ -443,7 +443,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                     href={`/dashboard/business-guide?user_id=${user.id}`}
                     className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-[#C9A24B] hover:bg-[#B8912A] text-white font-bold text-xs rounded-full transition-all shadow-sm"
                   >
-                    <span>🧭 व्यापार सुधार रोडमैप बनाएं (5-Stage Business Guide)</span>
+                    <span>🧭 Build 5-Stage Business Roadmap</span>
                     <span>→</span>
                   </Link>
                 </div>
@@ -456,7 +456,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             {/* Card 1: Profit Margin */}
             <div className="bg-white border border-[#C9A24B]/20 rounded-2xl p-5 shadow-[0_8px_24px_rgba(11,30,51,0.05)] flex flex-col justify-between">
               <span className="text-[#0B1E33]/50 text-xs font-bold uppercase tracking-wider">
-                लाभ प्रतिशत / Margin %
+                Profit Margin %
               </span>
               <div className="my-2">
                 <span className={`text-4xl font-bold ${Number(latestPlan?.margin_percent || 0) >= 0 ? 'text-[#0B1E33]' : 'text-rose-600'}`}>
@@ -464,27 +464,27 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                 </span>
               </div>
               <p className="text-xs text-[#0B1E33]/50">
-                {Number(latestPlan?.margin_percent || 0) >= 0 ? '✓ लाभ की स्थिति में है' : '⚠️ नुकसान में चल रहा है'}
+                {Number(latestPlan?.margin_percent || 0) >= 0 ? '✓ Currently profitable' : '⚠️ Currently at a loss'}
               </p>
             </div>
 
             {/* Card 2: Break-even target */}
             <div className="bg-white border border-[#C9A24B]/20 rounded-2xl p-5 shadow-[0_8px_24px_rgba(11,30,51,0.05)] flex flex-col justify-between">
               <span className="text-[#0B1E33]/50 text-xs font-bold uppercase tracking-wider">
-                लागत निकालने का लक्ष्य / Break-Even
+                Break-Even Target
               </span>
               <div className="my-2">
                 <span className="text-3xl sm:text-4xl font-bold text-[#0B1E33]">
                   ₹{profile?.monthly_expense_est ? Number(profile.monthly_expense_est).toLocaleString('en-IN') : '28,000'}
                 </span>
               </div>
-              <p className="text-xs text-[#0B1E33]/50">खर्च निकालने के लिए न्यूनतम मासिक बिक्री</p>
+              <p className="text-xs text-[#0B1E33]/50">Minimum monthly sales needed</p>
             </div>
 
             {/* Card 3: Cash Flow Risk */}
             <div className={`${riskConfig.bg} border ${riskConfig.border} rounded-2xl p-5 shadow-[0_8px_24px_rgba(27,27,27,0.04)] flex flex-col justify-between`}>
               <span className="text-[#0B1E33]/50 text-xs font-bold uppercase tracking-wider">
-                कैश फ्लो स्थिति / Cash Flow Risk
+                Cash Flow Risk
               </span>
               <div className="my-2">
                 <span className={`text-2xl sm:text-3xl font-extrabold ${riskConfig.text}`}>
@@ -492,7 +492,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                 </span>
               </div>
               <p className="text-xs text-[#0B1E33]/50">
-                {profile?.existing_loans ? 'ऋण (Loan): सक्रिय है' : 'कोई सक्रिय ऋण नहीं'}
+                {profile?.existing_loans ? 'Active loan present' : 'No active loans'}
               </p>
             </div>
           </section>
@@ -502,18 +502,18 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <h3 className="font-['Playfair_Display',Georgia,serif] text-lg font-bold text-[#0B1E33] flex items-center gap-2">
-                  📊 पिछले 30 दिनों का हिसाब / 30-Day Cash Flow
+                  📊 30-Day Cash Flow
                 </h3>
-                <p className="text-xs text-[#0B1E33]/50">दैनिक आय और व्यय का ग्राफ</p>
+                <p className="text-xs text-[#0B1E33]/50">Daily income & expenses trend</p>
               </div>
               <div className="flex items-center gap-4 text-xs font-semibold">
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-3 rounded-full bg-[#151515] inline-block"></span>
-                  <span className="text-[#0B1E33]">कुल कमाई: ₹{totalIncome.toLocaleString('en-IN')}</span>
+                  <span className="text-[#0B1E33]">Total Income: ₹{totalIncome.toLocaleString('en-IN')}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-3 rounded-full bg-[#FF416C] inline-block"></span>
-                  <span className="text-[#C9A24B]">कुल खर्च: ₹{totalExpense.toLocaleString('en-IN')}</span>
+                  <span className="text-[#C9A24B]">Total Expense: ₹{totalExpense.toLocaleString('en-IN')}</span>
                 </div>
               </div>
             </div>
@@ -559,20 +559,20 @@ export default async function DashboardPage({ searchParams }: PageProps) {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-['Playfair_Display',Georgia,serif] text-lg font-bold text-[#0B1E33] flex items-center gap-2">
-                  🏛️ सरकारी योजनाएं / Matched Schemes
+                  🏛️ Matched Government Schemes
                 </h3>
                 <p className="text-xs text-[#0B1E33]/50">
-                  आपके प्रोफाइल के आधार पर {eligibleCount} योजनाएं योग्य पाई गईं
+                  Based on your profile, {eligibleCount} schemes matched
                 </p>
               </div>
               <span className="px-3 py-1 bg-[#F0EFEB] border border-[#E5E2E1] text-[#0B1E33] text-xs font-bold rounded-full">
-                {eligibleCount} योग्य (Eligible)
+                {eligibleCount} Eligible
               </span>
             </div>
 
             <div className="space-y-3">
               {matchedSchemes.length === 0 ? (
-                <p className="text-sm text-[#8C8880]">कोई योजना डेटा उपलब्ध नहीं है।</p>
+                <p className="text-sm text-[#8C8880]">No scheme data available.</p>
               ) : (
                 matchedSchemes.slice(0, 6).map((item, idx) => (
                   <div
@@ -602,7 +602,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                           rel="noopener noreferrer"
                           className="px-4 py-2 bg-[#0B1E33] hover:bg-[#162D59] text-[#F5F1E6] text-xs font-semibold rounded-full shrink-0 text-center transition-all"
                         >
-                          आवेदन लिंक ↗
+                          Apply ↗
                         </a>
                       )}
                     </div>
@@ -623,7 +623,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                 href={`/dashboard/schemes?user_id=${user.id}`}
                 className="inline-flex items-center gap-2 px-6 py-3 bg-[#0B1E33] hover:bg-[#162D59] text-[#F5F1E6] font-bold text-xs sm:text-sm rounded-full transition-all shadow-sm"
               >
-                <span>🏛️ योजना केंद्र खोलें — सभी 15+ योजनाएं, पात्रता व दस्तावेज चेकलिस्ट (Open Yojana Kendra)</span>
+                <span>🏛️ Open Yojana Kendra — All 15+ Schemes, Eligibility & Document Checklist</span>
                 <span>→</span>
               </Link>
             </div>
@@ -633,7 +633,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           <section className="bg-white border border-[#C9A24B]/20 rounded-[32px] p-5 sm:p-6 shadow-[0_16px_40px_rgba(11,30,51,0.07)] space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="font-['Playfair_Display',Georgia,serif] text-lg font-bold text-[#0B1E33] flex items-center gap-2">
-                📝 हाल के लेन-देन / Recent Transactions
+                📝 Recent Transactions
               </h3>
               <span className="text-xs text-[#0B1E33]/50 font-mono">
                 {ledgerEntries.length} Records
@@ -649,7 +649,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                   <div>
                     <p className="text-sm font-bold text-[#0B1E33]">{entry.description}</p>
                     <p className="text-xs text-[#0B1E33]/50">
-                      {new Date(entry.created_at).toLocaleDateString('hi-IN')} • {entry.source.toUpperCase()}
+                      {new Date(entry.created_at).toLocaleDateString('en-IN')} • {entry.source.toUpperCase()}
                     </p>
                   </div>
                   <span

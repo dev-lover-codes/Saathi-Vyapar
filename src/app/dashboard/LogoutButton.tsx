@@ -22,7 +22,7 @@ export default function LogoutButton() {
       onClick={handleLogout}
       className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold rounded-full border border-rose-200/50 transition-all cursor-pointer"
     >
-      लॉगआउट / Logout
+      Logout
     </button>
   );
 }

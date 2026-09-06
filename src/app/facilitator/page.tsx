@@ -59,9 +59,9 @@ export default async function FacilitatorPage() {
 
     entrepreneurs.push({
       id: u.id,
-      name: u.name || 'उद्यमी (Entrepreneur)',
+      name: u.name || 'Entrepreneur',
       phone: u.phone,
-      sector: profile?.sector || 'अनिर्दिष्ट (General)',
+      sector: profile?.sector || 'General',
       monthly_revenue: Number(profile?.monthly_revenue_est) || 0,
       monthly_expense: Number(profile?.monthly_expense_est) || 0,
       lastPlanDate: plan?.created_at || null,
@@ -85,14 +85,14 @@ export default async function FacilitatorPage() {
             <div className="flex items-center gap-2.5">
               <span className="text-3xl">🤝</span>
               <h1 className="font-['Playfair_Display',Georgia,serif] text-2xl font-bold tracking-tight text-[#0B1E33] flex items-center gap-2">
-                सुविधाकर्ता डैशबोर्ड / Facilitator Hub
+                Facilitator Hub
                 <span className="text-[11px] font-bold bg-[#C9A24B]/15 text-[#0B1E33] border border-[#C9A24B]/30 px-2.5 py-0.5 rounded-full font-['Inter',sans-serif]">
                   Field Ops
                 </span>
               </h1>
             </div>
             <p className="text-[#0B1E33]/50 text-xs sm:text-sm mt-0.5">
-              ग्रामीण उद्यमियों की सहायता और वित्तीय निगरानी प्रणाली (Field Assistant Portal)
+              Field Assistant Portal for rural entrepreneur monitoring
             </p>
           </div>
 
@@ -102,7 +102,7 @@ export default async function FacilitatorPage() {
               href="/dashboard"
               className="px-4 py-2 bg-white hover:bg-[#F5F1E6] text-[#0B1E33] text-xs font-semibold rounded-full border border-[#C9A24B]/30 transition-all"
             >
-              ← उद्यमी दृश्य (Entrepreneur View)
+              ← Entrepreneur View
             </Link>
           </div>
         </header>
@@ -111,13 +111,13 @@ export default async function FacilitatorPage() {
           {/* ── Stats Overview ───────────────────────────────────────── */}
           <section className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div className="bg-white border border-[#C9A24B]/20 rounded-[24px] p-5 shadow-[0_8px_24px_rgba(11,30,51,0.05)]">
-              <span className="text-[#0B1E33]/50 text-xs font-bold uppercase tracking-wider">कुल पंजीकृत उद्यमी</span>
+              <span className="text-[#0B1E33]/50 text-xs font-bold uppercase tracking-wider">Total Registered</span>
               <p className="text-3xl font-bold text-[#0B1E33] mt-1">{entrepreneurs.length}</p>
               <p className="text-[11px] text-[#0B1E33]/50 mt-1">Total Registered</p>
             </div>
 
             <div className="bg-white border border-[#C9A24B]/20 rounded-[24px] p-5 shadow-[0_8px_24px_rgba(11,30,51,0.05)]">
-              <span className="text-[#0B1E33]/50 text-xs font-bold uppercase tracking-wider">प्लान जनरेटेड</span>
+              <span className="text-[#0B1E33]/50 text-xs font-bold uppercase tracking-wider">Plans Generated</span>
               <p className="text-3xl font-extrabold text-emerald-700 mt-1">
                 {entrepreneurs.filter((e) => e.lastPlanDate).length}
               </p>
@@ -125,7 +125,7 @@ export default async function FacilitatorPage() {
             </div>
 
             <div className="bg-white border border-[#C9A24B]/20 rounded-[24px] p-5 shadow-[0_8px_24px_rgba(11,30,51,0.05)]">
-              <span className="text-[#0B1E33]/50 text-xs font-bold uppercase tracking-wider">औसत मासिक आय</span>
+              <span className="text-[#0B1E33]/50 text-xs font-bold uppercase tracking-wider">Avg. Monthly Revenue</span>
               <p className="text-3xl font-bold text-[#0B1E33] mt-1">
                 ₹
                 {entrepreneurs.length > 0
@@ -139,7 +139,7 @@ export default async function FacilitatorPage() {
             </div>
 
             <div className="bg-white border border-[#C9A24B]/20 rounded-[24px] p-5 shadow-[0_8px_24px_rgba(11,30,51,0.05)]">
-              <span className="text-[#0B1E33]/50 text-xs font-bold uppercase tracking-wider">उच्च जोखिम मामले</span>
+              <span className="text-[#0B1E33]/50 text-xs font-bold uppercase tracking-wider">High Risk Cases</span>
               <p className="text-3xl font-bold text-[#C9A24B] mt-1">
                 {entrepreneurs.filter((e) => e.cashFlowRisk === 'high').length}
               </p>
@@ -151,18 +151,18 @@ export default async function FacilitatorPage() {
           <section className="bg-white border border-[#C9A24B]/20 rounded-[32px] p-5 sm:p-6 shadow-[0_16px_40px_rgba(11,30,51,0.07)] space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="font-['Playfair_Display',Georgia,serif] text-lg font-bold text-[#0B1E33] flex items-center gap-2">
-                📋 उद्यमियों की सूची / Entrepreneur Directory
+                📋 Entrepreneur Directory
               </h2>
               <span className="text-xs text-[#0B1E33]/50">
-                {entrepreneurs.length} उद्यमी जुड़े हुए हैं
+                {entrepreneurs.length} entrepreneurs registered
               </span>
             </div>
 
             {entrepreneurs.length === 0 ? (
               <div className="text-center py-12 text-[#0B1E33]/50 space-y-2">
-                <p className="text-lg font-semibold text-[#0B1E33]">अभी कोई उद्यमी पंजीकृत नहीं है।</p>
+                <p className="text-lg font-semibold text-[#0B1E33]">No entrepreneurs registered yet.</p>
                 <p className="text-xs text-[#0B1E33]/50">
-                  ऊपर दिए गए &quot;नया उद्यमी जोड़ें&quot; बटन से पहला उद्यमी जोड़ें।
+                  Use the "Add New Entrepreneur" button above to add the first entrepreneur.
                 </p>
               </div>
             ) : (
@@ -170,12 +170,12 @@ export default async function FacilitatorPage() {
                 <table className="w-full text-left text-sm">
                   <thead>
                     <tr className="border-b border-[#C9A24B]/20 text-[#0B1E33]/50 text-xs uppercase font-bold">
-                      <th className="pb-3 px-3">उद्यमी / Name</th>
-                      <th className="pb-3 px-3">क्षेत्र / Sector</th>
-                      <th className="pb-3 px-3">मासिक आय / खर्च</th>
-                      <th className="pb-3 px-3">मुनाफा / जोखिम</th>
-                      <th className="pb-3 px-3">अंतिम प्लान तारीख</th>
-                      <th className="pb-3 px-3 text-right">कार्रवाई / Action</th>
+                      <th className="pb-3 px-3">Entrepreneur / Name</th>
+                      <th className="pb-3 px-3">Sector</th>
+                      <th className="pb-3 px-3">Revenue / Expense</th>
+                      <th className="pb-3 px-3">Profit / Risk</th>
+                      <th className="pb-3 px-3">Last Plan Date</th>
+                      <th className="pb-3 px-3 text-right">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#C9A24B]/15">
@@ -195,7 +195,7 @@ export default async function FacilitatorPage() {
                             ₹{item.monthly_revenue.toLocaleString('en-IN')}
                           </div>
                           <div className="text-[11px] text-[#C9A24B]">
-                            खर्च: ₹{item.monthly_expense.toLocaleString('en-IN')}
+                            Expense: ₹{item.monthly_expense.toLocaleString('en-IN')}
                           </div>
                         </td>
                         <td className="py-3.5 px-3">
@@ -210,25 +210,25 @@ export default async function FacilitatorPage() {
                               </span>
                               {item.cashFlowRisk && (
                                 <div className="text-[10px] uppercase font-bold text-[#0B1E33]/50">
-                                  जोखिम: {item.cashFlowRisk}
+                                  Risk: {item.cashFlowRisk}
                                 </div>
                               )}
                             </div>
                           ) : (
-                            <span className="text-xs text-[#0B1E33]/50">कोई प्लान नहीं</span>
+                            <span className="text-xs text-[#0B1E33]/50">No Plan Yet</span>
                           )}
                         </td>
                         <td className="py-3.5 px-3 text-xs text-[#0B1E33]/50">
                           {item.lastPlanDate
-                            ? new Date(item.lastPlanDate).toLocaleDateString('hi-IN')
-                            : 'लंबित (Pending)'}
+                            ? new Date(item.lastPlanDate).toLocaleDateString('en-IN')
+                            : 'Pending'}
                         </td>
                         <td className="py-3.5 px-3 text-right">
                           <Link
                             href={`/dashboard?user_id=${item.id}`}
                             className="inline-flex items-center px-4 py-2 bg-[#0B1E33] hover:bg-[#162D59] text-[#F5F1E6] text-xs font-bold rounded-full transition-all"
                           >
-                            प्लान देखें (View Plan) →
+                            View Plan →
                           </Link>
                         </td>
                       </tr>

@@ -47,7 +47,7 @@ export default function AddEntrepreneurModal({ facilitatorId }: Props) {
         throw new Error(data.error || 'Failed to add entrepreneur');
       }
 
-      setSuccess('उद्यमी सफलतापूर्वक जोड़ा गया! (Entrepreneur added)');
+      setSuccess('उद्यमी Added successfully! (Entrepreneur added)');
       setTimeout(() => {
         setIsOpen(false);
         setName('');
@@ -70,7 +70,7 @@ export default function AddEntrepreneurModal({ facilitatorId }: Props) {
         className="px-5 py-2.5 rounded-full bg-[#0B1E33] text-white font-bold text-xs shadow-md hover:opacity-95 transition-all flex items-center gap-2"
       >
         <span>➕</span>
-        <span>नया उद्यमी जोड़ें / Add Entrepreneur</span>
+        <span>Add New Entrepreneur / Add Entrepreneur</span>
       </button>
 
       {isOpen && (
@@ -78,7 +78,7 @@ export default function AddEntrepreneurModal({ facilitatorId }: Props) {
           <div className="bg-white border border-[#C9A24B]/20 w-full max-w-md rounded-[32px] p-6 shadow-2xl space-y-5 text-[#0B1E33]">
             <div className="flex items-center justify-between pb-3 border-b border-[#C9A24B]/20">
               <h3 className="text-base font-bold text-[#0B1E33] flex items-center gap-2">
-                👤 नया उद्यमी जोड़ें
+                👤 Add New Entrepreneur
               </h3>
               <button
                 onClick={() => setIsOpen(false)}
@@ -91,7 +91,7 @@ export default function AddEntrepreneurModal({ facilitatorId }: Props) {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-[#0B1E33]/60 mb-1.5">
-                  उद्यमी का नाम / Full Name
+                  Entrepreneur Name / Full Name
                 </label>
                 <input
                   type="text"
@@ -104,7 +104,7 @@ export default function AddEntrepreneurModal({ facilitatorId }: Props) {
 
               <div>
                 <label className="block text-xs font-semibold text-[#0B1E33]/60 mb-1.5">
-                  मोबाइल नंबर / Phone Number *
+                  Mobile Number / Phone Number *
                 </label>
                 <div className="flex">
                   <span className="inline-flex items-center px-3.5 bg-[#E5E2E1]/60 text-[#0B1E33]/60 text-xs font-semibold border border-r-0 border-[#C9A24B]/20 rounded-l-2xl">
@@ -160,14 +160,14 @@ export default function AddEntrepreneurModal({ facilitatorId }: Props) {
                   onClick={() => setIsOpen(false)}
                   className="px-5 py-2.5 bg-[#F5F1E6] hover:bg-[#E5E2E1] text-[#0B1E33] text-xs font-semibold rounded-full transition-colors"
                 >
-                  रद्द करें (Cancel)
+                  Cancel (Cancel)
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
                   className="px-6 py-2.5 bg-[#0B1E33] hover:opacity-95 disabled:opacity-50 text-white text-xs font-bold rounded-full transition-all shadow-md"
                 >
-                  {loading ? 'जोड़ रहे हैं...' : 'सुरक्षित करें (Save)'}
+                  {loading ? 'जोड़ रहे हैं...' : 'Save (Save)'}
                 </button>
               </div>
             </form>
