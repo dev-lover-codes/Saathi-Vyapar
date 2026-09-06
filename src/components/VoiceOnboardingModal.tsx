@@ -1,0 +1,779 @@
+'use client';
+
+/**
+ * src/components/VoiceOnboardingModal.tsx
+ *
+ * Conversational Voice Onboarding Modal using Web Speech API:
+ * - SpeechRecognition (listening) & SpeechSynthesis (speaking back)
+ * - Detects browser compatibility ('webkitSpeechRecognition' in window)
+ * - 8-Step Conversational State Machine with DPDP Act consent enforcement
+ * - Sends transcripts to /api/onboarding/parse (Gemini-powered extraction)
+ * - Saves via /api/onboarding/complete and redirects to /dashboard
+ */
+
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabaseClient } from '@/lib/supabase/client';
+
+export type OnboardingStep =
+  | 'auth'
+  | 'name'
+  | 'district'
+  | 'sector'
+  | 'finances'
+  | 'loans'
+  | 'confirmation'
+  | 'consent'
+  | 'complete';
+
+export interface OnboardingData {
+  user_id?: string;
+  phone?: string;
+  name: string;
+  district: string;
+  state?: string;
+  sector: string;
+  business_name?: string;
+  monthly_revenue_est: number;
+  monthly_expense_est: number;
+  existing_loans: boolean;
+  consent_given: boolean;
+}
+
+interface VoiceOnboardingModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSwitchToText?: () => void;
+}
+
+// Step prompts in Hindi & English
+const STEP_PROMPTS: Record<
+  OnboardingStep,
+  { hi: string; en: string; short: string; fieldLabel: string }
+> = {
+  auth: {
+    hi: 'शुरू करने से पहले, कृपया अपना 10 अंकों का मोबाइल नंबर दर्ज करें या बोलें।',
+    en: 'Before we begin, please enter or speak your 10-digit mobile number.',
+    short: 'मोबाइल नंबर / Mobile Number',
+    fieldLabel: 'मोबाइल नंबर',
+  },
+  name: {
+    hi: 'नमस्ते! आपका साथी व्यापार में स्वागत है। आपका शुभ नाम क्या है?',
+    en: 'Hello! Welcome to Saathi Vyapar. What is your name?',
+    short: 'आपका नाम / Your Name',
+    fieldLabel: 'उद्यमी का नाम',
+  },
+  district: {
+    hi: 'धन्यवाद! आप किस गांव या जिले में रहते हैं?',
+    en: 'Thank you! Which village or district are you located in?',
+    short: 'स्थान / Village or District',
+    fieldLabel: 'गांव / जिला',
+  },
+  sector: {
+    hi: 'आपका क्या काम या व्यापार है? जैसे: किराना दुकान, सिलाई, खेती, डेयरी या कोई अन्य व्यवसाय?',
+    en: 'What trade or work do you do? (e.g., kirana shop, tailoring, farming, dairy, etc.)',
+    short: 'व्यवसाय का प्रकार / Trade or Sector',
+    fieldLabel: 'व्यवसाय का क्षेत्र',
+  },
+  finances: {
+    hi: 'हर महीने आपकी लगभग कितनी कमाई और कितना खर्च होता है? (जैसे: कमाई 25000 और खर्च 15000)',
+    en: 'Roughly how much do you earn and spend monthly? (e.g. earn 25000 and spend 15000)',
+    short: 'मासिक कमाई व खर्च / Monthly Revenue & Expenses',
+    fieldLabel: 'कमाई और खर्च',
+  },
+  loans: {
+    hi: 'क्या आपके ऊपर पहले से कोई बैंक या समूह का लोन या पुराना कर्ज है? बोलें हाँ या नहीं।',
+    en: 'Do you have any existing loans or debts? Please say yes or no.',
+    short: 'पुराना कर्ज / Existing Loans',
+    fieldLabel: 'सक्रिय ऋण (Loan)',
+  },
+  confirmation: {
+    hi: 'कृपया जांचें: क्या आपकी सभी जानकारी सही है? आगे बढ़ने के लिए "हाँ" बोलें या पुष्टि करें।',
+    en: 'Please check if your summary is correct. Say "yes" or tap confirm to proceed.',
+    short: 'विवरण की पुष्टि / Summary Confirmation',
+    fieldLabel: 'सारांश पुष्टि',
+  },
+  consent: {
+    hi: 'क्या आप हमें व्यापारिक सलाह और सरकारी योजनाएं ढूंढने के लिए यह जानकारी सुरक्षित रूप से सेव करने की अनुमति देते हैं? आगे बढ़ने के लिए "हाँ" बोलें या सहमति दें।',
+    en: 'Do you agree to let us store this information to give you financial advice? Say or tap yes to continue.',
+    short: 'सहमति (DPDP Act Consent) / Data Consent',
+    fieldLabel: 'डेटा सुरक्षा सहमति',
+  },
+  complete: {
+    hi: 'बधाई हो! आपका वित्तीय खाता तैयार हो रहा है। हम आपको डैशबोर्ड पर ले जा रहे हैं...',
+    en: 'Congratulations! Your profile is saved. Redirecting to your dashboard...',
+    short: 'सफलतापूर्वक पूर्ण / Completed',
+    fieldLabel: 'खाता तैयार है',
+  },
+};
+
+export default function VoiceOnboardingModal({
+  isOpen,
+  onClose,
+  onSwitchToText,
+}: VoiceOnboardingModalProps) {
+  const router = useRouter();
+
+  // Current conversational step
+  const [step, setStep] = useState<OnboardingStep>('name');
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [liveTranscript, setLiveTranscript] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Form State
+  const [formData, setFormData] = useState<OnboardingData>({
+    name: '',
+    district: '',
+    sector: '',
+    business_name: '',
+    monthly_revenue_est: 0,
+    monthly_expense_est: 0,
+    existing_loans: false,
+    consent_given: false,
+    phone: '',
+  });
+
+  // Direct text edit state for current step
+  const [manualInput, setManualInput] = useState('');
+
+  // Speech API references
+  const recognitionRef = useRef<any>(null);
+  const synthRef = useRef<SpeechSynthesis | null>(null);
+
+  // 1. Initial Session Check on Mount / Open
+  useEffect(() => {
+    if (!isOpen) return;
+
+    async function checkAuth() {
+      try {
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+        if (session?.user) {
+          setFormData((prev) => ({
+            ...prev,
+            user_id: session.user.id,
+            phone: session.user.phone || prev.phone,
+          }));
+          setStep('name');
+        } else {
+          // If no active session, start with auth step or name
+          setStep('auth');
+        }
+      } catch (err) {
+        console.warn('Session check error:', err);
+      }
+    }
+
+    checkAuth();
+  }, [isOpen]);
+
+  // Stop speaking on unmount
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch {
+          // ignore
+        }
+      }
+    };
+  }, []);
+
+  // 2. Speech Synthesis: Speak Assistant Prompt
+  const speakText = useCallback(
+    (text: string, onDone?: () => void) => {
+      if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+        if (onDone) onDone();
+        return;
+      }
+
+      const synth = window.speechSynthesis;
+      synth.cancel(); // Stop any ongoing speech
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.95;
+      utterance.pitch = 1.0;
+
+      // Pick Hindi or Indian English voice if available
+      const voices = synth.getVoices();
+      const preferredVoice = voices.find(
+        (v) =>
+          v.lang.toLowerCase().includes('hi-in') ||
+          v.lang.toLowerCase().includes('hi') ||
+          v.lang.toLowerCase().includes('en-in')
+      );
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+      }
+      utterance.lang = 'hi-IN';
+
+      utterance.onstart = () => {
+        setIsSpeaking(true);
+      };
+
+      utterance.onend = () => {
+        setIsSpeaking(false);
+        if (onDone) onDone();
+      };
+
+      utterance.onerror = () => {
+        setIsSpeaking(false);
+        if (onDone) onDone();
+      };
+
+      synth.speak(utterance);
+    },
+    []
+  );
+
+  // 3. Speech Recognition: Start Listening
+  const startListening = useCallback(() => {
+    if (typeof window === 'undefined') return;
+
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      setErrorMessage('Web Speech API is not supported in this browser. Please use text mode.');
+      return;
+    }
+
+    // Stop speaking before listening
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+
+    try {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch {
+          // ignore
+        }
+      }
+
+      const recognition = new SpeechRecognition();
+      recognitionRef.current = recognition;
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'hi-IN'; // Also handles Hinglish / Indian speech well
+
+      recognition.onstart = () => {
+        setIsListening(true);
+        setErrorMessage(null);
+        setLiveTranscript('');
+      };
+
+      recognition.onresult = (event: any) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          transcript += event.results[i][0].transcript;
+        }
+        setLiveTranscript(transcript);
+        setManualInput(transcript);
+      };
+
+      recognition.onerror = (event: any) => {
+        console.warn('Speech recognition error:', event.error);
+        setIsListening(false);
+        if (event.error === 'no-speech') {
+          setErrorMessage('कोई आवाज़ सुनाई नहीं दी। कृपया फिर से बोलें या नीचे लिखें।');
+        } else if (event.error === 'not-allowed') {
+          setErrorMessage('माइक्रोफ़ोन की अनुमति अस्वीकृत है। कृपया टेक्स्ट मोड का उपयोग करें।');
+        }
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.start();
+    } catch (err) {
+      console.error('Failed to start speech recognition:', err);
+      setIsListening(false);
+    }
+  }, []);
+
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch {
+        // ignore
+      }
+    }
+    setIsListening(false);
+  }, []);
+
+  // 4. Trigger voice question whenever step changes
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const promptObj = STEP_PROMPTS[step];
+    if (!promptObj) return;
+
+    let speechText = promptObj.hi;
+
+    if (step === 'confirmation') {
+      const loanText = formData.existing_loans ? 'सक्रिय लोन है' : 'कोई लोन नहीं';
+      speechText = `कृपया पुष्टि करें: नाम ${formData.name}, जिला ${formData.district}, व्यवसाय ${formData.sector}, मासिक कमाई ₹${formData.monthly_revenue_est.toLocaleString('en-IN')}, खर्च ₹${formData.monthly_expense_est.toLocaleString('en-IN')}, और ${loanText}। क्या यह सही है?`;
+    }
+
+    setManualInput('');
+    setLiveTranscript('');
+    setErrorMessage(null);
+
+    // Speak prompt, then automatically listen
+    speakText(speechText, () => {
+      // Auto-listen after prompt completes
+      if (step !== 'complete') {
+        startListening();
+      }
+    });
+  }, [step, isOpen, speakText, startListening]);
+
+  // 5. Send Transcript to /api/onboarding/parse
+  async function processUserAnswer(rawInput: string) {
+    if (!rawInput.trim()) {
+      setErrorMessage('कृपया अपना उत्तर बोलें या टाइप करें।');
+      return;
+    }
+
+    stopListening();
+    setIsProcessing(true);
+    setErrorMessage(null);
+
+    try {
+      const response = await fetch('/api/onboarding/parse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          step,
+          transcript: rawInput.trim(),
+          currentData: formData,
+        }),
+      });
+
+      const data = await response.json();
+      const parsed = data.parsed || {};
+
+      // Update state based on current step
+      if (step === 'auth') {
+        const phoneClean = rawInput.replace(/\D/g, '');
+        if (phoneClean.length >= 10) {
+          setFormData((prev) => ({ ...prev, phone: phoneClean.slice(-10) }));
+          setStep('name');
+        } else {
+          setErrorMessage('कृपया वैध 10 अंकों का मोबाइल नंबर दर्ज करें।');
+        }
+      } else if (step === 'name') {
+        const nameVal = parsed.name || rawInput.trim();
+        if (nameVal) {
+          setFormData((prev) => ({ ...prev, name: nameVal }));
+          setStep('district');
+        } else {
+          setErrorMessage('नाम समझ नहीं आया। कृपया दोबारा बोलें।');
+        }
+      } else if (step === 'district') {
+        const distVal = parsed.district || parsed.village || rawInput.trim();
+        if (distVal) {
+          setFormData((prev) => ({ ...prev, district: distVal }));
+          setStep('sector');
+        } else {
+          setErrorMessage('स्थान समझ नहीं आया। कृपया दोबारा बोलें।');
+        }
+      } else if (step === 'sector') {
+        const sectorVal = parsed.sector || parsed.business_name || rawInput.trim();
+        if (sectorVal) {
+          setFormData((prev) => ({
+            ...prev,
+            sector: sectorVal,
+            business_name: parsed.business_name || sectorVal,
+          }));
+          setStep('finances');
+        } else {
+          setErrorMessage('व्यवसाय समझ नहीं आया। कृपया दोबारा बताएं।');
+        }
+      } else if (step === 'finances') {
+        const rev = parsed.monthly_revenue_est ?? parseFloat(rawInput.replace(/[^\d.]/g, ''));
+        const exp = parsed.monthly_expense_est ?? 0;
+        if (!isNaN(rev) && rev > 0) {
+          setFormData((prev) => ({
+            ...prev,
+            monthly_revenue_est: rev,
+            monthly_expense_est: !isNaN(exp) ? exp : 0,
+          }));
+          setStep('loans');
+        } else {
+          setErrorMessage('कृपया कमाई की संख्या स्पष्ट बताएं (जैसे: 25000)।');
+        }
+      } else if (step === 'loans') {
+        const hasLoan = parsed.existing_loans !== undefined ? Boolean(parsed.existing_loans) : /yes|haan|हाँ/i.test(rawInput);
+        setFormData((prev) => ({ ...prev, existing_loans: hasLoan }));
+        setStep('confirmation');
+      } else if (step === 'confirmation') {
+        const confirmed = parsed.confirmed !== undefined ? Boolean(parsed.confirmed) : /yes|haan|हाँ|theek|sahi/i.test(rawInput);
+        if (confirmed) {
+          setStep('consent');
+        } else {
+          // Restart to allow corrections
+          setErrorMessage('विवरण बदलने के लिए नाम से दोबारा शुरू करते हैं।');
+          setStep('name');
+        }
+      } else if (step === 'consent') {
+        const consent = parsed.consent_given !== undefined ? Boolean(parsed.consent_given) : /yes|haan|हाँ|agree/i.test(rawInput);
+        if (consent) {
+          setFormData((prev) => ({ ...prev, consent_given: true }));
+          await handleFinalSave({ ...formData, consent_given: true });
+        } else {
+          setErrorMessage('डेटा सुरक्षा सहमति (DPDP Act) के बिना जानकारी सेव नहीं की जा सकती।');
+        }
+      }
+    } catch (err) {
+      console.error('Extraction error:', err);
+      setErrorMessage('सर्वर से उत्तर प्राप्त करने में दिक्कत हुई। कृपया दोबारा प्रयास करें।');
+    } finally {
+      setIsProcessing(false);
+    }
+  }
+
+  // 6. Complete Registration & DPDP Act Verified Save
+  async function handleFinalSave(finalData: OnboardingData) {
+    if (!finalData.consent_given) {
+      setErrorMessage('DPDP Act सहमति आवश्यक है।');
+      return;
+    }
+
+    setStep('complete');
+    setIsProcessing(true);
+
+    try {
+      const response = await fetch('/api/onboarding/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(finalData),
+      });
+
+      const resData = await response.json();
+
+      if (!response.ok || !resData.success) {
+        throw new Error(resData.error || 'Failed to save onboarding data');
+      }
+
+      // Speak success
+      speakText('बधाई हो! आपकी जानकारी सेव हो गई है। हम आपके लिए वित्तीय रिपोर्ट खोल रहे हैं।');
+
+      // Redirect to dashboard
+      setTimeout(() => {
+        onClose();
+        router.push(resData.redirectUrl || `/dashboard?user_id=${resData.userId}`);
+        router.refresh();
+      }, 2000);
+    } catch (err: any) {
+      console.error('Final save error:', err);
+      setErrorMessage(err.message || 'प्रोफाइल सेव करने में त्रुटि हुई।');
+      setStep('consent');
+    } finally {
+      setIsProcessing(false);
+    }
+  }
+
+  if (!isOpen) return null;
+
+  const currentPrompt = STEP_PROMPTS[step];
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-50 bg-[#060b1c]/95 backdrop-blur-xl flex flex-col justify-between p-4 sm:p-6 text-white animate-in fade-in duration-200"
+    >
+      {/* ── Top Header ────────────────────────────────────────────── */}
+      <div className="max-w-4xl w-full mx-auto flex items-center justify-between border-b border-[#182a52] pb-3.5">
+        <div className="flex items-center gap-2.5">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-300 text-slate-950 flex items-center justify-center font-black text-xl shadow-md">
+            🎙️
+          </div>
+          <div>
+            <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+              वॉइस ऑनबोर्डिंग (Voice Registration)
+              <span className="text-[10px] font-bold bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-400/30">
+                DPDP Compliant
+              </span>
+            </h2>
+            <p className="text-xs text-zinc-400">
+              चरण: {currentPrompt?.short || 'पंजीकरण'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {onSwitchToText && (
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== 'undefined' && window.speechSynthesis) {
+                  window.speechSynthesis.cancel();
+                }
+                stopListening();
+                onSwitchToText();
+              }}
+              className="text-xs text-amber-300 hover:text-amber-200 font-semibold px-3 py-1.5 rounded-lg bg-[#112042] border border-[#1f376e] hover:border-amber-400/50 transition-colors"
+            >
+              ✍️ टेक्स्ट फॉर्म (Text Mode)
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== 'undefined' && window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+              }
+              stopListening();
+              onClose();
+            }}
+            className="p-2 rounded-full bg-[#112042] hover:bg-[#1a3163] text-zinc-300 hover:text-white border border-zinc-700 transition-colors"
+            aria-label="Close"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* ── Main Interactive Center ───────────────────────────────── */}
+      <div className="max-w-2xl w-full mx-auto my-auto py-4 space-y-6 text-center">
+        {/* Step Progress Pills */}
+        <div className="flex items-center justify-center gap-1 sm:gap-1.5 overflow-x-auto pb-1">
+          {(
+            ['auth', 'name', 'district', 'sector', 'finances', 'loans', 'confirmation', 'consent'] as OnboardingStep[]
+          ).map((s, idx) => (
+            <span
+              key={s}
+              className={`h-1.5 rounded-full transition-all ${
+                s === step
+                  ? 'w-8 bg-amber-400 shadow-[0_0_8px_rgba(245,166,35,0.8)]'
+                  : idx < ['auth', 'name', 'district', 'sector', 'finances', 'loans', 'confirmation', 'consent'].indexOf(step)
+                  ? 'w-4 bg-emerald-400'
+                  : 'w-3 bg-zinc-700'
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* Assistant Speaking / Status Banner */}
+        <div className="bg-[#0f1d3e] border-2 border-[#1c356e] rounded-2xl p-5 shadow-2xl space-y-2">
+          <div className="flex items-center justify-center gap-2 text-amber-300 text-xs sm:text-sm font-bold uppercase tracking-wider">
+            {isSpeaking && <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>}
+            {isListening && <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>}
+            {isProcessing && <span className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-spin"></span>}
+            <span>
+              {isSpeaking
+                ? '🔊 साथी बोल रहा है (Assistant Speaking)...'
+                : isListening
+                ? '🎙️ आपकी आवाज़ सुन रहे हैं (Listening)...'
+                : isProcessing
+                ? '⚡ समझ रहे हैं (Processing with Gemini)...'
+                : '💡 आपका उत्तर अपेक्षित है'}
+            </span>
+          </div>
+
+          <h3 className="text-base sm:text-lg md:text-xl font-bold text-white leading-relaxed">
+            {currentPrompt?.hi}
+          </h3>
+          <p className="text-xs text-zinc-400 font-normal">
+            {currentPrompt?.en}
+          </p>
+        </div>
+
+        {/* Dynamic Summary Card on Step 6 (Confirmation) or Step 7 (Consent) */}
+        {(step === 'confirmation' || step === 'consent' || step === 'complete') && (
+          <div className="bg-[#0b1633] border border-amber-400/40 rounded-2xl p-4 text-left space-y-2 text-xs sm:text-sm shadow-xl">
+            <h4 className="font-black text-amber-300 text-xs uppercase tracking-wider border-b border-zinc-800 pb-1.5 flex items-center justify-between">
+              <span>📋 आपका व्यवसाय प्रोफाइल (Summary)</span>
+              <span className="text-[11px] text-emerald-400">सत्यापित करने के लिए तैयार</span>
+            </h4>
+            <div className="grid grid-cols-2 gap-2 text-zinc-300 pt-1">
+              <div>
+                <span className="text-zinc-500 block text-[11px]">नाम:</span>
+                <strong className="text-white">{formData.name || '—'}</strong>
+              </div>
+              <div>
+                <span className="text-zinc-500 block text-[11px]">स्थान (जिला):</span>
+                <strong className="text-white">{formData.district || '—'}</strong>
+              </div>
+              <div>
+                <span className="text-zinc-500 block text-[11px]">व्यवसाय का क्षेत्र:</span>
+                <strong className="text-white">{formData.sector || '—'}</strong>
+              </div>
+              <div>
+                <span className="text-zinc-500 block text-[11px]">पुराना ऋण (Loan):</span>
+                <strong className={formData.existing_loans ? 'text-amber-300' : 'text-emerald-400'}>
+                  {formData.existing_loans ? 'हाँ (सक्रिय)' : 'नहीं'}
+                </strong>
+              </div>
+              <div>
+                <span className="text-zinc-500 block text-[11px]">मासिक कमाई:</span>
+                <strong className="text-emerald-400">₹{formData.monthly_revenue_est.toLocaleString('en-IN')}</strong>
+              </div>
+              <div>
+                <span className="text-zinc-500 block text-[11px]">मासिक खर्च:</span>
+                <strong className="text-rose-400">₹{formData.monthly_expense_est.toLocaleString('en-IN')}</strong>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* DPDP Act Consent Explicit Box */}
+        {step === 'consent' && (
+          <div className="p-4 rounded-xl bg-emerald-950/40 border-2 border-emerald-500/60 text-left space-y-2 text-xs">
+            <div className="flex items-center gap-2 text-emerald-300 font-bold">
+              <span>🛡️ DPDP Act 2023 डेटा संरक्षण सहमति</span>
+            </div>
+            <p className="text-zinc-300 leading-relaxed">
+              हम आपके डेटा का उपयोग केवल वित्तीय विश्लेषण (Break-even, Margin) और सरकारी योजनाओं (PMEGP, Mudra) की पात्रता जांचने के लिए करते हैं। आपकी जानकारी सुरक्षित है।
+            </p>
+          </div>
+        )}
+
+        {/* Animated Central Mic Trigger Button */}
+        {step !== 'complete' && (
+          <div className="relative flex flex-col items-center justify-center gap-3">
+            <div className="relative flex items-center justify-center">
+              {/* Outer Waves */}
+              {isListening && (
+                <>
+                  <div className="absolute w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-rose-500/20 animate-ping" />
+                  <div className="absolute w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-rose-500/30 animate-pulse" />
+                </>
+              )}
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (isListening) {
+                    stopListening();
+                  } else {
+                    startListening();
+                  }
+                }}
+                disabled={isProcessing}
+                className={`relative z-10 w-24 h-24 sm:w-28 sm:h-28 rounded-full flex flex-col items-center justify-center gap-1 font-black shadow-2xl transition-all transform active:scale-95 ${
+                  isListening
+                    ? 'bg-rose-500 text-white animate-pulse shadow-[0_0_35px_rgba(244,63,94,0.6)]'
+                    : 'bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-300 text-slate-950 hover:scale-105 shadow-[0_0_30px_rgba(245,166,35,0.45)]'
+                }`}
+              >
+                <svg className="w-8 h-8 sm:w-10 sm:h-10 fill-current" viewBox="0 0 24 24">
+                  <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                  <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                </svg>
+                <span className="text-[10px] uppercase tracking-wider">
+                  {isListening ? 'सुन रहे हैं...' : 'टैप करके बोलें'}
+                </span>
+              </button>
+            </div>
+
+            {/* Live Transcript / Manual Input Bar */}
+            <div className="w-full flex items-center gap-2 pt-2">
+              <input
+                type="text"
+                value={manualInput}
+                onChange={(e) => setManualInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    processUserAnswer(manualInput);
+                  }
+                }}
+                placeholder={
+                  liveTranscript ||
+                  (step === 'loans'
+                    ? 'हाँ या नहीं बोलें या लिखें...'
+                    : step === 'finances'
+                    ? 'उदा. कमाई 25000 खर्च 15000'
+                    : 'बोलें या यहाँ टाइप करें...')
+                }
+                className="flex-1 bg-[#0b1633] text-white placeholder-zinc-500 border border-[#1f376e] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 shadow-inner"
+              />
+              <button
+                type="button"
+                onClick={() => processUserAnswer(manualInput)}
+                disabled={isProcessing || !manualInput.trim()}
+                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 disabled:opacity-40 text-slate-950 font-bold text-sm shadow-md transition-all hover:scale-105 active:scale-95 shrink-0"
+              >
+                {isProcessing ? '⏳...' : 'आगे बढ़ें →'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Error Alert */}
+        {errorMessage && (
+          <div className="p-3 rounded-xl bg-rose-950/80 border border-rose-500/60 text-xs text-rose-200 flex items-center justify-center gap-2">
+            <span>⚠️</span>
+            <span>{errorMessage}</span>
+          </div>
+        )}
+      </div>
+
+      {/* ── Modal Footer Controls ─────────────────────────────────── */}
+      <div className="max-w-4xl w-full mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[#182a52] pt-3.5 text-xs text-zinc-400">
+        <div className="flex items-center gap-2">
+          <span>🔒 जीरो-हैलुसिनेशन • शुद्ध वित्तीय गणना</span>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {step !== 'auth' && step !== 'name' && step !== 'complete' && (
+            <button
+              type="button"
+              onClick={() => {
+                const stepOrder: OnboardingStep[] = [
+                  'auth',
+                  'name',
+                  'district',
+                  'sector',
+                  'finances',
+                  'loans',
+                  'confirmation',
+                  'consent',
+                ];
+                const currentIndex = stepOrder.indexOf(step);
+                if (currentIndex > 0) {
+                  setStep(stepOrder[currentIndex - 1]);
+                }
+              }}
+              className="text-zinc-400 hover:text-white underline font-medium"
+            >
+              ← पिछला चरण (Back)
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== 'undefined' && window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+              }
+              stopListening();
+              onClose();
+            }}
+            className="px-4 py-2 rounded-xl bg-[#112042] hover:bg-[#1a3163] text-zinc-200 text-xs font-bold border border-zinc-700 transition-colors"
+          >
+            बंद करें (Close)
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

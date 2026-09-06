@@ -1,0 +1,500 @@
+'use client';
+
+/**
+ * src/app/dashboard/business-guide/page.tsx
+ *
+ * Business Transformation Guide & Roadmap Generator
+ *
+ * Capabilities:
+ * - Text and Native Web Speech API voice input for describing business challenges
+ * - Calls /api/business-guide/generate for 5-stage structured roadmap
+ * - Displays 5 numbered cards with actionable tasks and impact milestones
+ * - Revisit past guides saved in business_guides table
+ * - Consistent navy/gold/cream high-contrast design
+ */
+
+import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { supabaseClient } from '@/lib/supabase/client';
+import { RoadmapStageItem } from '@/app/api/business-guide/generate/route';
+
+interface PastGuideItem {
+  id: string;
+  input_text: string;
+  roadmap_json: RoadmapStageItem[];
+  created_at: string;
+}
+
+const PRESET_CHALLENGES = [
+  {
+    label: '🛒 बिचौलिये व कच्चा माल (Middlemen & Sourcing)',
+    text: 'बिचौलिये सारा मुनाफा ले जाते हैं और कच्चा माल बहुत महंगा मिलता है।',
+  },
+  {
+    label: '📉 कम बिक्री व ग्राहक (Low Footfall & Sales)',
+    text: 'दुकान में बिक्री कम है, नए ग्राहक नहीं आ रहे और उधार का पैसा फंस जाता है।',
+  },
+  {
+    label: '🥛 डेयरी व पशुपालन (Dairy & Fodder Cost)',
+    text: 'दूध की सही कीमत नहीं मिलती और चारे का खर्च लगातार बढ़ रहा है।',
+  },
+  {
+    label: '🧵 सिलाई व कारीगरी (Tailoring & Value Add)',
+    text: 'कपड़े सिलाई में मेहनत ज्यादा है पर मार्जिन कम है, नए बड़े ऑर्डर कैसे पाएं?',
+  },
+];
+
+const STAGE_ICONS: Record<string, string> = {
+  'Cost Optimization': '📉',
+  'Value Addition': '✨',
+  'Direct Market Access': '🎯',
+  'Formal Registration': '📜',
+  'Scale': '🚀',
+};
+
+export default function BusinessGuidePage() {
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string>('उद्यमी');
+  const [userSector, setUserSector] = useState<string>('व्यापार');
+
+  // Input state
+  const [challengeText, setChallengeText] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Active Roadmap & Past Guides
+  const [currentRoadmap, setCurrentRoadmap] = useState<RoadmapStageItem[] | null>(null);
+  const [pastGuides, setPastGuides] = useState<PastGuideItem[]>([]);
+  const [selectedGuideId, setSelectedGuideId] = useState<string | null>(null);
+
+  // Voice Input State
+  const [isListening, setIsListening] = useState(false);
+  const [hasVoiceSupport, setHasVoiceSupport] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  // 1. Fetch User Profile & Past Guides on Mount
+  useEffect(() => {
+    // Detect Web Speech API support
+    const voiceSupported =
+      typeof window !== 'undefined' &&
+      ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
+    setHasVoiceSupport(voiceSupported);
+
+    async function loadData() {
+      try {
+        let activeUserId: string | null = null;
+
+        // Check auth session
+        const {
+          data: { session },
+        } = await supabaseClient.auth.getSession();
+
+        if (session?.user) {
+          activeUserId = session.user.id;
+        } else {
+          // Fallback to latest active user for demonstration
+          const { data: latestUsers } = await supabaseClient
+            .from('users')
+            .select('id, name')
+            .order('created_at', { ascending: false })
+            .limit(1);
+
+          if (latestUsers && latestUsers.length > 0) {
+            activeUserId = latestUsers[0].id;
+            setUserName(latestUsers[0].name || 'उद्यमी');
+          }
+        }
+
+        if (activeUserId) {
+          setUserId(activeUserId);
+
+          // Fetch business profile
+          const { data: profile } = await supabaseClient
+            .from('business_profiles')
+            .select('sector, business_name')
+            .eq('user_id', activeUserId)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+          if (profile?.sector) {
+            setUserSector(profile.sector);
+          }
+
+          // Fetch past guides
+          const { data: guides } = await supabaseClient
+            .from('business_guides')
+            .select('*')
+            .eq('user_id', activeUserId)
+            .order('created_at', { ascending: false });
+
+          if (guides && guides.length > 0) {
+            const formatted: PastGuideItem[] = guides.map((g: any) => ({
+              id: g.id,
+              input_text: g.input_text,
+              roadmap_json: g.roadmap_json,
+              created_at: g.created_at,
+            }));
+            setPastGuides(formatted);
+            setCurrentRoadmap(formatted[0].roadmap_json);
+            setSelectedGuideId(formatted[0].id);
+          }
+        }
+      } catch (err) {
+        console.warn('Initial load error:', err);
+      }
+    }
+
+    loadData();
+  }, []);
+
+  // 2. Voice Input Handler
+  function toggleVoiceListening() {
+    if (typeof window === 'undefined') return;
+
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      setErrorMessage('इस ब्राउज़र में वॉइस इनपुट समर्थित नहीं है।');
+      return;
+    }
+
+    if (isListening) {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch {
+          // ignore
+        }
+      }
+      setIsListening(false);
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognitionRef.current = recognition;
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'hi-IN';
+
+      recognition.onstart = () => {
+        setIsListening(true);
+        setErrorMessage(null);
+      };
+
+      recognition.onresult = (event: any) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          transcript += event.results[i][0].transcript;
+        }
+        setChallengeText(transcript);
+      };
+
+      recognition.onerror = (event: any) => {
+        setIsListening(false);
+        if (event.error !== 'no-speech') {
+          setErrorMessage('माइक इनपुट में समस्या आई। कृपया टाइप करें।');
+        }
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.start();
+    } catch (err) {
+      console.error('Speech recognition error:', err);
+      setIsListening(false);
+    }
+  }
+
+  // 3. Generate Roadmap Submit Handler
+  async function handleGenerateRoadmap(e: React.FormEvent) {
+    e.preventDefault();
+    if (!challengeText.trim()) {
+      setErrorMessage('कृपया अपने व्यापार की समस्या या स्थिति का विवरण दें।');
+      return;
+    }
+
+    if (!userId) {
+      setErrorMessage('कृपया पहले लॉगिन या रजिस्टर करें।');
+      return;
+    }
+
+    setIsGenerating(true);
+    setErrorMessage(null);
+
+    try {
+      const response = await fetch('/api/business-guide/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          challenge_text: challengeText.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to generate transformation roadmap');
+      }
+
+      const newRoadmap = data.roadmap as RoadmapStageItem[];
+      setCurrentRoadmap(newRoadmap);
+      setSelectedGuideId(data.guideId);
+
+      // Add to past guides list
+      const newGuideEntry: PastGuideItem = {
+        id: data.guideId || `temp-${Date.now()}`,
+        input_text: challengeText.trim(),
+        roadmap_json: newRoadmap,
+        created_at: data.createdAt || new Date().toISOString(),
+      };
+      setPastGuides((prev) => [newGuideEntry, ...prev]);
+    } catch (err: any) {
+      console.error('Generate roadmap error:', err);
+      setErrorMessage(err.message || 'रोडमैप बनाने में समस्या आई।');
+    } finally {
+      setIsGenerating(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-[#070c1e] text-[#fdfbf7] font-sans p-3 sm:p-6 pb-24 selection:bg-[#f5a623] selection:text-[#0a1128]">
+      {/* ── Top Header Navigation ────────────────────────────────── */}
+      <header className="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1c2e56] pb-4 mb-6">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <span className="text-3xl filter drop-shadow">🧭</span>
+            <div>
+              <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+                व्यापारिक मार्गदर्शन रोडमैप (Business Transformation Guide)
+              </h1>
+              <p className="text-xs sm:text-sm text-zinc-400 mt-0.5">
+                {userName} • {userSector} • AI संचालित 5-चरणीय विकास योजना
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          <Link
+            href={`/dashboard${userId ? `?user_id=${userId}` : ''}`}
+            className="px-3.5 py-2 bg-[#122040] hover:bg-[#1a2d59] text-amber-300 text-xs font-bold rounded-xl border border-[#233b70] transition-colors"
+          >
+            ← मुख्य डैशबोर्ड (Dashboard)
+          </Link>
+        </div>
+      </header>
+
+      <main className="max-w-5xl mx-auto space-y-8">
+        {/* ── Challenge Input Section ──────────────────────────────── */}
+        <section className="bg-[#0f1d3e] border-2 border-[#1c356e] rounded-3xl p-5 sm:p-7 shadow-2xl space-y-4">
+          <div className="flex items-start gap-3">
+            <div className="p-3 bg-amber-400/10 border border-amber-400/30 rounded-2xl text-2xl shrink-0">
+              💡
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-white">
+                अपने व्यापार की चुनौतियां बताएं / Describe Your Challenges
+              </h2>
+              <p className="text-xs text-zinc-300 mt-0.5">
+                बोलकर या लिखकर बताएं कि आपको व्यापार में क्या कठिनाई आ रही है (जैसे: कच्चे माल की लागत, बिचौलिये, कम मुनाफा, सरकारी योजनाएं)।
+              </p>
+            </div>
+          </div>
+
+          {/* Quick Preset Buttons */}
+          <div className="space-y-1.5 pt-1">
+            <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">
+              उदाहरण चुनें (Quick Presets):
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {PRESET_CHALLENGES.map((preset, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setChallengeText(preset.text)}
+                  className="px-3 py-1.5 rounded-xl bg-[#091228] hover:bg-[#142347] border border-[#1d3363] hover:border-amber-400/50 text-xs text-zinc-300 font-medium transition-all"
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Main Input Form */}
+          <form onSubmit={handleGenerateRoadmap} className="space-y-3 pt-2">
+            <div className="relative">
+              <textarea
+                rows={3}
+                required
+                value={challengeText}
+                onChange={(e) => setChallengeText(e.target.value)}
+                placeholder="उदा. बिचौलिये सारा मुनाफा ले जाते हैं, कच्चा माल बहुत महंगा मिलता है और दुकान का खर्च निकालना मुश्किल हो रहा है..."
+                className="w-full bg-[#081024] text-white placeholder-zinc-500 border border-[#1f376e] rounded-2xl p-4 text-sm sm:text-base focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 shadow-inner"
+              />
+
+              {/* Voice Input Button inside textarea container */}
+              {hasVoiceSupport && (
+                <button
+                  type="button"
+                  onClick={toggleVoiceListening}
+                  className={`absolute right-3.5 bottom-3.5 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-md ${
+                    isListening
+                      ? 'bg-rose-500 text-white animate-pulse'
+                      : 'bg-[#14244a] text-amber-300 border border-amber-400/30 hover:bg-[#1f376e]'
+                  }`}
+                  title={isListening ? 'Stop listening' : 'Speak your challenge'}
+                >
+                  <span>🎙️</span>
+                  <span>{isListening ? 'सुन रहे हैं...' : 'बोलें'}</span>
+                </button>
+              )}
+            </div>
+
+            {errorMessage && (
+              <div className="p-3 rounded-xl bg-rose-950/80 border border-rose-500/60 text-xs text-rose-200 flex items-center gap-2">
+                <span>⚠️</span>
+                <span>{errorMessage}</span>
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
+              <span className="text-[11px] text-zinc-400">
+                🔒 Gemini AI आपकी जानकारी और प्रोफाइल के आधार पर सटीक 5-चरणीय रोडमैप तैयार करेगा।
+              </span>
+
+              <button
+                type="submit"
+                disabled={isGenerating || !challengeText.trim()}
+                className="w-full sm:w-auto px-8 py-3 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950 text-sm font-extrabold shadow-lg hover:scale-105 active:scale-95 transition-all disabled:opacity-50 shrink-0"
+              >
+                {isGenerating ? '⏳ रोडमैप तैयार हो रहा है...' : '🚀 रोडमैप बनाएं (Generate Roadmap) →'}
+              </button>
+            </div>
+          </form>
+        </section>
+
+        {/* ── Past Guides Revisit Tabs ─────────────────────────────── */}
+        {pastGuides.length > 1 && (
+          <section className="bg-[#0b1633] border border-[#1c356e] rounded-2xl p-4 space-y-2">
+            <span className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+              <span>📜 पूर्व में बनाए गए रोडमैप (Saved Roadmaps):</span>
+            </span>
+            <div className="flex items-center gap-2 overflow-x-auto pb-1">
+              {pastGuides.map((g, idx) => (
+                <button
+                  key={g.id}
+                  type="button"
+                  onClick={() => {
+                    setCurrentRoadmap(g.roadmap_json);
+                    setSelectedGuideId(g.id);
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap border transition-all ${
+                    selectedGuideId === g.id
+                      ? 'bg-amber-400 text-slate-950 border-amber-300 font-bold shadow-sm'
+                      : 'bg-[#0f1d3e] text-zinc-300 border-[#1f376e] hover:border-zinc-500'
+                  }`}
+                >
+                  योजना {pastGuides.length - idx} (
+                  {new Date(g.created_at).toLocaleDateString('hi-IN', {
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+                  )
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── 5 Numbered Roadmap Cards Display ─────────────────────── */}
+        {currentRoadmap && currentRoadmap.length === 5 && (
+          <section className="space-y-5 animate-in fade-in duration-300">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#1c2e56] pb-3">
+              <div>
+                <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+                  🗺️ 5-चरणीय व्यवसाय परिवर्तन रोडमैप
+                </h3>
+                <p className="text-xs text-zinc-400">
+                  हर चरण को क्रमिक रूप से पूरा करें और अपने व्यापार को सुरक्षित लाभ की ओर ले जाएं।
+                </p>
+              </div>
+
+              <span className="px-3 py-1 bg-emerald-950 border border-emerald-500 text-emerald-400 text-xs font-extrabold rounded-full w-fit">
+                ✓ 5 चरण सक्रिय
+              </span>
+            </div>
+
+            {/* The 5 Cards Grid */}
+            <div className="space-y-4">
+              {currentRoadmap.map((item, index) => {
+                const stepNum = index + 1;
+                const icon = STAGE_ICONS[item.stage] || '📌';
+
+                return (
+                  <div
+                    key={item.stage}
+                    className="bg-[#0f1d3e] border-2 border-[#1c356e] hover:border-amber-400/50 rounded-2xl p-5 sm:p-6 shadow-xl transition-all space-y-3"
+                  >
+                    {/* Card Header */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#1b2d56] pb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-950 font-black text-base flex items-center justify-center shadow-md shrink-0">
+                          {stepNum}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg">{icon}</span>
+                            <h4 className="text-base sm:text-lg font-black text-white">
+                              {item.title_hi}
+                            </h4>
+                          </div>
+                          <span className="text-[11px] font-bold text-amber-300 uppercase tracking-widest">
+                            Stage {stepNum}: {item.stage}
+                          </span>
+                        </div>
+                      </div>
+
+                      {item.impact_milestone && (
+                        <span className="px-3 py-1 rounded-xl bg-[#091228] border border-amber-400/40 text-amber-300 text-xs font-bold w-fit">
+                          🎯 लक्ष्य: {item.impact_milestone}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-xs sm:text-sm text-zinc-200 leading-relaxed font-medium">
+                      {item.description}
+                    </p>
+
+                    {/* Action Items Checklist */}
+                    {item.action_items && item.action_items.length > 0 && (
+                      <div className="pt-2 space-y-1.5 bg-[#081024]/70 rounded-xl p-3.5 border border-[#182a52]">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-400">
+                          कार्रवाई के कदम (Action Checklist):
+                        </span>
+                        <div className="space-y-1.5 pt-1">
+                          {item.action_items.map((act, actIdx) => (
+                            <div key={actIdx} className="flex items-start gap-2 text-xs text-zinc-300">
+                              <span className="text-emerald-400 font-bold shrink-0">✓</span>
+                              <span className="leading-snug">{act}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+      </main>
+    </div>
+  );
+}
