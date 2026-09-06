@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Saathi Vyapar (साथी व्यापार) — Lumio Financial Advisory",
+  title: "Saathi Vyapar (साथी व्यापार) — AI Business Advisory for Rural Micro-Entrepreneurs",
   description:
-    "AI-driven hyper-local business advisory and financial structuring assistant for rural micro-entrepreneurs, accessible via WhatsApp, SMS, and web. SIH26091.",
+    "AI-driven hyper-local business advisory and financial structuring assistant for rural micro-entrepreneurs, accessible via WhatsApp, SMS, and web. SIH26091 · Ministry of Social Justice & Empowerment · Team Pantheon Eternal.",
 };
 
 export default function RootLayout({
@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased light`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased light scroll-smooth`}
     >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -36,11 +36,11 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-full flex flex-col bg-[#FAF9F5] text-[#1B1B1B] font-['Poppins',sans-serif]">
+      <body className="min-h-full flex flex-col bg-[#F5F1E6] text-[#0B1E33] font-['Inter',sans-serif]">
         {children}
       </body>
     </html>

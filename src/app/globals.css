@@ -246,3 +246,57 @@
 .lumio-pill {
   border-radius: 9999px;
 }
+
+/* Pantheon Eternal / Classical Heritage Showcase Utilities */
+.font-playfair {
+  font-family: 'Playfair Display', Georgia, serif !important;
+}
+
+.font-inter {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 28s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+.pantheon-glass {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(201, 162, 75, 0.25);
+  box-shadow: 0 20px 50px rgba(11, 30, 51, 0.06);
+}
+
+.pantheon-card-navy {
+  background: #0B1E33;
+  color: #F5F1E6;
+  border: 1px solid rgba(201, 162, 75, 0.3);
+}
+
+.pantheon-pill-gold {
+  border: 1px solid #C9A24B;
+  color: #C9A24B;
+  transition: all 0.3s ease;
+}
+
+.pantheon-pill-gold:hover {
+  background: #C9A24B;
+  color: #0B1E33;
+}
+
