@@ -162,7 +162,7 @@ export default async function FacilitatorPage() {
               <div className="text-center py-12 text-[#0B1E33]/50 space-y-2">
                 <p className="text-lg font-semibold text-[#0B1E33]">No entrepreneurs registered yet.</p>
                 <p className="text-xs text-[#0B1E33]/50">
-                  Use the "Add New Entrepreneur" button above to add the first entrepreneur.
+                  Use the &quot;Add New Entrepreneur&quot; button above to add the first entrepreneur.
                 </p>
               </div>
             ) : (
