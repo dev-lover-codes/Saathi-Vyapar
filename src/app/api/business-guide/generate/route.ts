@@ -52,15 +52,16 @@ function generateFallbackRoadmap(
   sector: string,
   revenue: number,
   expense: number,
-  challenge: string
+  challengeText?: string
 ): RoadmapStageItem[] {
   const monthlySavingsTarget = Math.max(2000, Math.round(revenue * 0.15));
+  const challengeNote = challengeText ? ` (विशेष ध्यान: ${challengeText})` : '';
 
   return [
     {
       stage: 'Cost Optimization',
       title_hi: 'लागत में कमी एवं कच्चा माल सुधार (Cost Optimization)',
-      description: `अपने ${sector || 'व्यवसाय'} में कच्चे माल और दैनिक खर्चों को 10-15% तक कम करने के लिए समूह खरीद और सीधे थोक व्यापारियों से संपर्क करें।`,
+      description: `अपने ${sector || 'व्यवसाय'} में कच्चे माल और दैनिक खर्चों को 10-15% तक कम करने के लिए समूह खरीद और सीधे थोक व्यापारियों से संपर्क करें।${challengeNote}`,
       action_items: [
         'स्थानीय व्यापारियों या स्वयं सहायता समूह (SHG) के साथ मिलकर थोक में कच्चा माल खरीदें।',
         'दुकान/काम में होने वाले दैनिक अपव्यय (waste) का हर शाम हिसाब रखें।',
@@ -135,12 +136,6 @@ export async function POST(request: NextRequest) {
     const { user_id, challenge_text } = parsed.data;
 
     // 1. Fetch user & business profile from Supabase
-    const { data: user } = await supabaseServer
-      .from('users')
-      .select('id, name, language, phone')
-      .eq('id', user_id)
-      .single();
-
     const { data: profile } = await supabaseServer
       .from('business_profiles')
       .select('*')

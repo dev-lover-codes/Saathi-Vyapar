@@ -16,6 +16,7 @@ import { matchSchemes, SchemeRecord, BusinessProfile } from '@/lib/engines/schem
 
 const OnboardingCompleteSchema = z.object({
   user_id: z.string().uuid().optional(),
+  email: z.string().optional(),
   phone: z.string().optional(),
   name: z.string().min(1, 'Name is required'),
   district: z.string().optional(),
@@ -110,7 +111,7 @@ export async function POST(request: NextRequest) {
     }
 
     // ── 2. Upsert Business Profile ─────────────────────────────────────────
-    const { data: profile, error: profileError } = await supabaseServer
+    const { error: profileError } = await supabaseServer
       .from('business_profiles')
       .upsert(
         {

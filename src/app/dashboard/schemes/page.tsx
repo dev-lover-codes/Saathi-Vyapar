@@ -402,13 +402,13 @@ function YojanaKendraContent() {
 
           const schemeList: SchemeRecord[] =
             dbSchemes && dbSchemes.length > 0
-              ? dbSchemes.map((s: any) => ({
-                  id: s.id,
-                  name: s.name,
-                  description: s.description,
-                  benefit_summary: s.benefit_summary,
-                  eligibility_rules: s.eligibility_rules || {},
-                  application_link: s.application_link,
+              ? dbSchemes.map((s: Record<string, unknown>) => ({
+                  id: String(s.id),
+                  name: String(s.name),
+                  description: String(s.description || ''),
+                  benefit_summary: s.benefit_summary ? String(s.benefit_summary) : undefined,
+                  eligibility_rules: (s.eligibility_rules as SchemeRecord['eligibility_rules']) || {},
+                  application_link: s.application_link ? String(s.application_link) : undefined,
                 }))
               : SEED_SCHEMES_FALLBACK;
 
@@ -438,13 +438,13 @@ function YojanaKendraContent() {
         const { data: dbSchemes } = await supabaseClient.from('schemes').select('*');
         const schemeList: SchemeRecord[] =
           dbSchemes && dbSchemes.length > 0
-            ? dbSchemes.map((s: any) => ({
-                id: s.id,
-                name: s.name,
-                description: s.description,
-                benefit_summary: s.benefit_summary,
-                eligibility_rules: s.eligibility_rules || {},
-                application_link: s.application_link,
+            ? dbSchemes.map((s: Record<string, unknown>) => ({
+                id: String(s.id),
+                name: String(s.name),
+                description: String(s.description || ''),
+                benefit_summary: s.benefit_summary ? String(s.benefit_summary) : undefined,
+                eligibility_rules: (s.eligibility_rules as SchemeRecord['eligibility_rules']) || {},
+                application_link: s.application_link ? String(s.application_link) : undefined,
               }))
             : SEED_SCHEMES_FALLBACK;
 

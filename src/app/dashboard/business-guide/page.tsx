@@ -13,8 +13,9 @@
  * - Consistent navy/gold/cream high-contrast design
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { supabaseClient } from '@/lib/supabase/client';
 import { RoadmapStageItem } from '@/app/api/business-guide/generate/route';
 
@@ -52,12 +53,57 @@ const STAGE_ICONS: Record<string, string> = {
   'Scale': '🚀',
 };
 
-export default function BusinessGuidePage() {
-  const [userId, setUserId] = useState<string | null>(null);
-  const [userName, setUserName] = useState<string>('उद्यमी');
-  const [userSector, setUserSector] = useState<string>('व्यापार');
+interface SpeechRecognitionEvent {
+  resultIndex: number;
+  results: {
+    length: number;
+    [index: number]: {
+      [index: number]: {
+        transcript: string;
+      };
+    };
+  };
+}
 
-  // Input state
+interface SpeechRecognitionErrorEvent {
+  error: string;
+}
+
+interface IWindowWithSpeech {
+  SpeechRecognition?: new () => {
+    continuous: boolean;
+    interimResults: boolean;
+    lang: string;
+    onstart: () => void;
+    onresult: (e: SpeechRecognitionEvent) => void;
+    onerror: (e: SpeechRecognitionErrorEvent) => void;
+    onend: () => void;
+    start: () => void;
+    stop: () => void;
+  };
+  webkitSpeechRecognition?: new () => {
+    continuous: boolean;
+    interimResults: boolean;
+    lang: string;
+    onstart: () => void;
+    onresult: (e: SpeechRecognitionEvent) => void;
+    onerror: (e: SpeechRecognitionErrorEvent) => void;
+    onend: () => void;
+    start: () => void;
+    stop: () => void;
+  };
+}
+
+function BusinessGuideContent() {
+  const searchParams = useSearchParams();
+  const paramUserId = searchParams.get('user_id');
+
+  // User identity state
+  const [userId, setUserId] = useState<string | null>(paramUserId);
+  const [userName, setUserName] = useState<string>('उद्यमी');
+  const [userSector, setUserSector] = useState<string>('');
+
+  // Form input state
   const [challengeText, setChallengeText] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -69,39 +115,37 @@ export default function BusinessGuidePage() {
 
   // Voice Input State
   const [isListening, setIsListening] = useState(false);
-  const [hasVoiceSupport, setHasVoiceSupport] = useState(false);
-  const recognitionRef = useRef<any>(null);
+  const [hasVoiceSupport] = useState(() =>
+    typeof window !== 'undefined' &&
+    ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)
+  );
+  const recognitionRef = useRef<{ stop: () => void; start?: () => void } | null>(null);
 
   // 1. Fetch User Profile & Past Guides on Mount
   useEffect(() => {
-    // Detect Web Speech API support
-    const voiceSupported =
-      typeof window !== 'undefined' &&
-      ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
-    setHasVoiceSupport(voiceSupported);
-
     async function loadData() {
       try {
-        let activeUserId: string | null = null;
+        let activeUserId: string | null = paramUserId || null;
 
-        // Check auth session
-        const {
-          data: { session },
-        } = await supabaseClient.auth.getSession();
+        if (!activeUserId) {
+          const {
+            data: { session },
+          } = await supabaseClient.auth.getSession();
 
-        if (session?.user) {
-          activeUserId = session.user.id;
-        } else {
-          // Fallback to latest active user for demonstration
-          const { data: latestUsers } = await supabaseClient
-            .from('users')
-            .select('id, name')
-            .order('created_at', { ascending: false })
-            .limit(1);
+          if (session?.user) {
+            activeUserId = session.user.id;
+          } else {
+            // Fallback to latest active user for demonstration
+            const { data: latestUsers } = await supabaseClient
+              .from('users')
+              .select('id, name')
+              .order('created_at', { ascending: false })
+              .limit(1);
 
-          if (latestUsers && latestUsers.length > 0) {
-            activeUserId = latestUsers[0].id;
-            setUserName(latestUsers[0].name || 'उद्यमी');
+            if (latestUsers && latestUsers.length > 0) {
+              activeUserId = latestUsers[0].id;
+              setUserName(latestUsers[0].name || 'उद्यमी');
+            }
           }
         }
 
@@ -129,11 +173,11 @@ export default function BusinessGuidePage() {
             .order('created_at', { ascending: false });
 
           if (guides && guides.length > 0) {
-            const formatted: PastGuideItem[] = guides.map((g: any) => ({
-              id: g.id,
-              input_text: g.input_text,
-              roadmap_json: g.roadmap_json,
-              created_at: g.created_at,
+            const formatted: PastGuideItem[] = guides.map((g: Record<string, unknown>) => ({
+              id: String(g.id),
+              input_text: String(g.input_text || ''),
+              roadmap_json: g.roadmap_json as RoadmapStageItem[],
+              created_at: String(g.created_at || ''),
             }));
             setPastGuides(formatted);
             setCurrentRoadmap(formatted[0].roadmap_json);
@@ -146,14 +190,14 @@ export default function BusinessGuidePage() {
     }
 
     loadData();
-  }, []);
+  }, [paramUserId]);
 
   // 2. Voice Input Handler
   function toggleVoiceListening() {
     if (typeof window === 'undefined') return;
 
-    const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const win = window as unknown as IWindowWithSpeech;
+    const SpeechRecognition = win.SpeechRecognition || win.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
       setErrorMessage('इस ब्राउज़र में वॉइस इनपुट समर्थित नहीं है।');
@@ -184,7 +228,7 @@ export default function BusinessGuidePage() {
         setErrorMessage(null);
       };
 
-      recognition.onresult = (event: any) => {
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
         let transcript = '';
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           transcript += event.results[i][0].transcript;
@@ -192,7 +236,7 @@ export default function BusinessGuidePage() {
         setChallengeText(transcript);
       };
 
-      recognition.onerror = (event: any) => {
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         setIsListening(false);
         if (event.error !== 'no-speech') {
           setErrorMessage('माइक इनपुट में समस्या आई। कृपया टाइप करें।');
@@ -254,9 +298,11 @@ export default function BusinessGuidePage() {
         created_at: data.createdAt || new Date().toISOString(),
       };
       setPastGuides((prev) => [newGuideEntry, ...prev]);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Generate roadmap error:', err);
-      setErrorMessage(err.message || 'रोडमैप बनाने में समस्या आई।');
+      setErrorMessage(
+        err instanceof Error ? err.message : 'रोडमैप बनाने में समस्या आई।'
+      );
     } finally {
       setIsGenerating(false);
     }
@@ -496,5 +542,22 @@ export default function BusinessGuidePage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function BusinessGuidePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#070D1D] flex items-center justify-center text-white">
+          <div className="text-center space-y-2">
+            <span className="text-3xl animate-spin block">🧭</span>
+            <p className="text-sm font-bold text-amber-300">व्यापार मार्गदर्शिका लोड हो रही है...</p>
+          </div>
+        </div>
+      }
+    >
+      <BusinessGuideContent />
+    </Suspense>
   );
 }

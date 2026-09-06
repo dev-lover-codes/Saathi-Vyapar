@@ -28,6 +28,7 @@ export type OnboardingStep =
 
 export interface OnboardingData {
   user_id?: string;
+  email?: string;
   phone?: string;
   name: string;
   district: string;
@@ -38,6 +39,44 @@ export interface OnboardingData {
   monthly_expense_est: number;
   existing_loans: boolean;
   consent_given: boolean;
+}
+
+interface SpeechRecognitionResultItem {
+  transcript: string;
+}
+
+interface SpeechRecognitionResultList {
+  readonly length: number;
+  [index: number]: { [index: number]: SpeechRecognitionResultItem };
+}
+
+interface ISpeechRecognitionEvent {
+  resultIndex: number;
+  results: SpeechRecognitionResultList;
+}
+
+interface ISpeechRecognitionErrorEvent {
+  error: string;
+}
+
+interface ISpeechRecognitionInstance {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onstart: (() => void) | null;
+  onresult: ((event: ISpeechRecognitionEvent) => void) | null;
+  onerror: ((event: ISpeechRecognitionErrorEvent) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+}
+
+type SpeechRecognitionConstructor = new () => ISpeechRecognitionInstance;
+
+interface WindowWithSpeech extends Window {
+  SpeechRecognition?: SpeechRecognitionConstructor;
+  webkitSpeechRecognition?: SpeechRecognitionConstructor;
 }
 
 interface VoiceOnboardingModalProps {
@@ -139,8 +178,14 @@ export default function VoiceOnboardingModal({
   const [manualInput, setManualInput] = useState('');
 
   // Speech API references
-  const recognitionRef = useRef<any>(null);
-  const synthRef = useRef<SpeechSynthesis | null>(null);
+  const recognitionRef = useRef<ISpeechRecognitionInstance | null>(null);
+
+  const changeStep = useCallback((newStep: OnboardingStep) => {
+    setStep(newStep);
+    setManualInput('');
+    setLiveTranscript('');
+    setErrorMessage(null);
+  }, []);
 
   // 1. Initial Session Check on Mount / Open
   useEffect(() => {
@@ -157,10 +202,10 @@ export default function VoiceOnboardingModal({
             user_id: session.user.id,
             phone: session.user.phone || prev.phone,
           }));
-          setStep('name');
+          changeStep('name');
         } else {
           // If no active session, start with auth step or name
-          setStep('auth');
+          changeStep('auth');
         }
       } catch (err) {
         console.warn('Session check error:', err);
@@ -168,7 +213,7 @@ export default function VoiceOnboardingModal({
     }
 
     checkAuth();
-  }, [isOpen]);
+  }, [isOpen, changeStep]);
 
   // Stop speaking on unmount
   useEffect(() => {
@@ -237,8 +282,8 @@ export default function VoiceOnboardingModal({
   const startListening = useCallback(() => {
     if (typeof window === 'undefined') return;
 
-    const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const win = window as unknown as WindowWithSpeech;
+    const SpeechRecognition = win.SpeechRecognition || win.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
       setErrorMessage('Web Speech API is not supported in this browser. Please use text mode.');
@@ -272,7 +317,7 @@ export default function VoiceOnboardingModal({
         setLiveTranscript('');
       };
 
-      recognition.onresult = (event: any) => {
+      recognition.onresult = (event: ISpeechRecognitionEvent) => {
         let transcript = '';
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           transcript += event.results[i][0].transcript;
@@ -281,7 +326,7 @@ export default function VoiceOnboardingModal({
         setManualInput(transcript);
       };
 
-      recognition.onerror = (event: any) => {
+      recognition.onerror = (event: ISpeechRecognitionErrorEvent) => {
         console.warn('Speech recognition error:', event.error);
         setIsListening(false);
         if (event.error === 'no-speech') {
@@ -327,10 +372,6 @@ export default function VoiceOnboardingModal({
       speechText = `कृपया पुष्टि करें: नाम ${formData.name}, जिला ${formData.district}, व्यवसाय ${formData.sector}, मासिक कमाई ₹${formData.monthly_revenue_est.toLocaleString('en-IN')}, खर्च ₹${formData.monthly_expense_est.toLocaleString('en-IN')}, और ${loanText}। क्या यह सही है?`;
     }
 
-    setManualInput('');
-    setLiveTranscript('');
-    setErrorMessage(null);
-
     // Speak prompt, then automatically listen
     speakText(speechText, () => {
       // Auto-listen after prompt completes
@@ -338,7 +379,18 @@ export default function VoiceOnboardingModal({
         startListening();
       }
     });
-  }, [step, isOpen, speakText, startListening]);
+  }, [
+    step,
+    isOpen,
+    speakText,
+    startListening,
+    formData.existing_loans,
+    formData.name,
+    formData.district,
+    formData.sector,
+    formData.monthly_revenue_est,
+    formData.monthly_expense_est,
+  ]);
 
   // 5. Send Transcript to /api/onboarding/parse
   async function processUserAnswer(rawInput: string) {
@@ -370,7 +422,7 @@ export default function VoiceOnboardingModal({
         const phoneClean = rawInput.replace(/\D/g, '');
         if (phoneClean.length >= 10) {
           setFormData((prev) => ({ ...prev, phone: phoneClean.slice(-10) }));
-          setStep('name');
+          changeStep('name');
         } else {
           setErrorMessage('कृपया वैध 10 अंकों का मोबाइल नंबर दर्ज करें।');
         }
@@ -378,7 +430,7 @@ export default function VoiceOnboardingModal({
         const nameVal = parsed.name || rawInput.trim();
         if (nameVal) {
           setFormData((prev) => ({ ...prev, name: nameVal }));
-          setStep('district');
+          changeStep('district');
         } else {
           setErrorMessage('नाम समझ नहीं आया। कृपया दोबारा बोलें।');
         }
@@ -386,7 +438,7 @@ export default function VoiceOnboardingModal({
         const distVal = parsed.district || parsed.village || rawInput.trim();
         if (distVal) {
           setFormData((prev) => ({ ...prev, district: distVal }));
-          setStep('sector');
+          changeStep('sector');
         } else {
           setErrorMessage('स्थान समझ नहीं आया। कृपया दोबारा बोलें।');
         }
@@ -398,7 +450,7 @@ export default function VoiceOnboardingModal({
             sector: sectorVal,
             business_name: parsed.business_name || sectorVal,
           }));
-          setStep('finances');
+          changeStep('finances');
         } else {
           setErrorMessage('व्यवसाय समझ नहीं आया। कृपया दोबारा बताएं।');
         }
@@ -411,22 +463,22 @@ export default function VoiceOnboardingModal({
             monthly_revenue_est: rev,
             monthly_expense_est: !isNaN(exp) ? exp : 0,
           }));
-          setStep('loans');
+          changeStep('loans');
         } else {
           setErrorMessage('कृपया कमाई की संख्या स्पष्ट बताएं (जैसे: 25000)।');
         }
       } else if (step === 'loans') {
         const hasLoan = parsed.existing_loans !== undefined ? Boolean(parsed.existing_loans) : /yes|haan|हाँ/i.test(rawInput);
         setFormData((prev) => ({ ...prev, existing_loans: hasLoan }));
-        setStep('confirmation');
+        changeStep('confirmation');
       } else if (step === 'confirmation') {
         const confirmed = parsed.confirmed !== undefined ? Boolean(parsed.confirmed) : /yes|haan|हाँ|theek|sahi/i.test(rawInput);
         if (confirmed) {
-          setStep('consent');
+          changeStep('consent');
         } else {
           // Restart to allow corrections
           setErrorMessage('विवरण बदलने के लिए नाम से दोबारा शुरू करते हैं।');
-          setStep('name');
+          changeStep('name');
         }
       } else if (step === 'consent') {
         const consent = parsed.consent_given !== undefined ? Boolean(parsed.consent_given) : /yes|haan|हाँ|agree/i.test(rawInput);
@@ -452,7 +504,7 @@ export default function VoiceOnboardingModal({
       return;
     }
 
-    setStep('complete');
+    changeStep('complete');
     setIsProcessing(true);
 
     try {
@@ -477,10 +529,11 @@ export default function VoiceOnboardingModal({
         router.push(resData.redirectUrl || `/dashboard?user_id=${resData.userId}`);
         router.refresh();
       }, 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Final save error:', err);
-      setErrorMessage(err.message || 'प्रोफाइल सेव करने में त्रुटि हुई।');
-      setStep('consent');
+      const errMsg = err instanceof Error ? err.message : 'प्रोफाइल सेव करने में त्रुटि हुई।';
+      setErrorMessage(errMsg);
+      changeStep('consent');
     } finally {
       setIsProcessing(false);
     }
@@ -750,7 +803,7 @@ export default function VoiceOnboardingModal({
                 ];
                 const currentIndex = stepOrder.indexOf(step);
                 if (currentIndex > 0) {
-                  setStep(stepOrder[currentIndex - 1]);
+                  changeStep(stepOrder[currentIndex - 1]);
                 }
               }}
               className="text-zinc-400 hover:text-white underline font-medium"
