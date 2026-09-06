@@ -32,6 +32,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import VoiceOnboardingModal from '@/components/VoiceOnboardingModal';
+import LanguageToggleButton from '@/components/LanguageToggleButton';
 
 export default function ShowcaseHomePage() {
   const [activePersona, setActivePersona] = useState<'vendor' | 'tailor' | 'artisan' | 'dairy'>('vendor');
@@ -114,8 +115,9 @@ export default function ShowcaseHomePage() {
             </a>
           </nav>
 
-          {/* Right: Gold-outlined "Try the Demo" Button */}
+          {/* Right: Language Toggle + Gold-outlined "Try the Demo" Button */}
           <div className="flex items-center gap-2.5">
+            <LanguageToggleButton className="border-[#C9A24B]/40 text-[#F5F1E6]/80 hover:text-[#F5F1E6]" />
             <Link
               href="/login"
               className="hidden sm:inline-block text-xs text-[#F5F1E6]/80 hover:text-[#F5F1E6] font-medium px-3 py-1.5 transition-colors"

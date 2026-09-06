@@ -470,27 +470,27 @@ function YojanaKendraContent() {
   const ineligibleResults = matchResults.filter((r) => !r.eligible);
 
   return (
-    <div className="min-h-screen bg-[#FAF9F5] text-[#1B1B1B] font-['Poppins',sans-serif] p-3 sm:p-6 pb-24 selection:bg-[#151515] selection:text-white relative overflow-hidden">
+    <div className="min-h-screen bg-[#F5F1E6] text-[#0B1E33] font-['Inter',sans-serif] p-3 sm:p-6 pb-24  relative overflow-hidden">
       {/* Background radial glow */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[radial-gradient(ellipse_at_center,rgba(255,65,108,0.06),transparent_70%)] blur-3xl"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-[radial-gradient(circle_at_center,rgba(255,75,43,0.04),transparent_70%)] blur-3xl"></div>
+        <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[radial-gradient(ellipse_at_center,rgba(201,162,75,0.07),transparent_70%)] blur-3xl"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-[radial-gradient(circle_at_center,rgba(11,30,51,0.04),transparent_70%)] blur-3xl"></div>
       </div>
 
       <div className="relative z-10 max-w-5xl mx-auto space-y-6">
         {/* ── Header ────────────────────────────────────────────────── */}
-        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E5E2E1] pb-4">
+        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#C9A24B]/20 pb-4">
           <div>
             <div className="flex items-center gap-2.5">
               <span className="text-3xl filter drop-shadow-sm">🏛️</span>
               <div>
-                <h1 className="text-xl sm:text-2xl font-black text-[#151515] flex items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-black text-[#0B1E33] flex items-center gap-2">
                   योजना केंद्र (Yojana Kendra)
-                  <span className="text-xs font-bold bg-[#F0EFEB] text-[#151515] border border-[#E5E2E1] px-2.5 py-0.5 rounded-full">
+                  <span className="text-xs font-bold bg-[#F5F1E6] text-[#0B1E33] border border-[#C9A24B]/20 px-2.5 py-0.5 rounded-full">
                     {eligibleResults.length} योजनाएं योग्य
                   </span>
                 </h1>
-                <p className="text-xs sm:text-sm text-[#8C8880] mt-0.5">
+                <p className="text-xs sm:text-sm text-[#0B1E33]/50 mt-0.5">
                   {user?.name || 'उद्यमी'} • आपके पंजीकृत व्यापार प्रोफाइल के आधार पर सरकारी योजनाओं का संपूर्ण मिलान
                 </p>
               </div>
@@ -500,7 +500,7 @@ function YojanaKendraContent() {
           <div className="flex items-center gap-2.5">
             <Link
               href={`/dashboard${userId ? `?user_id=${userId}` : ''}`}
-              className="px-4 py-2 bg-white hover:bg-[#F0EFEB] text-[#151515] text-xs font-semibold rounded-full border border-[#E5E2E1] shadow-xs transition-all"
+              className="px-4 py-2 bg-white hover:bg-[#F5F1E6] text-[#0B1E33] text-xs font-semibold rounded-full border border-[#C9A24B]/20 shadow-xs transition-all"
             >
               ← मुख्य डैशबोर्ड (Dashboard)
             </Link>
@@ -522,13 +522,13 @@ function YojanaKendraContent() {
           )}
 
           {/* ── 1. Current Business Profile Data Card (Anchoring Banner) ── */}
-          <section className="bg-white/95 border border-[#E5E2E1] rounded-[24px] p-5 sm:p-6 shadow-[0_10px_30px_rgba(27,27,27,0.05)] backdrop-blur-xl space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E5E2E1] pb-3">
+          <section className="bg-white/95 border border-[#C9A24B]/20 rounded-[32px] p-5 sm:p-6 shadow-[0_16px_40px_rgba(11,30,51,0.07)] backdrop-blur-xl space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#C9A24B]/20 pb-3">
               <div>
-                <h2 className="text-sm sm:text-base font-bold text-[#151515] flex items-center gap-2">
+                <h2 className="text-sm sm:text-base font-bold text-[#0B1E33] flex items-center gap-2">
                   📋 आपका पंजीकृत व्यापार प्रोफाइल (Active Matching Profile)
                 </h2>
-                <p className="text-xs text-[#8C8880] mt-0.5">
+                <p className="text-xs text-[#0B1E33]/50 mt-0.5">
                   सभी योजनाओं की पात्रता नीचे दिए गए आपके वास्तविक आंकड़ों पर आधारित है।
                 </p>
               </div>
@@ -536,7 +536,7 @@ function YojanaKendraContent() {
               <div className="flex items-center gap-2">
                 <Link
                   href="/onboarding"
-                  className="px-4 py-2 bg-[#F0EFEB] hover:bg-[#E9E8E4] text-[#151515] text-xs font-semibold rounded-full border border-[#E5E2E1] transition-all"
+                  className="px-4 py-2 bg-[#F5F1E6] hover:bg-[#EDE9DA] text-[#0B1E33] text-xs font-semibold rounded-full border border-[#C9A24B]/20 transition-all"
                 >
                   ✏️ विवरण बदलें (Update Details)
                 </Link>
@@ -545,7 +545,7 @@ function YojanaKendraContent() {
                   type="button"
                   onClick={handleRecheck}
                   disabled={isRechecking || isLoading}
-                  className="px-5 py-2 bg-gradient-to-r from-[#FF416C] to-[#FF4B2B] hover:opacity-95 text-white text-xs font-bold rounded-full shadow-xs active:scale-95 transition-all disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-2 bg-gradient-to-r bg-[#C9A24B] hover:opacity-95 text-white text-xs font-bold rounded-full shadow-xs active:scale-95 transition-all disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
                 >
                   <span>{isRechecking ? '⏳' : '🔄'}</span>
                   <span>{isRechecking ? 'जांच रहे हैं...' : 'पात्रता पुनः जांचें'}</span>
@@ -555,50 +555,50 @@ function YojanaKendraContent() {
 
             {/* Profile Snapshot Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-              <div className="bg-[#F4F3EF] p-3.5 rounded-2xl border border-[#E5E2E1]">
-                <span className="text-[#8C8880] block text-[11px]">व्यवसाय / Sector:</span>
-                <strong className="text-[#151515] text-sm capitalize">{profile?.sector || 'General'}</strong>
+              <div className="bg-[#F5F1E6] p-3.5 rounded-2xl border border-[#C9A24B]/20">
+                <span className="text-[#0B1E33]/50 block text-[11px]">व्यवसाय / Sector:</span>
+                <strong className="text-[#0B1E33] text-sm capitalize">{profile?.sector || 'General'}</strong>
               </div>
 
-              <div className="bg-[#F4F3EF] p-3.5 rounded-2xl border border-[#E5E2E1]">
-                <span className="text-[#8C8880] block text-[11px]">मासिक कमाई / Revenue:</span>
-                <strong className="text-[#151515] text-sm">
+              <div className="bg-[#F5F1E6] p-3.5 rounded-2xl border border-[#C9A24B]/20">
+                <span className="text-[#0B1E33]/50 block text-[11px]">मासिक कमाई / Revenue:</span>
+                <strong className="text-[#0B1E33] text-sm">
                   ₹{profile?.monthly_revenue_est ? Number(profile.monthly_revenue_est).toLocaleString('en-IN') : '—'}
                 </strong>
               </div>
 
-              <div className="bg-[#F4F3EF] p-3.5 rounded-2xl border border-[#E5E2E1]">
-                <span className="text-[#8C8880] block text-[11px]">मासिक खर्च / Expense:</span>
-                <strong className="text-[#FF416C] text-sm">
+              <div className="bg-[#F5F1E6] p-3.5 rounded-2xl border border-[#C9A24B]/20">
+                <span className="text-[#0B1E33]/50 block text-[11px]">मासिक खर्च / Expense:</span>
+                <strong className="text-[#C9A24B] text-sm">
                   ₹{profile?.monthly_expense_est ? Number(profile.monthly_expense_est).toLocaleString('en-IN') : '—'}
                 </strong>
               </div>
 
-              <div className="bg-[#F4F3EF] p-3.5 rounded-2xl border border-[#E5E2E1]">
-                <span className="text-[#8C8880] block text-[11px]">सक्रिय ऋण / Loans:</span>
-                <strong className={profile?.existing_loans ? 'text-[#FF416C]' : 'text-emerald-700'}>
+              <div className="bg-[#F5F1E6] p-3.5 rounded-2xl border border-[#C9A24B]/20">
+                <span className="text-[#0B1E33]/50 block text-[11px]">सक्रिय ऋण / Loans:</span>
+                <strong className={profile?.existing_loans ? 'text-[#C9A24B]' : 'text-emerald-700'}>
                   {profile?.existing_loans ? 'हाँ (Active Loan)' : 'कोई लोन नहीं'}
                 </strong>
               </div>
 
-              <div className="bg-[#F4F3EF] p-3.5 rounded-2xl border border-[#E5E2E1]">
-                <span className="text-[#8C8880] block text-[11px]">स्थान (जिला / राज्य):</span>
-                <strong className="text-[#151515]">{profile?.state || 'India'}</strong>
+              <div className="bg-[#F5F1E6] p-3.5 rounded-2xl border border-[#C9A24B]/20">
+                <span className="text-[#0B1E33]/50 block text-[11px]">स्थान (जिला / राज्य):</span>
+                <strong className="text-[#0B1E33]">{profile?.state || 'India'}</strong>
               </div>
 
-              <div className="bg-[#F4F3EF] p-3.5 rounded-2xl border border-[#E5E2E1]">
-                <span className="text-[#8C8880] block text-[11px]">वर्ग / Category:</span>
-                <strong className="text-[#151515] uppercase">{profile?.category || 'General'}</strong>
+              <div className="bg-[#F5F1E6] p-3.5 rounded-2xl border border-[#C9A24B]/20">
+                <span className="text-[#0B1E33]/50 block text-[11px]">वर्ग / Category:</span>
+                <strong className="text-[#0B1E33] uppercase">{profile?.category || 'General'}</strong>
               </div>
 
-              <div className="bg-[#F4F3EF] p-3.5 rounded-2xl border border-[#E5E2E1]">
-                <span className="text-[#8C8880] block text-[11px]">लिंग / Gender:</span>
-                <strong className="text-[#151515] capitalize">{profile?.gender || 'Any'}</strong>
+              <div className="bg-[#F5F1E6] p-3.5 rounded-2xl border border-[#C9A24B]/20">
+                <span className="text-[#0B1E33]/50 block text-[11px]">लिंग / Gender:</span>
+                <strong className="text-[#0B1E33] capitalize">{profile?.gender || 'Any'}</strong>
               </div>
 
-              <div className="bg-[#F4F3EF] p-3.5 rounded-2xl border border-[#E5E2E1]">
-                <span className="text-[#8C8880] block text-[11px]">वार्षिक टर्नओवर (Est):</span>
-                <strong className="text-[#151515]">
+              <div className="bg-[#F5F1E6] p-3.5 rounded-2xl border border-[#C9A24B]/20">
+                <span className="text-[#0B1E33]/50 block text-[11px]">वार्षिक टर्नओवर (Est):</span>
+                <strong className="text-[#0B1E33]">
                   ₹{profile?.monthly_revenue_est ? (Number(profile.monthly_revenue_est) * 12).toLocaleString('en-IN') : '—'}
                 </strong>
               </div>
@@ -608,24 +608,24 @@ function YojanaKendraContent() {
           {/* ── 2. Ranked Eligible Schemes Section ────────────────────── */}
           <section className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-black text-[#151515] flex items-center gap-2">
+              <h3 className="text-lg font-black text-[#0B1E33] flex items-center gap-2">
                 ⭐ योग्य सरकारी योजनाएं / Matched Eligible Schemes
               </h3>
-              <span className="text-xs text-[#8C8880]">
+              <span className="text-xs text-[#0B1E33]/50">
                 {eligibleResults.length} योजनाएं आपके लिए उपयुक्त हैं
               </span>
             </div>
 
             {isLoading ? (
-              <div className="text-center py-12 text-[#151515] bg-white rounded-2xl border border-[#E5E2E1]">
+              <div className="text-center py-12 text-[#0B1E33] bg-white rounded-2xl border border-[#C9A24B]/20">
                 <span className="text-2xl block mb-2 animate-spin">⏳</span>
                 <p className="text-sm font-semibold">सरकारी योजनाओं का मिलान हो रहा है...</p>
               </div>
             ) : eligibleResults.length === 0 ? (
-              <div className="p-8 text-center bg-white rounded-2xl border border-[#E5E2E1] space-y-2">
+              <div className="p-8 text-center bg-white rounded-2xl border border-[#C9A24B]/20 space-y-2">
                 <span className="text-3xl">ℹ️</span>
-                <h4 className="text-base font-bold text-[#151515]">वर्तमान प्रोफाइल के अनुसार कोई सीधी योजना नहीं मिली।</h4>
-                <p className="text-xs text-[#8C8880] max-w-md mx-auto">
+                <h4 className="text-base font-bold text-[#0B1E33]">वर्तमान प्रोफाइल के अनुसार कोई सीधी योजना नहीं मिली।</h4>
+                <p className="text-xs text-[#0B1E33]/50 max-w-md mx-auto">
                   कृपया &quot;विवरण बदलें&quot; पर क्लिक करके अपनी श्रेणी, वार्षिक कमाई या क्षेत्र की जानकारी अपडेट करें।
                 </p>
               </div>
@@ -638,24 +638,24 @@ function YojanaKendraContent() {
                   return (
                     <div
                       key={item.scheme.id || idx}
-                      className="bg-white/95 border border-[#E5E2E1] hover:border-[#151515] rounded-[24px] p-5 sm:p-7 shadow-[0_10px_30px_rgba(27,27,27,0.05)] transition-all space-y-4 relative overflow-hidden"
+                      className="bg-white/95 border border-[#C9A24B]/20 hover:border-[#151515] rounded-[32px] p-5 sm:p-7 shadow-[0_16px_40px_rgba(11,30,51,0.07)] transition-all space-y-4 relative overflow-hidden"
                     >
                       {/* Rank Badge */}
-                      <div className="absolute top-0 right-0 bg-gradient-to-l from-[#FF416C] to-[#FF4B2B] text-white font-bold text-xs px-4 py-1.5 rounded-bl-2xl shadow-xs flex items-center gap-1">
+                      <div className="absolute top-0 right-0 bg-gradient-to-l bg-[#C9A24B] text-white font-bold text-xs px-4 py-1.5 rounded-bl-2xl shadow-xs flex items-center gap-1">
                         <span>#Rank {rank}</span>
                         <span>• योग्य (Eligible)</span>
                       </div>
 
                       {/* Scheme Header */}
                       <div className="space-y-1 pt-1">
-                        <span className="text-xs font-semibold text-[#8C8880]">
+                        <span className="text-xs font-semibold text-[#0B1E33]/50">
                           {details.sponsoringBody}
                         </span>
-                        <h4 className="text-lg sm:text-xl font-extrabold text-[#151515] leading-tight">
+                        <h4 className="text-lg sm:text-xl font-bold text-[#0B1E33] leading-tight">
                           {item.scheme.name}
                         </h4>
                         {item.scheme.description && (
-                          <p className="text-xs text-[#615E57] leading-relaxed">
+                          <p className="text-xs text-[#0B1E33]/60 leading-relaxed">
                             {item.scheme.description}
                           </p>
                         )}
@@ -677,13 +677,13 @@ function YojanaKendraContent() {
                       )}
 
                       {/* Matched Reasons List */}
-                      <div className="space-y-2 bg-[#F4F3EF] p-4 rounded-2xl border border-[#E5E2E1]">
-                        <span className="text-xs font-bold uppercase tracking-wider text-[#151515] block">
+                      <div className="space-y-2 bg-[#F5F1E6] p-4 rounded-2xl border border-[#C9A24B]/20">
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#0B1E33] block">
                           सटीक पात्रता के कारण (Why You Qualify):
                         </span>
                         <div className="space-y-1">
                           {item.reasons.map((reason, rIdx) => (
-                            <div key={rIdx} className="flex items-start gap-2 text-xs text-[#151515]">
+                            <div key={rIdx} className="flex items-start gap-2 text-xs text-[#0B1E33]">
                               <span className="text-emerald-700 font-bold shrink-0">✓</span>
                               <span>{reason.replace(/^✓\s*/, '')}</span>
                             </div>
@@ -692,10 +692,10 @@ function YojanaKendraContent() {
                       </div>
 
                       {/* Required Documents Checklist */}
-                      <div className="space-y-2 bg-[#F4F3EF] p-4 rounded-2xl border border-[#E5E2E1]">
-                        <span className="text-xs font-bold uppercase tracking-wider text-[#151515] flex items-center justify-between">
+                      <div className="space-y-2 bg-[#F5F1E6] p-4 rounded-2xl border border-[#C9A24B]/20">
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#0B1E33] flex items-center justify-between">
                           <span>आवश्यक दस्तावेज चेकलिस्ट (Required Documents):</span>
-                          <span className="text-[10px] text-[#8C8880] font-normal">
+                          <span className="text-[10px] text-[#0B1E33]/50 font-normal">
                             तैयार दस्तावेजों पर टिक करें
                           </span>
                         </span>
@@ -711,14 +711,14 @@ function YojanaKendraContent() {
                                 className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-xs cursor-pointer transition-colors ${
                                   isChecked
                                     ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
-                                    : 'bg-white border-[#E5E2E1] text-[#151515] hover:border-[#151515]'
+                                    : 'bg-white border-[#C9A24B]/20 text-[#0B1E33] hover:border-[#151515]'
                                 }`}
                               >
                                 <input
                                   type="checkbox"
                                   checked={isChecked}
                                   onChange={() => toggleDocCheck(docKey)}
-                                  className="w-4 h-4 rounded text-[#151515] focus:ring-[#151515]/20 border-[#E5E2E1] bg-white"
+                                  className="w-4 h-4 rounded text-[#0B1E33] focus:ring-[#151515]/20 border-[#C9A24B]/20 bg-white"
                                 />
                                 <span className={isChecked ? 'line-through text-emerald-800 font-medium' : ''}>
                                   {docName}
@@ -736,7 +736,7 @@ function YojanaKendraContent() {
                             href={item.scheme.application_link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#151515] hover:bg-[#2A2A2A] text-white font-bold text-xs sm:text-sm shadow-xs active:scale-95 transition-all"
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#0B1E33] hover:bg-[#162D59] text-white font-bold text-xs sm:text-sm shadow-xs active:scale-95 transition-all"
                           >
                             <span>आधिकारिक पोर्टल पर आवेदन करें (Apply on Official Portal)</span>
                             <span>→</span>
@@ -751,65 +751,65 @@ function YojanaKendraContent() {
           </section>
 
           {/* ── 3. Explainability Section: Ineligible Schemes (Collapsible) ── */}
-          <section className="bg-white/95 border border-[#E5E2E1] rounded-[24px] p-5 sm:p-6 shadow-[0_10px_30px_rgba(27,27,27,0.05)] space-y-4">
+          <section className="bg-white/95 border border-[#C9A24B]/20 rounded-[32px] p-5 sm:p-6 shadow-[0_16px_40px_rgba(11,30,51,0.07)] space-y-4">
             <button
               type="button"
               onClick={() => setShowIneligible((prev) => !prev)}
               className="w-full flex items-center justify-between text-left group cursor-pointer"
             >
               <div>
-                <h3 className="text-base sm:text-lg font-bold text-[#151515] flex items-center gap-2">
+                <h3 className="text-base sm:text-lg font-bold text-[#0B1E33] flex items-center gap-2">
                   <span>ℹ️ अन्य सरकारी योजनाएं (Ineligible Schemes — Explainability Log)</span>
-                  <span className="text-xs bg-[#F0EFEB] text-[#615E57] px-2.5 py-0.5 rounded-full border border-[#E5E2E1] font-normal">
+                  <span className="text-xs bg-[#F5F1E6] text-[#0B1E33]/60 px-2.5 py-0.5 rounded-full border border-[#C9A24B]/20 font-normal">
                     {ineligibleResults.length} योजनाएं
                   </span>
                 </h3>
-                <p className="text-xs text-[#8C8880] mt-0.5">
+                <p className="text-xs text-[#0B1E33]/50 mt-0.5">
                   पारदर्शिता हेतु: वे योजनाएं जिनमें आपका प्रोफाइल वर्तमान में क्यों मेल नहीं खाया।
                 </p>
               </div>
 
-              <span className="text-[#8C8880] group-hover:text-[#151515] text-xl font-bold p-2 transition-transform duration-200">
+              <span className="text-[#0B1E33]/50 group-hover:text-[#0B1E33] text-xl font-bold p-2 transition-transform duration-200">
                 {showIneligible ? '▲' : '▼'}
               </span>
             </button>
 
             {showIneligible && (
-              <div className="space-y-4 pt-3 border-t border-[#E5E2E1] animate-in fade-in duration-200">
+              <div className="space-y-4 pt-3 border-t border-[#C9A24B]/20 animate-in fade-in duration-200">
                 {ineligibleResults.map((item, idx) => {
                   const details = getSchemeDetails(item.scheme.name);
 
                   return (
                     <div
                       key={item.scheme.id || idx}
-                      className="bg-[#F4F3EF] border border-[#E5E2E1] rounded-2xl p-4 sm:p-5 space-y-2 opacity-90 hover:opacity-100 transition-opacity"
+                      className="bg-[#F5F1E6] border border-[#C9A24B]/20 rounded-2xl p-4 sm:p-5 space-y-2 opacity-90 hover:opacity-100 transition-opacity"
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                         <div>
-                          <span className="text-[11px] text-[#8C8880]">{details.sponsoringBody}</span>
-                          <h4 className="text-base font-bold text-[#151515]">{item.scheme.name}</h4>
+                          <span className="text-[11px] text-[#0B1E33]/50">{details.sponsoringBody}</span>
+                          <h4 className="text-base font-bold text-[#0B1E33]">{item.scheme.name}</h4>
                         </div>
-                        <span className="text-xs bg-[#FFDAD6] border border-[#FF897D] text-[#93000A] font-bold px-2.5 py-1 rounded-full w-fit">
+                        <span className="text-xs bg-rose-50 border border-rose-200 text-rose-800 font-bold px-2.5 py-1 rounded-full w-fit">
                           वर्तमान में अपात्र (Not Eligible)
                         </span>
                       </div>
 
                       {item.scheme.benefit_summary && (
-                        <p className="text-xs text-[#615E57]">
+                        <p className="text-xs text-[#0B1E33]/60">
                           लाभ: {item.scheme.benefit_summary}
                         </p>
                       )}
 
                       {/* Explicit Ineligibility Reasons */}
-                      <div className="bg-white p-3.5 rounded-xl border border-[#E5E2E1] space-y-1 mt-2">
-                        <span className="text-[11px] font-bold text-[#93000A] uppercase tracking-wider block">
+                      <div className="bg-white p-3.5 rounded-xl border border-[#C9A24B]/20 space-y-1 mt-2">
+                        <span className="text-[11px] font-bold text-rose-800 uppercase tracking-wider block">
                           अपात्रता का कारण (Reason Not Matched):
                         </span>
                         {item.reasons.map((r, rIdx) => (
                           <p
                             key={rIdx}
                             className={`text-xs ${
-                              r.startsWith('✗') ? 'text-[#93000A] font-medium' : 'text-[#615E57]'
+                              r.startsWith('✗') ? 'text-rose-800 font-medium' : 'text-[#0B1E33]/60'
                             }`}
                           >
                             {r}
@@ -832,10 +832,10 @@ export default function YojanaKendraPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#FAF9F5] flex items-center justify-center text-[#151515]">
+        <div className="min-h-screen bg-[#F5F1E6] flex items-center justify-center text-[#0B1E33]">
           <div className="text-center space-y-2">
             <span className="text-3xl animate-spin block">🏛️</span>
-            <p className="text-sm font-bold text-[#151515]">योजना केंद्र लोड हो रहा है...</p>
+            <p className="text-sm font-bold text-[#0B1E33]">योजना केंद्र लोड हो रहा है...</p>
           </div>
         </div>
       }

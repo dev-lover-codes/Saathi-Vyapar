@@ -67,22 +67,22 @@ export default function AddEntrepreneurModal({ facilitatorId }: Props) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#FF416C] to-[#FF4B2B] text-white font-bold text-xs shadow-md hover:opacity-95 transition-all flex items-center gap-2"
+        className="px-5 py-2.5 rounded-full bg-[#0B1E33] text-white font-bold text-xs shadow-md hover:opacity-95 transition-all flex items-center gap-2"
       >
         <span>➕</span>
         <span>नया उद्यमी जोड़ें / Add Entrepreneur</span>
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#151515]/40 backdrop-blur-sm p-4">
-          <div className="bg-white border border-[#E5E2E1] w-full max-w-md rounded-[28px] p-6 shadow-2xl space-y-5 text-[#151515]">
-            <div className="flex items-center justify-between pb-3 border-b border-[#E5E2E1]">
-              <h3 className="text-base font-bold text-[#151515] flex items-center gap-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B1E33]/40 backdrop-blur-sm p-4">
+          <div className="bg-white border border-[#C9A24B]/20 w-full max-w-md rounded-[32px] p-6 shadow-2xl space-y-5 text-[#0B1E33]">
+            <div className="flex items-center justify-between pb-3 border-b border-[#C9A24B]/20">
+              <h3 className="text-base font-bold text-[#0B1E33] flex items-center gap-2">
                 👤 नया उद्यमी जोड़ें
               </h3>
               <button
                 onClick={() => setIsOpen(false)}
-                className="w-8 h-8 rounded-full bg-[#F0EFEB] hover:bg-[#E5E2E1] text-[#8C8880] hover:text-[#151515] text-xs font-bold flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-full bg-[#F5F1E6] hover:bg-[#E5E2E1] text-[#0B1E33]/50 hover:text-[#0B1E33] text-xs font-bold flex items-center justify-center transition-colors"
               >
                 ✕
               </button>
@@ -90,7 +90,7 @@ export default function AddEntrepreneurModal({ facilitatorId }: Props) {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-[#615E57] mb-1.5">
+                <label className="block text-xs font-semibold text-[#0B1E33]/60 mb-1.5">
                   उद्यमी का नाम / Full Name
                 </label>
                 <input
@@ -98,16 +98,16 @@ export default function AddEntrepreneurModal({ facilitatorId }: Props) {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="उदा. रमेश कुमार (Ramesh Kumar)"
-                  className="w-full bg-[#F4F3EF] border border-[#E5E2E1] text-[#151515] placeholder-[#8C8880] rounded-2xl px-4 py-2.5 text-xs focus:outline-none focus:border-[#151515] focus:ring-1 focus:ring-[#151515]/20 transition-colors"
+                  className="w-full bg-[#F5F1E6] border border-[#C9A24B]/20 text-[#0B1E33] placeholder-[#8C8880] rounded-2xl px-4 py-2.5 text-xs focus:outline-none focus:border-[#C9A24B] focus:ring-1 focus:ring-[#C9A24B]/20 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#615E57] mb-1.5">
+                <label className="block text-xs font-semibold text-[#0B1E33]/60 mb-1.5">
                   मोबाइल नंबर / Phone Number *
                 </label>
                 <div className="flex">
-                  <span className="inline-flex items-center px-3.5 bg-[#E5E2E1]/60 text-[#615E57] text-xs font-semibold border border-r-0 border-[#E5E2E1] rounded-l-2xl">
+                  <span className="inline-flex items-center px-3.5 bg-[#E5E2E1]/60 text-[#0B1E33]/60 text-xs font-semibold border border-r-0 border-[#C9A24B]/20 rounded-l-2xl">
                     +91
                   </span>
                   <input
@@ -117,19 +117,19 @@ export default function AddEntrepreneurModal({ facilitatorId }: Props) {
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="9876543210"
                     maxLength={10}
-                    className="flex-1 bg-[#F4F3EF] border border-[#E5E2E1] text-[#151515] placeholder-[#8C8880] rounded-r-2xl px-4 py-2.5 text-xs focus:outline-none focus:border-[#151515] focus:ring-1 focus:ring-[#151515]/20 transition-colors"
+                    className="flex-1 bg-[#F5F1E6] border border-[#C9A24B]/20 text-[#0B1E33] placeholder-[#8C8880] rounded-r-2xl px-4 py-2.5 text-xs focus:outline-none focus:border-[#C9A24B] focus:ring-1 focus:ring-[#C9A24B]/20 transition-colors"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-[#615E57] mb-1.5">
+                <label className="block text-xs font-semibold text-[#0B1E33]/60 mb-1.5">
                   व्यवसाय का प्रकार / Business Sector
                 </label>
                 <select
                   value={sector}
                   onChange={(e) => setSector(e.target.value)}
-                  className="w-full bg-[#F4F3EF] border border-[#E5E2E1] text-[#151515] rounded-2xl px-4 py-2.5 text-xs focus:outline-none focus:border-[#151515] focus:ring-1 focus:ring-[#151515]/20 transition-colors"
+                  className="w-full bg-[#F5F1E6] border border-[#C9A24B]/20 text-[#0B1E33] rounded-2xl px-4 py-2.5 text-xs focus:outline-none focus:border-[#C9A24B] focus:ring-1 focus:ring-[#C9A24B]/20 transition-colors"
                 >
                   <option value="">क्षेत्र चुनें (Select Sector)</option>
                   <option value="agriculture">खेती / कृषि (Agriculture)</option>
@@ -143,7 +143,7 @@ export default function AddEntrepreneurModal({ facilitatorId }: Props) {
               </div>
 
               {error && (
-                <p className="text-xs text-[#93000A] bg-[#FFDAD6] p-3 rounded-2xl border border-[#FFDAD6]">
+                <p className="text-xs text-rose-800 bg-rose-50 p-3 rounded-2xl border border-[#FFDAD6]">
                   ❌ {error}
                 </p>
               )}
@@ -158,14 +158,14 @@ export default function AddEntrepreneurModal({ facilitatorId }: Props) {
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="px-5 py-2.5 bg-[#F0EFEB] hover:bg-[#E5E2E1] text-[#151515] text-xs font-semibold rounded-full transition-colors"
+                  className="px-5 py-2.5 bg-[#F5F1E6] hover:bg-[#E5E2E1] text-[#0B1E33] text-xs font-semibold rounded-full transition-colors"
                 >
                   रद्द करें (Cancel)
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-2.5 bg-gradient-to-r from-[#FF416C] to-[#FF4B2B] hover:opacity-95 disabled:opacity-50 text-white text-xs font-bold rounded-full transition-all shadow-md"
+                  className="px-6 py-2.5 bg-[#0B1E33] hover:opacity-95 disabled:opacity-50 text-white text-xs font-bold rounded-full transition-all shadow-md"
                 >
                   {loading ? 'जोड़ रहे हैं...' : 'सुरक्षित करें (Save)'}
                 </button>
