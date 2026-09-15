@@ -51,7 +51,6 @@ Rural micro-entrepreneurs have no access to chartered accountants, no awareness 
 | Receipt / bill OCR via WhatsApp photo | WhatsApp | HI |
 | Multi-turn WhatsApp onboarding bot | WhatsApp | HI |
 | Facilitator portal (field officer dashboard) | Web | EN |
-| Exhibition Folio showcase | Web | EN |
 
 ---
 
@@ -105,7 +104,6 @@ Rural micro-entrepreneurs have no access to chartered accountants, no awareness 
 | Database | Supabase (PostgreSQL 15, Row Level Security) |
 | Auth | Supabase Auth — Google OAuth + Email/Password |
 | AI — Generation | Google Gemini 2.0 Flash (`@google/genai`) |
-| AI — Fallback LLM | Groq SDK (secondary provider) |
 | OCR | Tesseract.js v7 (in-process, no external OCR API) |
 | Messaging | WhatsApp Cloud API (Meta) |
 | Validation | Zod v4 (all API request bodies) |
@@ -141,7 +139,6 @@ Rural micro-entrepreneurs have no access to chartered accountants, no awareness 
 │   │   ├── facilitator/              # Field officer portal (view all entrepreneurs)
 │   │   │   ├── page.tsx
 │   │   │   └── AddEntrepreneurModal.tsx
-│   │   ├── folio/                    # Exhibition showcase (SIH presentation folio)
 │   │   │   └── page.tsx
 │   │   ├── auth/
 │   │   │   ├── callback/route.ts     # Google OAuth PKCE callback
@@ -164,9 +161,6 @@ Rural micro-entrepreneurs have no access to chartered accountants, no awareness 
 │   │   ├── khata-mitr/
 │   │   │   ├── KhataMitraAssistant.tsx  # Full chat UI with ledger display
 │   │   │   └── KhataMitraChatInput.tsx  # Voice + text input bar
-│   │   └── panels/
-│   │       ├── StitchFolio.tsx       # Full-page folio layout
-│   │       └── PlatesGallery.tsx     # Panel thumbnail gallery
 │   ├── contexts/
 │   │   └── LanguageContext.tsx       # Global EN/HI context + useLanguage() hook
 │   ├── lib/
@@ -186,7 +180,6 @@ Rural micro-entrepreneurs have no access to chartered accountants, no awareness 
 │   │   │   └── speak.ts              # Browser TTS helper (speechSynthesis)
 │   │   ├── i18n.ts                   # EN + HI translation dictionary (all UI strings)
 │   │   ├── whatsapp.ts               # WhatsApp Cloud API client (send text, media, templates)
-│   │   └── stitchPanelsData.ts       # Static data for folio exhibition panels
 │   └── proxy.ts                      # Next.js 16 Proxy (auth cookie refresh middleware)
 ├── supabase/
 │   ├── schema.sql                    # Complete DB schema (run first in SQL Editor)
@@ -200,7 +193,6 @@ Rural micro-entrepreneurs have no access to chartered accountants, no awareness 
 │   ├── Logo.png                      # Brand logo
 │   ├── fonts/                        # Self-hosted: Bodoni Moda, EB Garamond,
 │   │   │                             # Space Grotesk, Material Symbols Outlined
-│   └── stitch-panels/images/         # Panel images for the folio showcase
 ├── scripts/
 │   └── create-whatsapp-template.mjs  # One-time script to register WhatsApp template
 ├── blueprint.md                      # Living project architecture & feature log
@@ -494,7 +486,6 @@ To prevent Supabase from pausing during inactivity:
 | `/dashboard/business-guide` | Client | 5-stage business transformation roadmap |
 | `/dashboard/khata-mitr` | Client | AI voice/text bookkeeping assistant |
 | `/facilitator` | Server | Field officer portal — all entrepreneurs overview |
-| `/folio` | Client | Exhibition showcase for SIH presentation |
 
 ---
 
