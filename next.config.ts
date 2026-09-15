@@ -10,11 +10,24 @@ const nextConfig: NextConfig = {
   // fine in a plain Node script, which is how it got missed.
   serverExternalPackages: ['tesseract.js'],
 
-  // Ship the committed eng/hin language packs inside every function that can
-  // run OCR, so Vercel never has to download them at runtime.
+  // Ship everything OCR needs inside each function that can run it:
+  //  - ./tessdata — the committed eng/hin language packs (no runtime download)
+  //  - tesseract.js-core — the WASM engine. The worker picks a variant at
+  //    runtime (SIMD / relaxed-SIMD / plain) via a conditional require, which
+  //    the file tracer cannot follow; without this the worker thread dies on
+  //    Vercel, recognize() never settles and the request 504s.
+  //  - tesseract.js/src — the worker script the main thread spawns by path.
   outputFileTracingIncludes: {
-    '/api/ledger/ocr': ['./tessdata/**/*'],
-    '/api/whatsapp/webhook': ['./tessdata/**/*'],
+    '/api/ledger/ocr': [
+      './tessdata/**/*',
+      './node_modules/tesseract.js-core/**/*',
+      './node_modules/tesseract.js/src/**/*',
+    ],
+    '/api/whatsapp/webhook': [
+      './tessdata/**/*',
+      './node_modules/tesseract.js-core/**/*',
+      './node_modules/tesseract.js/src/**/*',
+    ],
   },
 
   async redirects() {
