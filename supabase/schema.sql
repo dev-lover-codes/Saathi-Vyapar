@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS public.ledger_entries (
   entry_type  TEXT NOT NULL CHECK (entry_type IN ('income', 'expense')),
   description TEXT,
   category    TEXT DEFAULT 'general',
-  source      TEXT DEFAULT 'manual' CHECK (source IN ('manual','whatsapp','sms','ocr','voice')),
+  source      TEXT DEFAULT 'manual' CHECK (source IN ('manual','whatsapp','ocr','voice')),
   confirmed   BOOLEAN DEFAULT TRUE,
   created_at  TIMESTAMPTZ DEFAULT NOW()
 );

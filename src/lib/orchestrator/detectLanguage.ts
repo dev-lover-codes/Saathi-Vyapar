@@ -1,7 +1,7 @@
 /**
  * src/lib/orchestrator/detectLanguage.ts
  *
- * Pick the language to answer an inbound WhatsApp/SMS message in.
+ * Pick the language to answer an inbound WhatsApp message in.
  *
  * There is no language toggle on those channels, so the reply language was
  * whatever `users.language` happened to hold — 'hi' for everyone, because

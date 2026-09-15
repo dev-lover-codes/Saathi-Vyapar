@@ -16,6 +16,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireApiUser, resolveTargetUserId, forbidden } from '@/lib/auth/requireUser';
 import { runLedgerOcr, OcrFailedError } from '@/lib/ledger/ocrService';
 
+// A cold OCR run (worker boot + eng/hin packs) exceeds Vercel's default limit.
+export const maxDuration = 60;
+
 /** Upload limits — OCR is expensive, so bound the work a single call can cause. */
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024; // 8 MB
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];

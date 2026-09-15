@@ -1,7 +1,7 @@
 /**
  * src/lib/orchestrator/conversationOrchestrator.ts
  *
- * Conversation state machine for WhatsApp and SMS onboarding flow.
+ * Conversation state machine for the WhatsApp onboarding flow.
  * Handles multi-turn conversations to collect business profile data,
  * trigger plan generation, and process OCR requests.
  *
@@ -158,35 +158,28 @@ async function callPlanGenerate(userId: string): Promise<string | null> {
 // PLAN generation takes longer than a single webhook round-trip, so its
 // result is delivered as a separate follow-up message once ready.
 
-async function notify(channel: 'whatsapp' | 'sms', phone: string, text: string): Promise<void> {
-  if (channel === 'whatsapp') {
-    const result = await sendWhatsAppText(phone, text);
-    if (!result.ok) {
-      console.error('Failed to send WhatsApp follow-up:', result.error);
-    }
-  } else {
-    // No outbound Twilio credentials are configured yet — SMS follow-ups for
-    // PLAN/OCR results can't be delivered until that's wired up.
-    console.warn('SMS follow-up not sent (outbound SMS not configured):', text);
+async function notify(_channel: 'whatsapp', phone: string, text: string): Promise<void> {
+  const result = await sendWhatsAppText(phone, text);
+  if (!result.ok) {
+    console.error('Failed to send WhatsApp follow-up:', result.error);
   }
 }
 
 // ── Main handler ──────────────────────────────────────────────────────────────
 
 /**
- * Handle an incoming message from WhatsApp or SMS.
+ * Handle an incoming message from WhatsApp.
  * Manages conversation state machine, updates user profile, and returns reply text.
  *
- * @param channel - 'whatsapp' or 'sms'
+ * @param channel - 'whatsapp'
  * @param phone - E.164 phone number (e.g., +919876543210)
  * @param messageText - Text content of the message (null if media-only)
  * @param media - Already-downloaded image bytes (null if text-only). The
- *                caller downloads, because each channel authenticates its
- *                media differently (Meta bearer token vs Twilio basic auth).
+ *                caller downloads, since it holds the Meta bearer token.
  * @returns Reply text to send back to the user
  */
 export async function handleIncomingMessage(
-  channel: 'whatsapp' | 'sms',
+  channel: 'whatsapp',
   phone: string,
   messageText: string | null,
   media: InboundMedia | null
@@ -223,7 +216,7 @@ export async function handleIncomingMessage(
   }
 
   // Stored preference is the starting point; the message itself can override
-  // it below. On WhatsApp/SMS there is no toggle to press, so the default of
+  // it below. On WhatsApp there is no toggle to press, so the default of
   // 'hi' set at row creation would otherwise answer every English speaker in
   // Hindi forever.
   let lang = user.language || 'hi';

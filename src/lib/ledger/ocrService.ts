@@ -10,7 +10,14 @@
  * suggestion, and nothing enters the entrepreneur's books until they say so.
  */
 
+import path from 'path';
 import Tesseract from 'tesseract.js';
+
+// Language packs are committed under ./tessdata and traced into the serverless
+// bundle (next.config `outputFileTracingIncludes`). `readOnly` makes tesseract
+// read them from there and never attempt a cache write — Vercel's filesystem
+// is read-only outside /tmp, so a write would throw and fail the whole OCR.
+const TESSDATA_DIR = path.join(process.cwd(), 'tessdata');
 import { supabaseServer } from '@/lib/supabase/server';
 import { parseOcrText, summariseEntries, type ParsedEntry } from './ocrParser';
 
@@ -50,6 +57,8 @@ export async function runLedgerOcr(
 
   try {
     const result = await Tesseract.recognize(image, 'eng+hin', {
+      cachePath: TESSDATA_DIR,
+      cacheMethod: 'readOnly',
       logger: () => {}, // suppress progress logs
     });
     rawText = result.data.text || '';

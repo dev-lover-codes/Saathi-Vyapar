@@ -24,7 +24,7 @@
 
 Saathi Vyapar is a full-stack AI advisory platform that helps rural Indian micro-entrepreneurs — vegetable vendors, tailors, dairy farmers, weavers, and small shopkeepers — understand their finances, discover government schemes they qualify for, and get actionable business growth guidance.
 
-It works **where users actually are**: on WhatsApp, by SMS, or on the web — in **Hindi or English**. A single entrepreneur needs no smartphone app, no bank account, and no internet beyond basic messaging to start getting value.
+It works **where users actually are**: on WhatsApp or on the web — in **Hindi or English**. A single entrepreneur needs no smartphone app, no bank account, and no internet beyond basic messaging to start getting value.
 
 ### The Core Problem it Solves
 
@@ -44,13 +44,12 @@ Rural micro-entrepreneurs have no access to chartered accountants, no awareness 
 |---|---|---|
 | Conversational onboarding (8-step form + voice) | Web | EN / HI |
 | Financial dashboard (margin, break-even, chart) | Web | EN / HI |
-| Government scheme matching — 16 schemes | Web / WhatsApp / SMS | EN / HI |
+| Government scheme matching — 16 schemes | Web / WhatsApp | EN / HI |
 | Yojana Kendra (full scheme portal with documents) | Web | EN / HI |
 | Business Transformation Guide (5-stage roadmap) | Web | HI (bilingual) |
 | Khata Mitr — AI voice/text bookkeeping assistant | Web | EN / HI |
 | Receipt / bill OCR via WhatsApp photo | WhatsApp | HI |
 | Multi-turn WhatsApp onboarding bot | WhatsApp | HI |
-| SMS onboarding & plan delivery | SMS | EN |
 | Facilitator portal (field officer dashboard) | Web | EN |
 | Exhibition Folio showcase | Web | EN |
 
@@ -61,7 +60,7 @@ Rural micro-entrepreneurs have no access to chartered accountants, no awareness 
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    Access Channels                       │
-│   Web Browser   │   WhatsApp Cloud API   │   Twilio SMS │
+│   Web Browser   │   WhatsApp Cloud API                 │
 └────────┬────────┴──────────┬─────────────┴──────┬───────┘
          │                  │                      │
          ▼                  ▼                      ▼
@@ -108,7 +107,7 @@ Rural micro-entrepreneurs have no access to chartered accountants, no awareness 
 | AI — Generation | Google Gemini 2.0 Flash (`@google/genai`) |
 | AI — Fallback LLM | Groq SDK (secondary provider) |
 | OCR | Tesseract.js v7 (in-process, no external OCR API) |
-| Messaging | WhatsApp Cloud API (Meta) + Twilio SMS |
+| Messaging | WhatsApp Cloud API (Meta) |
 | Validation | Zod v4 (all API request bodies) |
 | Testing | Vitest v2 — 43 tests, 2 suites (100% passing) |
 | Linting | ESLint 9 + `eslint-config-next` |
@@ -158,7 +157,6 @@ Rural micro-entrepreneurs have no access to chartered accountants, no awareness 
 │   │       ├── facilitator/          # POST: add entrepreneur, send WhatsApp welcome
 │   │       │   └── add-entrepreneur/
 │   │       ├── whatsapp/webhook/     # GET/POST: Meta Cloud API webhook
-│   │       ├── sms/webhook/          # POST: Twilio SMS webhook
 │   │       └── keepalive/            # GET: Supabase uptime ping
 │   ├── components/
 │   │   ├── VoiceOnboardingModal.tsx  # Web Speech API voice onboarding
@@ -178,7 +176,7 @@ Rural micro-entrepreneurs have no access to chartered accountants, no awareness 
 │   │   │   ├── schemeMatcher.ts      # Government scheme eligibility engine (pure TS)
 │   │   │   └── schemeMatcher.test.ts # 13 unit tests
 │   │   ├── orchestrator/
-│   │   │   └── conversationOrchestrator.ts  # WhatsApp/SMS multi-turn state machine
+│   │   │   └── conversationOrchestrator.ts  # WhatsApp multi-turn state machine
 │   │   ├── supabase/
 │   │   │   ├── client.ts             # Browser Supabase client (@supabase/ssr)
 │   │   │   └── server.ts             # SSR Supabase client (cookie-based auth)
@@ -223,7 +221,7 @@ Rural micro-entrepreneurs have no access to chartered accountants, no awareness 
 | `users` | App users — entrepreneurs, facilitators, admins |
 | `business_profiles` | Onboarding data: sector, revenue, expenses, SHG membership, category, gender |
 | `financial_plans` | AI-generated plan results (margin %, break-even, summary, full JSON) |
-| `ledger_entries` | Daily income/expense entries — manual, WhatsApp, SMS, OCR, or voice |
+| `ledger_entries` | Daily income/expense entries — manual, WhatsApp, OCR, or voice |
 | `schemes` | Government scheme catalogue with JSONB eligibility rules |
 | `business_guides` | AI-generated 5-stage roadmap outputs |
 | `facilitators` | Field officer records |
@@ -299,7 +297,7 @@ Returns `MatchResult[]` sorted eligible-first with human-readable reasons for ev
 
 ## Conversational Flows
 
-### WhatsApp / SMS State Machine (`conversationOrchestrator.ts`)
+### WhatsApp State Machine (`conversationOrchestrator.ts`)
 
 Multi-turn onboarding via messaging:
 
@@ -328,7 +326,7 @@ Understands Hindi and English mixed input: *"Ram ne 200 rupaye diye"* → debit 
 | Language | Code | Coverage |
 |---|---|---|
 | English | `en` | All web UI, API responses |
-| Hindi | `hi` | All web UI, WhatsApp bot, SMS bot, AI roadmap content |
+| Hindi | `hi` | All web UI, WhatsApp bot, AI roadmap content |
 
 All UI strings live in [`src/lib/i18n.ts`](src/lib/i18n.ts). The `LanguageContext` provides a `t(key)` function and `toggleLanguage()` to every client component. The AI plan generation supports 11 regional languages (English, Hindi, Tamil, Telugu, Marathi, Bengali, Gujarati, Kannada, Malayalam, Punjabi, Odia) via a language-aware Gemini prompt.
 
@@ -385,13 +383,9 @@ WHATSAPP_APP_SECRET=your-meta-app-secret
 WHATSAPP_WELCOME_TEMPLATE_NAME=saathi_vyapar_welcome
 WHATSAPP_WELCOME_TEMPLATE_LANG=hi
 
-# Twilio SMS Configuration
-TWILIO_ACCOUNT_SID=your-twilio-account-sid
-TWILIO_AUTH_TOKEN=your-twilio-auth-token
-TWILIO_PHONE_NUMBER=+1234567890
 ```
 
-> WhatsApp and Twilio keys are only needed for the messaging channels. The full web app works without them.
+> WhatsApp keys are only needed for the messaging channel. The full web app works without them.
 
 ### 3. Database Setup
 
@@ -482,7 +476,6 @@ To prevent Supabase from pausing during inactivity:
 | `POST` | `/api/ledger/ocr` | Tesseract OCR → parse & save ledger entries |
 | `POST` | `/api/facilitator/add-entrepreneur` | Register entrepreneur, send WhatsApp welcome |
 | `GET/POST` | `/api/whatsapp/webhook` | Meta WhatsApp Cloud API webhook handler |
-| `POST` | `/api/sms/webhook` | Twilio SMS webhook handler |
 | `GET` | `/api/keepalive` | Supabase ping (uptime monitoring) |
 | `GET` | `/auth/callback` | Google OAuth PKCE callback |
 | `GET` | `/auth/confirm` | Email magic-link confirmation |

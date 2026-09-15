@@ -8,7 +8,7 @@ import { getServerLanguage } from "@/lib/i18n.server";
 export const metadata: Metadata = {
   title: "Saathi Vyapar (साथी व्यापार) — AI Business Advisory for Rural Micro-Entrepreneurs",
   description:
-    "AI-driven hyper-local business advisory and financial structuring assistant for rural micro-entrepreneurs, accessible via WhatsApp, SMS, and web. SIH26091 · Ministry of Social Justice & Empowerment · Team Pantheon Eternal.",
+    "AI-driven hyper-local business advisory and financial structuring assistant for rural micro-entrepreneurs, accessible via WhatsApp and web. SIH26091 · Ministry of Social Justice & Empowerment · Team Pantheon Eternal.",
   icons: {
     icon: [
       { url: '/Logo.png', type: 'image/png' },

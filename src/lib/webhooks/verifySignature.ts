@@ -1,23 +1,20 @@
 /**
  * src/lib/webhooks/verifySignature.ts
  *
- * Both inbound webhooks used to accept any POST from anyone. A forged request
- * could drive the conversation state machine, write rows as any phone number,
- * and — on the WhatsApp path — make the app send messages from the project's
- * own Meta number to an arbitrary recipient.
+ * The inbound WhatsApp webhook used to accept any POST from anyone. A forged
+ * request could drive the conversation state machine, write rows as any phone
+ * number, and make the app send messages from the project's own Meta number
+ * to an arbitrary recipient.
  *
  * Meta signs each delivery with HMAC-SHA256 over the raw body
- * (`X-Hub-Signature-256: sha256=...`, keyed by the app secret). Twilio signs
- * the request URL plus the sorted POST parameters (`X-Twilio-Signature`,
- * keyed by the auth token). Verify both before doing any work.
+ * (`X-Hub-Signature-256: sha256=...`, keyed by the app secret). Verify it
+ * before doing any work.
  *
  * Missing secret → rejected in production, allowed with a loud warning in
  * development so local testing against ngrok/curl still works.
  */
 
 import crypto from 'crypto';
-import { validateRequest } from 'twilio';
-import type { NextRequest } from 'next/server';
 
 export type VerificationResult =
   | { valid: true }
@@ -64,50 +61,4 @@ export function verifyWhatsAppSignature(rawBody: string, header: string | null):
   }
 
   return { valid: true };
-}
-
-/**
- * Reconstruct the public URL Twilio signed. Twilio computes the digest over
- * the URL it requested, which behind Vercel's proxy is the forwarded host,
- * not the internal one `request.url` reports.
- */
-function publicUrlFor(request: NextRequest): string {
-  const configured = process.env.NEXT_PUBLIC_APP_URL;
-  const url = new URL(request.url);
-
-  const forwardedHost = request.headers.get('x-forwarded-host') || request.headers.get('host');
-  const forwardedProto = request.headers.get('x-forwarded-proto') || 'https';
-
-  if (forwardedHost) {
-    return `${forwardedProto}://${forwardedHost}${url.pathname}${url.search}`;
-  }
-
-  if (configured) {
-    return `${configured.replace(/\/$/, '')}${url.pathname}${url.search}`;
-  }
-
-  return request.url;
-}
-
-/**
- * Verify a Twilio webhook against the already-parsed form parameters.
- */
-export function verifyTwilioSignature(
-  request: NextRequest,
-  params: Record<string, string>
-): VerificationResult {
-  const authToken = process.env.TWILIO_AUTH_TOKEN;
-
-  if (!authToken) {
-    return allowUnsigned('TWILIO_AUTH_TOKEN');
-  }
-
-  const signature = request.headers.get('x-twilio-signature');
-  if (!signature) {
-    return { valid: false, reason: 'Missing X-Twilio-Signature header' };
-  }
-
-  const isValid = validateRequest(authToken, signature, publicUrlFor(request), params);
-
-  return isValid ? { valid: true } : { valid: false, reason: 'Signature mismatch' };
 }

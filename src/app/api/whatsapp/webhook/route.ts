@@ -15,6 +15,9 @@ import {
   type InboundMedia,
 } from '@/lib/orchestrator/conversationOrchestrator';
 import { verifyWhatsAppSignature } from '@/lib/webhooks/verifySignature';
+
+// Photo messages run OCR in this function — give a cold run room to finish.
+export const maxDuration = 60;
 import {
   sendWhatsAppText,
   getWhatsAppMediaUrl,

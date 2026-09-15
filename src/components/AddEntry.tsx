@@ -25,6 +25,32 @@ import { useSpeechSupported } from '@/lib/hooks/useSpeechSupported';
 
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 
+/**
+ * Downscale a phone photo before upload. Vercel rejects request bodies over
+ * ~4.5 MB and a raw camera JPEG is often 5-10 MB; 1600px @ 0.85 JPEG is
+ * typically well under 500 KB and still plenty for Tesseract. Falls back to
+ * the original file if decoding fails (e.g. HEIC in some browsers) — the
+ * server-side size check still applies.
+ */
+async function compressForUpload(file: File, maxDim = 1600, quality = 0.85): Promise<File> {
+  try {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
+    if (scale === 1 && file.size < 1_500_000) return file;
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return file;
+    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, 'image/jpeg', quality));
+    if (!blob) return file;
+    return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' });
+  } catch {
+    return file;
+  }
+}
+
 interface StagedEntry {
   id: string;
   amount: number;
@@ -165,8 +191,9 @@ export default function AddEntry({ userId }: Props) {
     setPhase('reading');
 
     try {
+      const upload = await compressForUpload(file);
       const formData = new FormData();
-      formData.append('image', file);
+      formData.append('image', upload);
       if (userId) formData.append('user_id', userId);
 
       const response = await fetch('/api/ledger/ocr', { method: 'POST', body: formData });

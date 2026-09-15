@@ -195,7 +195,7 @@ const ABOUT = `Saathi Vyapar is a free app for small shopkeepers, tailors, dairy
 - Khata Mitra: speak or type a sale, expense or customer credit (udhaar) and it is written to the ledger.
 - Yojana Kendra: matches the user's profile against 60+ government schemes, explains why they qualify, and lists the documents needed.
 - How to grow: builds a 5-step growth plan from the user's own figures and stated problem.
-- Works in Hindi and English (toggle at the top), on WhatsApp and SMS as well as the web.`;
+- Works in Hindi and English (toggle at the top), on WhatsApp as well as the web.`;
 
 /** Facts the model may repeat, and nothing beyond them. */
 function factSheet(c: ChatContext): string {

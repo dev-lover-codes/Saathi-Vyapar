@@ -3,7 +3,7 @@
  *
  * Speech-to-text for WhatsApp voice notes.
  *
- * The pitch calls the product "voice-first WhatsApp/SMS access", but the
+ * The pitch calls the product "voice-first WhatsApp access", but the
  * webhook only ever handled text and images — an `audio` message was silently
  * dropped and the sender got no reply at all. Voice worked on the web (via the
  * browser's Web Speech API) and nowhere else.

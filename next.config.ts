@@ -10,6 +10,13 @@ const nextConfig: NextConfig = {
   // fine in a plain Node script, which is how it got missed.
   serverExternalPackages: ['tesseract.js'],
 
+  // Ship the committed eng/hin language packs inside every function that can
+  // run OCR, so Vercel never has to download them at runtime.
+  outputFileTracingIncludes: {
+    '/api/ledger/ocr': ['./tessdata/**/*'],
+    '/api/whatsapp/webhook': ['./tessdata/**/*'],
+  },
+
   async redirects() {
     return [
       {
