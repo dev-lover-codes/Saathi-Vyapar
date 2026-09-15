@@ -9,13 +9,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/contexts/LanguageContext';
 
-interface Props {
-  facilitatorId?: string;
-}
-
-export default function AddEntrepreneurModal({ facilitatorId }: Props) {
+export default function AddEntrepreneurModal() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -34,11 +32,11 @@ export default function AddEntrepreneurModal({ facilitatorId }: Props) {
       const res = await fetch('/api/facilitator/add-entrepreneur', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        // The acting facilitator comes from the session cookie server-side.
         body: JSON.stringify({
           name: name.trim(),
           phone: phone.trim(),
           sector: sector.trim(),
-          facilitator_id: facilitatorId,
         }),
       });
 
@@ -74,7 +72,7 @@ export default function AddEntrepreneurModal({ facilitatorId }: Props) {
         className="px-5 py-2.5 rounded-full bg-[#0B1E33] text-white font-bold text-xs shadow-md hover:opacity-95 transition-all flex items-center gap-2"
       >
         <span>➕</span>
-        <span>Add New Entrepreneur / Add Entrepreneur</span>
+        <span>{t('facilitator_add')}</span>
       </button>
 
       {isOpen && (

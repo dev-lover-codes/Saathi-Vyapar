@@ -7,7 +7,11 @@
  */
 
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { supabaseServer } from '@/lib/supabase/server';
+import { requirePageUser, listLinkedEntrepreneurIds } from '@/lib/auth/requireUser';
+import { getServerT } from '@/lib/i18n.server';
+import LanguageToggleButton from '@/components/LanguageToggleButton';
 import AddEntrepreneurModal from './AddEntrepreneurModal';
 
 interface EntrepreneurViewItem {
@@ -25,12 +29,34 @@ interface EntrepreneurViewItem {
 export const dynamic = 'force-dynamic';
 
 export default async function FacilitatorPage() {
-  // 1. Fetch all users who have the role of entrepreneur
-  const { data: usersData } = await supabaseServer
+  // This portal lists names, phone numbers and monthly finances. It used to
+  // render for anyone who knew the URL, over *every* entrepreneur in the
+  // database. It now requires a facilitator session and shows only the
+  // entrepreneurs explicitly linked to that facilitator.
+  const sessionUser = await requirePageUser('/facilitator');
+  const { t } = await getServerT();
+
+  if (sessionUser.role !== 'facilitator' && sessionUser.role !== 'admin') {
+    redirect('/dashboard');
+  }
+
+  const linkedIds =
+    sessionUser.role === 'admin' ? null : await listLinkedEntrepreneurIds(sessionUser.id);
+
+  // 1. Fetch the entrepreneurs this facilitator is responsible for
+  let usersQuery = supabaseServer
     .from('users')
     .select('id, name, phone, language, created_at')
     .eq('role', 'entrepreneur')
     .order('created_at', { ascending: false });
+
+  if (linkedIds !== null) {
+    usersQuery = usersQuery.in('id', linkedIds);
+  }
+
+  const { data: usersData } = linkedIds !== null && linkedIds.length === 0
+    ? { data: [] }
+    : await usersQuery;
 
   const entrepreneurs: EntrepreneurViewItem[] = [];
 
@@ -71,7 +97,7 @@ export default async function FacilitatorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F1E6] text-[#0B1E33] p-3 sm:p-6 pb-24 font-['Inter',sans-serif] relative overflow-hidden">
+    <div className="min-h-screen bg-[#F5F1E6] text-[#0B1E33] p-3 sm:p-6 pb-24 font-['Open_Sans',sans-serif] relative overflow-hidden">
       {/* Background radial glow */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[radial-gradient(ellipse_at_center,rgba(201,162,75,0.07),transparent_70%)] blur-3xl"></div>
@@ -88,17 +114,18 @@ export default async function FacilitatorPage() {
               </Link>
             </div>
             <p className="text-[#0B1E33]/50 text-xs sm:text-sm mt-0.5">
-              Field Assistant Portal for rural entrepreneur monitoring
+              {t('facilitator_sub')}
             </p>
           </div>
 
           <div className="flex items-center gap-3">
+            <LanguageToggleButton />
             <AddEntrepreneurModal />
             <Link
               href="/dashboard"
               className="px-4 py-2 bg-white hover:bg-[#F5F1E6] text-[#0B1E33] text-xs font-semibold rounded-full border border-[#C9A24B]/30 transition-all"
             >
-              ← Entrepreneur View
+              ← {t('dashboard_badge')}
             </Link>
           </div>
         </header>
@@ -146,7 +173,7 @@ export default async function FacilitatorPage() {
           {/* ── Entrepreneurs Table ───────────────────────────────────── */}
           <section className="bg-white border border-[#C9A24B]/20 rounded-[32px] p-5 sm:p-6 shadow-[0_16px_40px_rgba(11,30,51,0.07)] space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="font-['Playfair_Display',Georgia,serif] text-lg font-bold text-[#0B1E33] flex items-center gap-2">
+              <h2 className="font-['Roboto',sans-serif] text-lg font-bold text-[#0B1E33] flex items-center gap-2">
                 📋 Entrepreneur Directory
               </h2>
               <span className="text-xs text-[#0B1E33]/50">
@@ -156,7 +183,7 @@ export default async function FacilitatorPage() {
 
             {entrepreneurs.length === 0 ? (
               <div className="text-center py-12 text-[#0B1E33]/50 space-y-2">
-                <p className="text-lg font-semibold text-[#0B1E33]">No entrepreneurs registered yet.</p>
+                <p className="text-lg font-semibold text-[#0B1E33]">{t('facilitator_no_entrepreneurs')}</p>
                 <p className="text-xs text-[#0B1E33]/50">
                   Use the &quot;Add New Entrepreneur&quot; button above to add the first entrepreneur.
                 </p>

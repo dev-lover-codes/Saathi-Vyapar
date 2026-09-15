@@ -1,6 +1,5 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-
 # dependencies
 /node_modules
 /.pnp
@@ -10,7 +9,6 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-
 
 # testing
 /coverage
@@ -65,3 +63,11 @@ image.png
 image copy.png
 # Local screenshots/exports that may contain live credentials
 whatsaap.png
+
+# Python scratch from tooling
+__pycache__/
+
+# The env template carries no secrets and the README tells you to copy it.
+# This must stay below every `.env*` rule above — there are two, and the
+# second one silently re-ignored the file when the exception sat higher up.
+!.env.local.example

@@ -1,17 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { supabaseServer } from '@/lib/supabase/server';
+import { requireApiUser } from '@/lib/auth/requireUser';
 import { sendWhatsAppNamedTemplate } from '@/lib/whatsapp';
 
+// facilitator_id is deliberately absent: the acting facilitator is the
+// session user. It used to be accepted, validated, and then ignored, while
+// the route still reported "registered and linked successfully".
 const AddEntrepreneurSchema = z.object({
   phone: z.string().min(10, 'Phone must be at least 10 digits'),
   name: z.string().optional(),
   sector: z.string().optional(),
-  facilitator_id: z.string().uuid().optional(),
 });
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireApiUser();
+    if (!auth.ok) return auth.response;
+
+    if (auth.user.role !== 'facilitator' && auth.user.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Only facilitators can register entrepreneurs.' },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const parsed = AddEntrepreneurSchema.safeParse(body);
 
@@ -93,7 +106,25 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 3. Send a WhatsApp welcome so the entrepreneur knows to start chatting with the bot.
+    // 3. Record the facilitator → entrepreneur link. Without this row the
+    // facilitator portal has nothing to scope its listing by, and every
+    // delegated read (dashboard, plan, guide) is correctly refused.
+    const { error: linkError } = await supabaseServer
+      .from('facilitators_entrepreneurs')
+      .upsert(
+        { facilitator_id: auth.user.id, entrepreneur_id: user.id },
+        { onConflict: 'facilitator_id,entrepreneur_id' }
+      );
+
+    if (linkError) {
+      console.error('Failed to link entrepreneur to facilitator:', linkError);
+      return NextResponse.json(
+        { error: 'Entrepreneur was saved but could not be linked to your account.' },
+        { status: 500 }
+      );
+    }
+
+    // 4. Send a WhatsApp welcome so the entrepreneur knows to start chatting with the bot.
     // A user who hasn't messaged the bot yet is outside WhatsApp's 24h customer-service
     // window, so this must go through a pre-approved template — free text would be rejected.
     // Template: "saathi_vyapar_welcome" (see scripts/create-whatsapp-template.mjs). Sending
@@ -120,7 +151,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error adding entrepreneur:', error);
     return NextResponse.json(
-      { error: 'Internal server error', details: String(error) },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

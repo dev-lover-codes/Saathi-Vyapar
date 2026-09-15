@@ -14,6 +14,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabaseClient } from '@/lib/supabase/client';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export type OnboardingStep =
   | 'auth'
@@ -38,6 +39,12 @@ export interface OnboardingData {
   monthly_revenue_est: number;
   monthly_expense_est: number;
   existing_loans: boolean;
+  /** Outstanding amount across all loans; only meaningful when existing_loans is true. */
+  loan_amount?: number;
+  /** What goes out every month towards those loans (EMI). */
+  loan_monthly_payment?: number;
+  /** Percent per year. */
+  loan_interest_rate?: number;
   consent_given: boolean;
 }
 
@@ -88,60 +95,60 @@ interface VoiceOnboardingModalProps {
 // Step prompts in Hindi & English
 const STEP_PROMPTS: Record<
   OnboardingStep,
-  { hi: string; en: string; short: string; fieldLabel: string }
+  { hi: string; en: string; short: { hi: string; en: string }; fieldLabel: string }
 > = {
   auth: {
     hi: 'शुरू करने से पहले, कृपया अपना 10 अंकों का मोबाइल नंबर दर्ज करें या बोलें।',
     en: 'Before we begin, please enter or speak your 10-digit mobile number.',
-    short: 'मोबाइल नंबर / Mobile Number',
+    short: { hi: 'मोबाइल नंबर', en: 'Mobile number' },
     fieldLabel: 'मोबाइल नंबर',
   },
   name: {
     hi: 'नमस्ते! आपका साथी व्यापार में स्वागत है। आपका शुभ नाम क्या है?',
     en: 'Hello! Welcome to Saathi Vyapar. What is your name?',
-    short: 'आपका नाम / Your Name',
+    short: { hi: 'आपका नाम', en: 'Your name' },
     fieldLabel: 'उद्यमी का नाम',
   },
   district: {
     hi: 'धन्यवाद! आप किस गांव या जिले में रहते हैं?',
     en: 'Thank you! Which village or district are you located in?',
-    short: 'स्थान / Village or District',
+    short: { hi: 'गाँव या ज़िला', en: 'Village or district' },
     fieldLabel: 'गांव / जिला',
   },
   sector: {
     hi: 'आपका क्या काम या व्यापार है? जैसे: किराना दुकान, सिलाई, खेती, डेयरी या कोई अन्य व्यवसाय?',
     en: 'What trade or work do you do? (e.g., kirana shop, tailoring, farming, dairy, etc.)',
-    short: 'व्यवसाय का प्रकार / Trade or Sector',
+    short: { hi: 'आपका काम', en: 'Your trade' },
     fieldLabel: 'व्यवसाय का क्षेत्र',
   },
   finances: {
     hi: 'हर महीने आपकी लगभग कितनी कमाई और कितना खर्च होता है? (जैसे: कमाई 25000 और खर्च 15000)',
     en: 'Roughly how much do you earn and spend monthly? (e.g. earn 25000 and spend 15000)',
-    short: 'मासिक कमाई व खर्च / Monthly Revenue & Expenses',
+    short: { hi: 'मासिक कमाई और खर्च', en: 'Monthly income and costs' },
     fieldLabel: 'कमाई और खर्च',
   },
   loans: {
     hi: 'क्या आपके ऊपर पहले से कोई बैंक या समूह का लोन या पुराना कर्ज है? बोलें हाँ या नहीं।',
     en: 'Do you have any existing loans or debts? Please say yes or no.',
-    short: 'पुराना कर्ज / Existing Loans',
-    fieldLabel: 'सक्रिय ऋण (Loan)',
+    short: { hi: 'पुराना कर्ज़', en: 'Existing loans' },
+    fieldLabel: 'पुराना कर्ज़',
   },
   confirmation: {
     hi: 'कृपया जांचें: क्या आपकी सभी जानकारी सही है? आगे बढ़ने के लिए "हाँ" बोलें या पुष्टि करें।',
     en: 'Please check if your summary is correct. Say "yes" or tap confirm to proceed.',
-    short: 'विवरण की पुष्टि / Summary Confirmation',
+    short: { hi: 'जानकारी की पुष्टि', en: 'Check your details' },
     fieldLabel: 'सारांश पुष्टि',
   },
   consent: {
     hi: 'क्या आप हमें व्यापारिक सलाह और सरकारी योजनाएं ढूंढने के लिए यह जानकारी सुरक्षित रूप से सेव करने की अनुमति देते हैं? आगे बढ़ने के लिए "हाँ" बोलें या सहमति दें।',
     en: 'Do you agree to let us store this information to give you financial advice? Say or tap yes to continue.',
-    short: 'सहमति (DPDP Act Consent) / Data Consent',
+    short: { hi: 'आपकी अनुमति', en: 'Your permission' },
     fieldLabel: 'डेटा सुरक्षा सहमति',
   },
   complete: {
     hi: 'बधाई हो! आपका वित्तीय खाता तैयार हो रहा है। हम आपको डैशबोर्ड पर ले जा रहे हैं...',
     en: 'Congratulations! Your profile is saved. Redirecting to your dashboard...',
-    short: 'सफलतापूर्वक पूर्ण / Completed',
+    short: { hi: 'हो गया', en: 'Done' },
     fieldLabel: 'खाता तैयार है',
   },
 };
@@ -151,6 +158,7 @@ export default function VoiceOnboardingModal({
   onClose,
   onSwitchToText,
 }: VoiceOnboardingModalProps) {
+  const { language, t } = useLanguage();
   const router = useRouter();
 
   // Current conversational step
@@ -257,7 +265,7 @@ export default function VoiceOnboardingModal({
       if (preferredVoice) {
         utterance.voice = preferredVoice;
       }
-      utterance.lang = 'hi-IN';
+      utterance.lang = language === 'hi' ? 'hi-IN' : 'en-IN';
 
       utterance.onstart = () => {
         setIsSpeaking(true);
@@ -275,7 +283,7 @@ export default function VoiceOnboardingModal({
 
       synth.speak(utterance);
     },
-    []
+    [language]
   );
 
   // 3. Speech Recognition: Start Listening
@@ -309,7 +317,8 @@ export default function VoiceOnboardingModal({
       recognitionRef.current = recognition;
       recognition.continuous = false;
       recognition.interimResults = true;
-      recognition.lang = 'hi-IN'; // Also handles Hinglish / Indian speech well
+      // en-IN still handles Hinglish well; hi-IN stays the default for Hindi.
+      recognition.lang = language === 'hi' ? 'hi-IN' : 'en-IN';
 
       recognition.onstart = () => {
         setIsListening(true);
@@ -345,7 +354,7 @@ export default function VoiceOnboardingModal({
       console.error('Failed to start speech recognition:', err);
       setIsListening(false);
     }
-  }, []);
+  }, [language]);
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
@@ -365,7 +374,7 @@ export default function VoiceOnboardingModal({
     const promptObj = STEP_PROMPTS[step];
     if (!promptObj) return;
 
-    let speechText = promptObj.hi;
+    let speechText = language === 'hi' ? promptObj.hi : promptObj.en;
 
     if (step === 'confirmation') {
       const loanText = formData.existing_loans ? 'सक्रिय लोन है' : 'कोई लोन नहीं';
@@ -381,6 +390,7 @@ export default function VoiceOnboardingModal({
     });
   }, [
     step,
+    language,
     isOpen,
     speakText,
     startListening,
@@ -486,7 +496,7 @@ export default function VoiceOnboardingModal({
           setFormData((prev) => ({ ...prev, consent_given: true }));
           await handleFinalSave({ ...formData, consent_given: true });
         } else {
-          setErrorMessage('डेटा सुरक्षा सहमति (DPDP Act) के बिना जानकारी सेव नहीं की जा सकती।');
+          setErrorMessage('बिना आपकी अनुमति के हम जानकारी सेव नहीं कर सकते।');
         }
       }
     } catch (err) {
@@ -547,7 +557,7 @@ export default function VoiceOnboardingModal({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 bg-[#F5F1E6]/96 backdrop-blur-2xl flex flex-col justify-between p-4 sm:p-6 text-[#0B1E33] font-['Inter',sans-serif] animate-in fade-in duration-200 selection:bg-[#0B1E33] selection:text-white"
+      className="fixed inset-0 z-50 bg-[#F5F1E6]/96 backdrop-blur-2xl flex flex-col justify-between p-4 sm:p-6 text-[#0B1E33] font-['Open_Sans',sans-serif] animate-in fade-in duration-200 selection:bg-[#0B1E33] selection:text-white"
     >
       {/* ── Top Header ────────────────────────────────────────────── */}
       <div className="max-w-4xl w-full mx-auto flex items-center justify-between border-b border-[#C9A24B]/20 pb-3.5">
@@ -557,13 +567,13 @@ export default function VoiceOnboardingModal({
           </div>
           <div>
             <h2 className="text-base sm:text-lg font-bold text-[#0B1E33] flex items-center gap-2">
-              वॉइस ऑनबोर्डिंग (Voice Registration)
+              {t('voice_title')}
               <span className="text-[10px] font-bold bg-[#F5F1E6] text-[#0B1E33]/60 px-2.5 py-0.5 rounded-full border border-[#C9A24B]/20">
-                DPDP Compliant
+                {t('voice_dpdp')}
               </span>
             </h2>
             <p className="text-xs text-[#0B1E33]/50">
-              चरण: {currentPrompt?.short || 'पंजीकरण'}
+              {t('voice_step')}: {currentPrompt ? currentPrompt.short[language] : t('voice_step_default')}
             </p>
           </div>
         </div>
@@ -632,12 +642,12 @@ export default function VoiceOnboardingModal({
             {isProcessing && <span className="w-2.5 h-2.5 rounded-full bg-[#0B1E33] animate-spin"></span>}
             <span>
               {isSpeaking
-                ? '🔊 साथी बोल रहा है (Assistant Speaking)...'
+                ? '🔊 साथी बोल रहा है...'
                 : isListening
-                ? '🎙️ आपकी आवाज़ सुन रहे हैं (Listening)...'
+                ? '🎙️ सुन रहे हैं...'
                 : isProcessing
-                ? '⚡ समझ रहे हैं (Processing with Gemini)...'
-                : '💡 आपका उत्तर अपेक्षित है'}
+                ? '⚡ समझ रहे हैं...'
+                : '💡 अब आप बोलिए'}
             </span>
           </div>
 
@@ -783,7 +793,7 @@ export default function VoiceOnboardingModal({
       {/* ── Modal Footer Controls ─────────────────────────────────── */}
       <div className="max-w-4xl w-full mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[#C9A24B]/20 pt-3.5 text-xs text-[#0B1E33]/50">
         <div className="flex items-center gap-2">
-          <span>🔒 जीरो-हैलुसिनेशन • शुद्ध वित्तीय गणना</span>
+          <span>🔒 {t('voice_dpdp')}</span>
         </div>
 
         <div className="flex items-center gap-3">

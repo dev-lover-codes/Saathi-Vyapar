@@ -11,6 +11,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { supabaseServer } from '@/lib/supabase/server';
+import { requireApiUser, resolveTargetUserId, forbidden } from '@/lib/auth/requireUser';
 import { generateFinancialSummary } from '@/lib/engines/financialEngine';
 import { matchSchemes, SchemeRecord, BusinessProfile } from '@/lib/engines/schemeMatcher';
 
@@ -26,6 +27,9 @@ const OnboardingCompleteSchema = z.object({
   monthly_revenue_est: z.number().min(0, 'Monthly revenue must be positive'),
   monthly_expense_est: z.number().min(0, 'Monthly expense must be positive'),
   existing_loans: z.boolean().default(false),
+  loan_amount: z.number().min(0).optional(),
+  loan_monthly_payment: z.number().min(0).optional(),
+  loan_interest_rate: z.number().min(0).max(100).optional(),
   category: z.string().optional(),
   gender: z.string().optional(),
   shg_membership: z.union([z.boolean(), z.string()]).optional(),
@@ -38,6 +42,11 @@ const OnboardingCompleteSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Onboarding always runs after sign-in (the wizard signs the user up
+    // first), so the profile owner is the session user — never a body field.
+    const auth = await requireApiUser();
+    if (!auth.ok) return auth.response;
+
     let body: unknown;
     try {
       body = await request.json();
@@ -55,81 +64,37 @@ export async function POST(request: NextRequest) {
 
     const data = parsed.data;
 
-    // ── 1. Resolve or Create User ──────────────────────────────────────────
-    let userId = data.user_id;
+    // ── 1. Resolve the owning user ─────────────────────────────────────────
+    // Previously this route would create a brand-new user for an anonymous
+    // caller, inventing a random +91 phone number when none was supplied.
+    // Those rows were unreachable by their supposed owner and could later
+    // collide with the real holder of that number against UNIQUE(phone).
+    const userId = await resolveTargetUserId(auth.user, data.user_id);
+    if (!userId) return forbidden();
 
-    if (!userId) {
-      // Clean phone or generate a fallback identifier if user arrived pre-auth without phone
-      let formattedPhone = data.phone?.replace(/\D/g, '');
-      if (!formattedPhone || formattedPhone.length < 10) {
-        // Fallback temporary registration phone
-        const randomDigits = Math.floor(1000000000 + Math.random() * 9000000000);
-        formattedPhone = `+91${randomDigits}`;
-      } else if (formattedPhone.length === 10) {
-        formattedPhone = `+91${formattedPhone}`;
-      } else if (!formattedPhone.startsWith('+')) {
-        formattedPhone = `+${formattedPhone}`;
-      }
+    // public.users may not have a row yet — auth.users does, but this table is
+    // only ever populated here or by the dashboard's first-visit upsert, and
+    // business_profiles has an FK to it.
+    const normalizedPhone = data.phone?.replace(/[^\d+]/g, '') || undefined;
 
-      // Check if user with phone already exists
-      const { data: existingUser } = await supabaseServer
-        .from('users')
-        .select('id')
-        .eq('phone', formattedPhone)
-        .single();
+    const { error: userUpsertError } = await supabaseServer.from('users').upsert(
+      {
+        id: userId,
+        name: data.name,
+        phone: normalizedPhone,
+        email: data.email || auth.user.email || undefined,
+        language: 'hi',
+        role: 'entrepreneur',
+      },
+      { onConflict: 'id' }
+    );
 
-      if (existingUser) {
-        userId = existingUser.id;
-        await supabaseServer
-          .from('users')
-          .update({ name: data.name, language: 'hi' })
-          .eq('id', userId);
-      } else {
-        const { data: newUser, error: userError } = await supabaseServer
-          .from('users')
-          .insert({
-            phone: formattedPhone,
-            name: data.name,
-            language: 'hi',
-            role: 'entrepreneur',
-          })
-          .select('id')
-          .single();
-
-        if (userError || !newUser) {
-          console.error('User creation failed:', userError);
-          return NextResponse.json(
-            { error: 'Failed to create user account', details: userError?.message },
-            { status: 500 }
-          );
-        }
-        userId = newUser.id;
-      }
-    } else {
-      // Session-authenticated user (password or Google sign-in): auth.users
-      // already has a row, but public.users may not — it's only ever created
-      // here or by the dashboard's own first-visit upsert. business_profiles
-      // has a FK to public.users(id), so it must exist before step 2 below,
-      // or the insert there fails with "Failed to save business profile".
-      const { error: userUpsertError } = await supabaseServer.from('users').upsert(
-        {
-          id: userId,
-          name: data.name,
-          phone: data.phone || undefined,
-          email: data.email || undefined,
-          language: 'hi',
-          role: 'entrepreneur',
-        },
-        { onConflict: 'id' }
+    if (userUpsertError) {
+      console.error('User upsert failed:', userUpsertError);
+      return NextResponse.json(
+        { error: 'Failed to save user account', details: userUpsertError.message },
+        { status: 500 }
       );
-
-      if (userUpsertError) {
-        console.error('User upsert failed:', userUpsertError);
-        return NextResponse.json(
-          { error: 'Failed to save user account', details: userUpsertError.message },
-          { status: 500 }
-        );
-      }
     }
 
     // ── 2. Upsert Business Profile ─────────────────────────────────────────
@@ -147,6 +112,10 @@ export async function POST(request: NextRequest) {
       monthly_revenue_est: data.monthly_revenue_est,
       monthly_expense_est: data.monthly_expense_est,
       existing_loans: data.existing_loans,
+      // Only meaningful with a loan; a stray figure without one is dropped.
+      loan_amount: data.existing_loans ? data.loan_amount ?? null : null,
+      loan_monthly_payment: data.existing_loans ? data.loan_monthly_payment ?? null : null,
+      loan_interest_rate: data.existing_loans ? data.loan_interest_rate ?? null : null,
       category: data.category || 'general',
       gender: data.gender || 'other',
       shg_membership: data.shg_membership ?? (data.is_shg_member ? 'shg_member' : 'none'),
@@ -193,6 +162,9 @@ export async function POST(request: NextRequest) {
       benefit_summary: s.benefit_summary,
       eligibility_rules: s.eligibility_rules || {},
       application_link: s.application_link,
+      sponsoring_body: s.sponsoring_body,
+      required_documents: s.required_documents || [],
+      scheme_type: s.scheme_type ?? null,
     }));
 
     const businessProfile: BusinessProfile = {
@@ -214,8 +186,8 @@ export async function POST(request: NextRequest) {
 
     const planJson = {
       financialMetrics: {
-        breakEvenUnits: isFinite(financialSummary.breakEvenUnits)
-          ? financialSummary.breakEvenUnits
+        breakEvenRevenue: isFinite(financialSummary.breakEvenRevenue)
+          ? financialSummary.breakEvenRevenue
           : null,
         marginPercent: financialSummary.marginPercent,
         cashFlowRisk: financialSummary.cashFlowRisk,
@@ -239,8 +211,8 @@ export async function POST(request: NextRequest) {
     // Save initial plan
     await supabaseServer.from('financial_plans').insert({
       user_id: userId,
-      break_even_units: isFinite(financialSummary.breakEvenUnits)
-        ? financialSummary.breakEvenUnits
+      break_even_revenue: isFinite(financialSummary.breakEvenRevenue)
+        ? financialSummary.breakEvenRevenue
         : null,
       margin_percent: financialSummary.marginPercent,
       plan_json: planJson,
@@ -257,7 +229,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Onboarding complete API error:', error);
     return NextResponse.json(
-      { error: 'Internal server error', details: String(error) },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

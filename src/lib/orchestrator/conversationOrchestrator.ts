@@ -11,8 +11,19 @@
  */
 
 import { supabaseServer } from '@/lib/supabase/server';
-import { sendWhatsAppText, downloadWhatsAppMedia } from '@/lib/whatsapp';
-import { processReceiptImage } from '@/lib/ledger/ocr';
+import { runLedgerOcr, OcrFailedError } from '@/lib/ledger/ocrService';
+import { transcribeAudio } from '@/lib/voice/transcribeAudio';
+import { detectMessageLanguage } from './detectLanguage';
+import { sendWhatsAppText } from '@/lib/whatsapp';
+import { generatePlanForUser } from '@/lib/plan/generatePlan';
+
+/** Media that arrived with an inbound message, already downloaded. */
+export interface InboundMedia {
+  buffer: Buffer;
+  mimeType?: string;
+  /** 'image' runs OCR; 'audio' is transcribed and re-enters as text. */
+  kind: 'image' | 'audio';
+}
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -72,6 +83,11 @@ function t(lang: string, key: string): string {
         '📄 आपका बिल देख रहे हैं... कुछ सेकंड रुकें।',
       ocr_error:
         '❌ फोटो पढ़ने में दिक्कत हुई। कृपया साफ फोटो भेजें।',
+      ocr_none:
+        '❌ फोटो में कोई रकम नहीं मिली। पन्ना सीधा रखकर, अच्छी रोशनी में साफ फोटो भेजें।',
+      voice_failed:
+        '❌ आवाज़ समझ नहीं आई। कृपया दोबारा बोलें या टाइप करके भेजें।',
+      voice_heard: '🎙️ आपने कहा:',
     },
     en: {
       ask_sector:
@@ -93,6 +109,11 @@ function t(lang: string, key: string): string {
       ocr_processing: '📄 Reading your bill... please wait.',
       ocr_error:
         '❌ Could not read the photo. Please send a clearer image.',
+      ocr_none:
+        '❌ No amounts found in the photo. Keep the page flat, use good light and send a clearer image.',
+      voice_failed:
+        '❌ Could not make out the voice message. Please try again or send it as text.',
+      voice_heard: '🎙️ You said:',
     },
   };
 
@@ -119,31 +140,23 @@ function parseYesNo(text: string): boolean | null {
   return null;
 }
 
-// ── Call internal plan generate API ──────────────────────────────────────────
+// ── Plan generation ───────────────────────────────────────────────────────────
+// Direct call. This used to POST to /api/plan/generate on its own server,
+// which stopped working the moment that route required a session cookie.
 
 async function callPlanGenerate(userId: string): Promise<string | null> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/plan/generate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId }),
-    });
-
-    if (!response.ok) {
-      return null;
-    }
-
-    const data = await response.json();
-    return data.plan?.summaryText || null;
-  } catch {
+    const plan = await generatePlanForUser(userId);
+    return plan.summaryText || null;
+  } catch (err) {
+    console.error('Plan generation failed:', err);
     return null;
   }
 }
 
 // ── Send an async follow-up message back to the user ─────────────────────────
-// PLAN generation and OCR both take longer than a single webhook round-trip,
-// so their result is delivered as a separate follow-up message once ready.
+// PLAN generation takes longer than a single webhook round-trip, so its
+// result is delivered as a separate follow-up message once ready.
 
 async function notify(channel: 'whatsapp' | 'sms', phone: string, text: string): Promise<void> {
   if (channel === 'whatsapp') {
@@ -158,37 +171,6 @@ async function notify(channel: 'whatsapp' | 'sms', phone: string, text: string):
   }
 }
 
-// ── Process a bill photo: download, OCR, save ledger entries, notify ─────────
-
-async function processReceiptAsync(
-  channel: 'whatsapp' | 'sms',
-  phone: string,
-  lang: string,
-  userId: string,
-  mediaUrl: string
-): Promise<void> {
-  try {
-    const imageBuffer = await downloadWhatsAppMedia(mediaUrl);
-    if (!imageBuffer) {
-      await notify(channel, phone, t(lang, 'ocr_error'));
-      return;
-    }
-
-    const result = await processReceiptImage(imageBuffer, userId);
-    const message =
-      result.parsedEntries.length > 0
-        ? lang === 'hi'
-          ? `✅ बिल पढ़ लिया! ${result.savedCount} एंट्री मिलीं। डैशबोर्ड में जाकर पुष्टि करें।`
-          : `✅ Bill read! Found ${result.savedCount} entries. Please confirm them in your dashboard.`
-        : t(lang, 'ocr_error');
-
-    await notify(channel, phone, message);
-  } catch (err) {
-    console.error('Receipt OCR processing failed:', err);
-    await notify(channel, phone, t(lang, 'ocr_error'));
-  }
-}
-
 // ── Main handler ──────────────────────────────────────────────────────────────
 
 /**
@@ -198,14 +180,16 @@ async function processReceiptAsync(
  * @param channel - 'whatsapp' or 'sms'
  * @param phone - E.164 phone number (e.g., +919876543210)
  * @param messageText - Text content of the message (null if media-only)
- * @param mediaUrl - URL of attached media (null if text-only)
+ * @param media - Already-downloaded image bytes (null if text-only). The
+ *                caller downloads, because each channel authenticates its
+ *                media differently (Meta bearer token vs Twilio basic auth).
  * @returns Reply text to send back to the user
  */
 export async function handleIncomingMessage(
   channel: 'whatsapp' | 'sms',
   phone: string,
   messageText: string | null,
-  mediaUrl: string | null
+  media: InboundMedia | null
 ): Promise<string> {
   // ── 1. Upsert user ────────────────────────────────────────────────────────
   let user: { id: string; language: string; name: string | null } | null = null;
@@ -238,7 +222,11 @@ export async function handleIncomingMessage(
     user = existingUser;
   }
 
-  const lang = user.language || 'hi';
+  // Stored preference is the starting point; the message itself can override
+  // it below. On WhatsApp/SMS there is no toggle to press, so the default of
+  // 'hi' set at row creation would otherwise answer every English speaker in
+  // Hindi forever.
+  let lang = user.language || 'hi';
 
   // ── 2. Fetch or create conversation ──────────────────────────────────────
   interface ConversationRecord {
@@ -299,17 +287,108 @@ export async function handleIncomingMessage(
       .eq('id', conversation!.id);
   }
 
-  // ── 3. Handle OCR (media) — available in any state ───────────────────────
-  if (mediaUrl) {
-    // Acknowledge immediately; OCR runs async and its result arrives as a
-    // separate follow-up message once processReceiptAsync finishes.
-    processReceiptAsync(channel, phone, lang, user.id, mediaUrl).catch((err) =>
-      console.error('processReceiptAsync failed:', err)
-    );
-    return t(lang, 'ocr_processing');
+  // ── 3a. Voice notes — transcribe, then continue as if it were typed ──────
+  // WhatsApp `audio` messages used to be dropped on the floor: no OCR branch
+  // matched them, so the sender received no reply at all.
+  let voiceTranscript: string | null = null;
+
+  if (media?.kind === 'audio') {
+    const transcription = await transcribeAudio(media.buffer, media.mimeType);
+
+    if (!transcription) {
+      return t(lang, 'voice_failed');
+    }
+
+    voiceTranscript = transcription.text;
   }
 
-  const text = (messageText || '').trim();
+  // ── 3b. Handle OCR (media) — available in any state ──────────────────────
+  // This used to answer "reading your bill…" and then discard the image: no
+  // OCR was ever run on the WhatsApp path and no reply ever followed. Now the
+  // photo is read inline and the entries are staged (unconfirmed) exactly as
+  // the web upload stages them.
+  if (media?.kind === 'image') {
+    try {
+      const result = await runLedgerOcr(media.buffer, user.id, 'whatsapp');
+
+      if (result.parsedEntries.length === 0) {
+        return t(lang, 'ocr_none');
+      }
+
+      const lines = result.parsedEntries
+        .slice(0, 8)
+        .map((entry) => {
+          const sign = entry.entry_type === 'income' ? '+' : '−';
+          const label =
+            lang === 'hi'
+              ? entry.entry_type === 'income'
+                ? 'आय'
+                : 'खर्च'
+              : entry.entry_type === 'income'
+                ? 'income'
+                : 'expense';
+          return `${sign} ₹${entry.amount.toLocaleString('en-IN')} — ${entry.description} (${label})`;
+        })
+        .join('\n');
+
+      const more = result.parsedEntries.length > 8
+        ? `\n… +${result.parsedEntries.length - 8}`
+        : '';
+
+      const header =
+        lang === 'hi'
+          ? `📄 आपके बही-खाते से ${result.parsedEntries.length} एंट्री मिलीं:`
+          : `📄 Found ${result.parsedEntries.length} entries in your notebook:`;
+
+      const totals =
+        lang === 'hi'
+          ? `\n\nकुल आय ₹${result.totals.income.toLocaleString('en-IN')} · कुल खर्च ₹${result.totals.expense.toLocaleString('en-IN')}`
+          : `\n\nTotal income ₹${result.totals.income.toLocaleString('en-IN')} · Total expenses ₹${result.totals.expense.toLocaleString('en-IN')}`;
+
+      const footer =
+        lang === 'hi'
+          ? '\n\n✅ ये एंट्री जाँच के लिए सेव हो गई हैं। डैशबोर्ड पर देखकर पक्का करें।'
+          : '\n\n✅ Saved for review. Open your dashboard to check and confirm them.';
+
+      return `${header}\n${lines}${more}${totals}${footer}`;
+    } catch (err) {
+      if (err instanceof OcrFailedError) {
+        return t(lang, 'ocr_error');
+      }
+      console.error('WhatsApp OCR handling failed:', err);
+      return t(lang, 'ocr_error');
+    }
+  }
+
+  const text = (voiceTranscript || messageText || '').trim();
+
+  // Answer in the language the user actually just used. A confident reading
+  // is also stored, so the next message starts in the right language; an
+  // unconfident one ("haan", "15000") steers this reply only and never
+  // rewrites the preference.
+  if (text) {
+    const detected = detectMessageLanguage(text);
+
+    if (detected.language !== lang) {
+      lang = detected.language;
+
+      if (detected.confident) {
+        const { error: langError } = await supabaseServer
+          .from('users')
+          .update({ language: detected.language })
+          .eq('id', user.id);
+
+        if (langError) {
+          // Non-fatal: this turn still answers in the detected language.
+          console.warn('Could not persist detected language:', langError);
+        }
+      }
+    }
+  }
+
+  /** Prefix replies to a voice note with what we heard, so it can be corrected. */
+  const echo = (reply: string) =>
+    voiceTranscript ? `${t(lang, 'voice_heard')} "${voiceTranscript}"\n\n${reply}` : reply;
 
   // ── 4. State machine ──────────────────────────────────────────────────────
 
@@ -317,56 +396,56 @@ export async function handleIncomingMessage(
     // ── idle: First contact — greet and ask for sector ──────────────────────
     case 'idle': {
       await updateConversation('awaiting_sector', context);
-      return greet(lang);
+      return echo(greet(lang));
     }
 
     // ── awaiting_sector ──────────────────────────────────────────────────────
     case 'awaiting_sector': {
       if (!text) {
-        return t(lang, 'ask_sector');
+        return echo(t(lang, 'ask_sector'));
       }
       const newContext = { ...context, sector: text };
       await updateConversation('awaiting_district', newContext);
-      return t(lang, 'ask_district');
+      return echo(t(lang, 'ask_district'));
     }
 
     // ── awaiting_district ────────────────────────────────────────────────────
     case 'awaiting_district': {
       if (!text) {
-        return t(lang, 'ask_district');
+        return echo(t(lang, 'ask_district'));
       }
       const newContext = { ...context, district: text };
       await updateConversation('awaiting_revenue', newContext);
-      return t(lang, 'ask_revenue');
+      return echo(t(lang, 'ask_revenue'));
     }
 
     // ── awaiting_revenue ─────────────────────────────────────────────────────
     case 'awaiting_revenue': {
       const amount = parseAmount(text);
       if (amount === null) {
-        return t(lang, 'invalid_number');
+        return echo(t(lang, 'invalid_number'));
       }
       const newContext = { ...context, monthly_revenue: amount };
       await updateConversation('awaiting_expenses', newContext);
-      return t(lang, 'ask_expenses');
+      return echo(t(lang, 'ask_expenses'));
     }
 
     // ── awaiting_expenses ────────────────────────────────────────────────────
     case 'awaiting_expenses': {
       const amount = parseAmount(text);
       if (amount === null) {
-        return t(lang, 'invalid_number');
+        return echo(t(lang, 'invalid_number'));
       }
       const newContext = { ...context, monthly_expense: amount };
       await updateConversation('awaiting_loans', newContext);
-      return t(lang, 'ask_loans');
+      return echo(t(lang, 'ask_loans'));
     }
 
     // ── awaiting_loans — final onboarding step ───────────────────────────────
     case 'awaiting_loans': {
       const hasLoans = parseYesNo(text);
       if (hasLoans === null) {
-        return t(lang, 'invalid_yesno');
+        return echo(t(lang, 'invalid_yesno'));
       }
 
       const newContext = { ...context, existing_loans: hasLoans };
@@ -404,7 +483,7 @@ export async function handleIncomingMessage(
       }
 
       await updateConversation('complete', newContext);
-      return t(lang, 'complete');
+      return echo(t(lang, 'complete'));
     }
 
     // ── complete — handle PLAN command or other messages ─────────────────────
@@ -423,7 +502,7 @@ export async function handleIncomingMessage(
             notify(channel, phone, t(lang, 'plan_error'));
           });
 
-        return generatingMsg;
+        return echo(generatingMsg);
       }
 
       // Media handled above; any other text gets plan reminder
@@ -431,12 +510,12 @@ export async function handleIncomingMessage(
         lang === 'hi'
           ? 'अपना वित्तीय प्लान देखने के लिए *PLAN* भेजें, या बिल की फोटो भेजें।'
           : 'Send *PLAN* to see your financial plan, or send a photo of your bill.';
-      return planReminder;
+      return echo(planReminder);
     }
 
     default: {
       await updateConversation('idle', {});
-      return greet(lang);
+      return echo(greet(lang));
     }
   }
 }

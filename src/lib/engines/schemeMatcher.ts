@@ -40,10 +40,18 @@ export interface SchemeRecord {
   name: string;
   description?: string;
   benefit_summary?: string;
-  sponsoring_body?: string;
   eligibility_rules: EligibilityRules;
   application_link?: string;
+  /** Ministry or agency running the scheme (schemes.sponsoring_body). */
+  sponsoring_body?: string;
+  /** Applicant document checklist (schemes.required_documents). */
+  required_documents?: string[];
   active?: boolean;
+  /** loan | subsidy | direct_benefit | credit_guarantee | training | registration | other (schemes.scheme_type). */
+  scheme_type?: string | null;
+  /** Hindi name and benefit (migration 016); English when absent. */
+  name_hi?: string | null;
+  benefit_summary_hi?: string | null;
 }
 
 /** Business profile input for matching */
@@ -78,6 +86,36 @@ export interface MatchResult {
   eligible: boolean;
   /** Human-readable reasons — explains why eligible or which rules were not met */
   reasons: string[];
+}
+
+/**
+ * The onboarding form offers eight sectors; scheme rules were written with
+ * the government's own vocabulary. Without this table a farmer who picked
+ * "agriculture" never matched PM-Kisan, whose rule says "farming".
+ *
+ * Keys are the words a rule may use; values are the profile sectors that
+ * satisfy it. A rule word absent from this table matches only itself.
+ */
+const SECTOR_ALIASES: Record<string, readonly string[]> = {
+  farming: ['agriculture'],
+  agriculture: ['farming'],
+  food_processing: ['food'],
+  food: ['food_processing'],
+  dairy_processing: ['dairy'],
+  crafts: ['manufacturing', 'tailoring'],
+  handicraft: ['manufacturing', 'tailoring'],
+  // "non-farm" in NRLM programmes means any rural enterprise that is not
+  // cultivation — every other sector the form offers.
+  non_farm: ['retail', 'tailoring', 'dairy', 'food', 'manufacturing', 'services', 'general'],
+};
+
+/** Whether a profile sector satisfies any of a rule's sector words. */
+export function sectorMatches(profileSector: string, ruleSectors: string[]): boolean {
+  const mine = profileSector.toLowerCase();
+  return ruleSectors.some((word) => {
+    const w = word.toLowerCase();
+    return w === mine || (SECTOR_ALIASES[w] ?? []).includes(mine);
+  });
 }
 
 /**
@@ -173,7 +211,7 @@ export function matchSchemes(
     // ── 3. Sector Check ───────────────────────────────────────────────
     if (rules.sector && rules.sector.length > 0) {
       const profileSector = profile.sector?.toLowerCase();
-      if (profileSector && rules.sector.map((s) => s.toLowerCase()).includes(profileSector)) {
+      if (profileSector && sectorMatches(profileSector, rules.sector)) {
         reasons.push(`✓ Your business sector (${profile.sector}) is covered by this scheme`);
       } else {
         eligible = false;
@@ -257,9 +295,29 @@ export function matchSchemes(
     return { scheme, eligible, reasons };
   });
 
-  // Sort: eligible schemes first
+  // Eligible first. Within the eligible set, the ones that matched this
+  // person specifically come before the ones that match everyone, and
+  // money before portals: a kirana owner's top result should be a loan or
+  // subsidy they fit, not a grievance portal that has no rules at all.
   return results.sort((a, b) => {
-    if (a.eligible === b.eligible) return 0;
-    return a.eligible ? -1 : 1;
+    if (a.eligible !== b.eligible) return a.eligible ? -1 : 1;
+    if (!a.eligible) return 0;
+    const fit = specificMatches(b) - specificMatches(a);
+    if (fit !== 0) return fit;
+    return typeRank(a.scheme.scheme_type) - typeRank(b.scheme.scheme_type);
   });
+}
+
+/** How many rules this person satisfied, ignoring the "no rules" tick. */
+function specificMatches(result: MatchResult): number {
+  return result.reasons.filter((r) => r.startsWith('✓') && !r.includes('no specific eligibility')).length;
+}
+
+const TYPE_ORDER = ['loan', 'subsidy', 'direct_benefit', 'credit_guarantee', 'training', 'registration', 'other'];
+
+/** Lower is better. Rows without a type (the original seed) sit with loans/subsidies. */
+function typeRank(type?: string | null): number {
+  if (!type) return 1;
+  const i = TYPE_ORDER.indexOf(type);
+  return i === -1 ? TYPE_ORDER.length : i;
 }

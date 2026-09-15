@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { matchSchemes, BusinessProfile, SchemeRecord } from './schemeMatcher';
+import { matchSchemes, sectorMatches, BusinessProfile, SchemeRecord } from './schemeMatcher';
 
 // ── Mock Schemes ──────────────────────────────────────────────────────────────
 
@@ -347,5 +347,67 @@ describe('matchSchemes', () => {
 
     expect(svep?.eligible).toBe(false);
     expect(svep?.reasons.some((r) => r.includes('Your sector (farming) is not listed'))).toBe(true);
+  });
+});
+
+describe('sectorMatches', () => {
+  it('matches the same word', () => {
+    expect(sectorMatches('retail', ['retail', 'services'])).toBe(true);
+    expect(sectorMatches('dairy', ['retail', 'services'])).toBe(false);
+  });
+
+  it('lets an "agriculture" profile satisfy a "farming" rule and vice versa', () => {
+    expect(sectorMatches('agriculture', ['farming'])).toBe(true);
+    expect(sectorMatches('farming', ['agriculture'])).toBe(true);
+  });
+
+  it('maps the form sectors onto the rule vocabulary', () => {
+    expect(sectorMatches('food', ['food_processing'])).toBe(true);
+    expect(sectorMatches('dairy', ['dairy_processing'])).toBe(true);
+    expect(sectorMatches('manufacturing', ['crafts'])).toBe(true);
+    expect(sectorMatches('tailoring', ['handicraft'])).toBe(true);
+  });
+
+  it('treats non_farm as everything except cultivation', () => {
+    expect(sectorMatches('retail', ['non_farm'])).toBe(true);
+    expect(sectorMatches('services', ['non_farm'])).toBe(true);
+    expect(sectorMatches('agriculture', ['non_farm'])).toBe(false);
+  });
+
+  it('is case-insensitive', () => {
+    expect(sectorMatches('Agriculture', ['Farming'])).toBe(true);
+  });
+});
+
+describe('ranking of eligible schemes', () => {
+  const profile: BusinessProfile = {
+    monthly_revenue_est: 25000,
+    monthly_expense_est: 15000,
+    existing_loans: false,
+    sector: 'retail',
+  };
+  const portal: SchemeRecord = { id: 'portal', name: 'Grievance Portal', eligibility_rules: {}, scheme_type: 'other' };
+  const loan: SchemeRecord = {
+    id: 'loan', name: 'Small Loan', eligibility_rules: { income_max: 2500000, sector: ['retail'] }, scheme_type: 'loan',
+  };
+  const registration: SchemeRecord = {
+    id: 'reg', name: 'Registration', eligibility_rules: { sector: ['retail'] }, scheme_type: 'registration',
+  };
+
+  it('puts schemes that matched the person before ones with no rules', () => {
+    const ids = matchSchemes(profile, [portal, registration, loan]).map((r) => r.scheme.id);
+    expect(ids).toEqual(['loan', 'reg', 'portal']);
+  });
+
+  it('puts money before portals when the fit is equal', () => {
+    const grant: SchemeRecord = { id: 'grant', name: 'Grant', eligibility_rules: {}, scheme_type: 'subsidy' };
+    const ids = matchSchemes(profile, [portal, grant]).map((r) => r.scheme.id);
+    expect(ids).toEqual(['grant', 'portal']);
+  });
+
+  it('still lists ineligible schemes last', () => {
+    const women: SchemeRecord = { id: 'w', name: 'Women only', eligibility_rules: { gender: 'female' }, scheme_type: 'loan' };
+    const ids = matchSchemes({ ...profile, gender: 'male' }, [women, portal]).map((r) => r.scheme.id);
+    expect(ids).toEqual(['portal', 'w']);
   });
 });

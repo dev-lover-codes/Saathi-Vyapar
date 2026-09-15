@@ -6,7 +6,10 @@
 
 import { describe, it, expect } from 'vitest';
 import {
+  explainPlain,
   calculateBreakEven,
+  calculateNetProfit,
+  calculateBreakEvenRevenue,
   calculateMarginPercent,
   assessCashFlowRisk,
   generateFinancialSummary,
@@ -136,6 +139,42 @@ describe('assessCashFlowRisk', () => {
 // ─────────────────────────────────────────────────────────
 // generateFinancialSummary
 // ─────────────────────────────────────────────────────────
+describe('calculateNetProfit', () => {
+  it('returns what is left after expenses', () => {
+    expect(calculateNetProfit(30000, 20000)).toBe(10000);
+  });
+
+  it('goes negative when expenses exceed revenue', () => {
+    expect(calculateNetProfit(5000, 7000)).toBe(-2000);
+  });
+
+  it('is zero at break-even', () => {
+    expect(calculateNetProfit(20000, 20000)).toBe(0);
+  });
+});
+
+// ─────────────────────────────────────────────────────────
+describe('calculateBreakEvenRevenue', () => {
+  it('equals fixed costs when no variable-cost split is known', () => {
+    expect(calculateBreakEvenRevenue(20000)).toBe(20000);
+  });
+
+  it('scales up as the contribution margin shrinks', () => {
+    expect(calculateBreakEvenRevenue(10000, 0.5)).toBe(20000);
+    expect(calculateBreakEvenRevenue(10000, 0.25)).toBe(40000);
+  });
+
+  it('is Infinity when the contribution margin is zero or negative', () => {
+    expect(calculateBreakEvenRevenue(10000, 0)).toBe(Infinity);
+    expect(calculateBreakEvenRevenue(10000, -0.1)).toBe(Infinity);
+  });
+
+  it('is zero when there are no costs to cover', () => {
+    expect(calculateBreakEvenRevenue(0)).toBe(0);
+  });
+});
+
+// ─────────────────────────────────────────────────────────
 describe('generateFinancialSummary', () => {
   it('returns correct structure for a healthy business', () => {
     const result = generateFinancialSummary({
@@ -143,7 +182,7 @@ describe('generateFinancialSummary', () => {
       monthlyExpenseEst: 10000,
       existingLoans: false,
     });
-    expect(result).toHaveProperty('breakEvenUnits');
+    expect(result).toHaveProperty('breakEvenRevenue');
     expect(result).toHaveProperty('marginPercent');
     expect(result).toHaveProperty('cashFlowRisk');
     expect(result).toHaveProperty('explanation');
@@ -171,7 +210,10 @@ describe('generateFinancialSummary', () => {
     });
     expect(result.cashFlowRisk).toBe('high');
     expect(result.marginPercent).toBe(0);
-    expect(result.breakEvenUnits).toBe(Infinity);
+    // Earning nothing does not make the target infinite — you still need
+    // ₹5,000 of sales to cover ₹5,000 of costs. The old formula
+    // (expenses / revenue) returned Infinity here.
+    expect(result.breakEvenRevenue).toBe(5000);
   });
 
   it('mentions loans in explanation when existingLoans is true', () => {
@@ -193,14 +235,25 @@ describe('generateFinancialSummary', () => {
     expect(result.cashFlowRisk).toBe('medium');
   });
 
-  it('breakEvenUnits is a finite positive number for normal case', () => {
+  it('reports break-even as the rupee sales target, not a ratio', () => {
     const result = generateFinancialSummary({
       monthlyRevenueEst: 30000,
       monthlyExpenseEst: 20000,
       existingLoans: false,
     });
-    expect(isFinite(result.breakEvenUnits)).toBe(true);
-    expect(result.breakEvenUnits).toBeGreaterThan(0);
+    // The old code returned 20000/30000 = 0.67 and stored it as "units".
+    expect(result.breakEvenRevenue).toBe(20000);
+    expect(result.explanation).toContain('₹20000');
+  });
+
+  it('reports profit in rupees alongside the percentage', () => {
+    const result = generateFinancialSummary({
+      monthlyRevenueEst: 30000,
+      monthlyExpenseEst: 20000,
+      existingLoans: false,
+    });
+    expect(result.netProfit).toBe(10000);
+    expect(result.explanation).toContain('₹10000');
   });
 
   it('marginPercent is negative when expenses exceed revenue', () => {
@@ -211,5 +264,33 @@ describe('generateFinancialSummary', () => {
     });
     expect(result.marginPercent).toBeLessThan(0);
     expect(result.explanation).toContain('loss');
+  });
+});
+
+describe('explainPlain', () => {
+  const summary = { netProfit: 21000, marginPercent: 84, breakEvenRevenue: 4000, cashFlowRisk: 'medium' as const };
+
+  it('says the same figures in Hindi with no English words', () => {
+    const text = explainPlain(summary, 'hi', true);
+    expect(text).toContain('₹21,000');
+    expect(text).toContain('₹4,000');
+    expect(text).not.toMatch(/[A-Za-z]{3,}/);
+  });
+
+  it('says the same figures in English with no Devanagari', () => {
+    const text = explainPlain(summary, 'en', false);
+    expect(text).toContain('₹21,000');
+    expect(text).toContain('₹4,000');
+    expect(text).not.toMatch(/[ऀ-ॿ]/);
+    expect(text).not.toMatch(/instalment/);
+  });
+
+  it('never says "₹100 of every ₹100" for a margin just under 100', () => {
+    const text = explainPlain({ ...summary, marginPercent: 99.93 }, 'en');
+    expect(text).toContain('₹99.9 of every ₹100');
+  });
+
+  it('describes a loss as a shortfall', () => {
+    expect(explainPlain({ ...summary, netProfit: -500, marginPercent: -5 }, 'en')).toMatch(/short by ₹500/);
   });
 });

@@ -3,1120 +3,334 @@
 /**
  * src/app/page.tsx
  *
- * Saathi Vyapar Showcase Site — Complete 12-Section Pantheon Eternal Heritage Implementation
+ * Homepage.
  *
- * Design System:
- * - Warm cream background (#F5F1E6)
- * - Deep navy ink (#0B1E33)
- * - Gold accent (#C9A24B)
- * - Serif display headlines (Playfair Display)
- * - Clean sans body text (Inter)
- * - Large 32-40px rounded corners on every card and image
- * - Generous whitespace, editorial premium feel referencing classical pantheon/column heritage
+ * Rewritten for the person the product is for: someone running a small shop
+ * who may be opening a website for the first time. The previous page had
+ * twelve sections, competition metadata in the hero, a 580px dark panel
+ * showing a fabricated "live deployment", four persona tabs that only moved a
+ * border, and section headings like "Core Advisory Architecture". None of that
+ * tells a shopkeeper what they can do here.
  *
- * All 12 Sections in order:
- * 1. Floating Nav (persistent, not a scroll section)
- * 2. Hero
- * 3. Trust/Alignment Strip
- * 4. Floating Visual Collage
- * 5. Manifesto
- * 6. Feature Split — Advisory Engine
- * 7. Feature Split — Yojana Kendra (reversed layout)
- * 8. Use-Case Grid (with persona filter buttons)
- * 9. Testimonial
- * 10. Roadmap / Updates
- * 11. Closing CTA
- * 12. Footer
+ * What replaced it:
+ *   - one plain headline and one plain paragraph
+ *   - a worked example of the actual product moment: a notebook page and the
+ *     entries it becomes, marked as an example rather than dressed up as live
+ *     data
+ *   - capabilities written as the questions a shop owner would ask
+ *   - three steps, in order
+ *   - schemes, explained without naming a single internal component
+ *
+ * Dark navy is now used for the nav bar and primary buttons only; the page
+ * itself stays on the warm cream ground.
+ *
+ * The primary call to action points at /onboarding, which is where the
+ * assistant experience begins — so when the chat panel lands it can take over
+ * this button without the page changing shape.
  */
 
-import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useLanguage } from '@/contexts/LanguageContext';
-import VoiceOnboardingModal from '@/components/VoiceOnboardingModal';
 import LanguageToggleButton from '@/components/LanguageToggleButton';
+import { useLanguage } from '@/contexts/LanguageContext';
+import Reveal from '@/components/Reveal';
 
-export default function ShowcaseHomePage() {
+/**
+ * The worked example, labelled as an example on the page.
+ *
+ * Written in the reader's own script: a Hindi reader is shown a notebook page
+ * in Devanagari, because that is what their notebook looks like. These are the
+ * same four lines the parser handles, so the totals shown are the totals the
+ * product would actually produce.
+ */
+const EXAMPLE_LINES = {
+  en: [
+    { raw: 'Bikri 2400', label: 'Bikri', amount: 2400, kind: 'in' as const },
+    { raw: 'Sabzi bikri 1850', label: 'Sabzi bikri', amount: 1850, kind: 'in' as const },
+    { raw: 'Maal kharid 1200', label: 'Maal kharid', amount: 1200, kind: 'out' as const },
+    { raw: 'Bijli bill 340', label: 'Bijli bill', amount: 340, kind: 'out' as const },
+  ],
+  hi: [
+    { raw: 'बिक्री 2400', label: 'बिक्री', amount: 2400, kind: 'in' as const },
+    { raw: 'सब्ज़ी बिक्री 1850', label: 'सब्ज़ी बिक्री', amount: 1850, kind: 'in' as const },
+    { raw: 'माल खरीद 1200', label: 'माल खरीद', amount: 1200, kind: 'out' as const },
+    { raw: 'बिजली बिल 340', label: 'बिजली बिल', amount: 340, kind: 'out' as const },
+  ],
+};
+
+export default function HomePage() {
   const { t, language } = useLanguage();
-  const tr = (en: string, hi: string) => (language === 'hi' ? hi : en);
-  const [activePersona, setActivePersona] = useState<'vendor' | 'tailor' | 'artisan' | 'dairy'>('vendor');
-  const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
-  const [isFabOpen, setIsFabOpen] = useState(false);
 
-  // WhatsApp Support Number from env or default
-  const whatsappNumber =
-    process.env.NEXT_PUBLIC_WHATSAPP_PHONE_NUMBER ||
-    process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ||
-    '919876543210';
-  const cleanWhatsappNumber = whatsappNumber.replace(/\D/g, '');
+  const exampleLines = EXAMPLE_LINES[language];
 
-  // Prevent background scrolling when voice modal is active
-  useEffect(() => {
-    if (isVoiceModalOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isVoiceModalOpen]);
+  const moneyIn = exampleLines.filter((l) => l.kind === 'in').reduce((s, l) => s + l.amount, 0);
+  const moneyOut = exampleLines.filter((l) => l.kind === 'out').reduce((s, l) => s + l.amount, 0);
+
+  // A Hindi reader's notebook has Devanagari numerals, so the sample page
+  // and its totals are shown that way in Hindi mode.
+  const digits = (text: string) =>
+    language === 'hi' ? text.replace(/[0-9]/g, (d) => '०१२३४५६७८९'[Number(d)]) : text;
+  const rupees = (n: number) => digits(`₹${n.toLocaleString('en-IN')}`);
+
+  const helps = [
+    { q: t('hp_q1'), a: t('hp_a1') },
+    { q: t('hp_q2'), a: t('hp_a2') },
+    { q: t('hp_q3'), a: t('hp_a3') },
+    { q: t('hp_q4'), a: t('hp_a4') },
+  ];
+
+  const strip = [
+    { title: t('hp_strip1_title'), sub: t('hp_strip1_sub') },
+    { title: t('hp_strip2_title'), sub: t('hp_strip2_sub') },
+    { title: t('hp_strip3_title'), sub: t('hp_strip3_sub') },
+    { title: t('hp_strip4_title'), sub: t('hp_strip4_sub') },
+  ];
+
+  const steps = [
+    { title: t('hp_how_1_title'), body: t('hp_how_1_body') },
+    { title: t('hp_how_2_title'), body: t('hp_how_2_body') },
+    { title: t('hp_how_3_title'), body: t('hp_how_3_body') },
+  ];
+
+  const schemePoints = [
+    t('hp_schemes_point1'),
+    t('hp_schemes_point2'),
+    t('hp_schemes_point3'),
+    t('hp_schemes_point4'),
+  ];
 
   return (
-    <div className="min-h-screen bg-[#F5F1E6] text-[#0B1E33] font-['Inter',sans-serif] selection:bg-[#0B1E33] selection:text-[#F5F1E6] relative overflow-x-hidden">
-      {/* ── Background Classical Architectural Geometry ── */}
-      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden opacity-35">
-        <svg
-          className="absolute top-10 left-1/2 -translate-x-1/2 w-[1200px] h-[1200px] text-[#C9A24B]"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 800 800"
-        >
-          <circle cx="400" cy="400" r="390" strokeDasharray="4 8" strokeWidth="0.5" />
-          <circle cx="400" cy="400" r="290" strokeWidth="0.4" />
-          <circle cx="400" cy="400" r="180" strokeDasharray="3 6" strokeWidth="0.5" />
-          <line x1="400" y1="10" x2="400" y2="790" strokeDasharray="2 8" strokeWidth="0.4" />
-          <line x1="10" y1="400" x2="790" y2="400" strokeDasharray="2 8" strokeWidth="0.4" />
-        </svg>
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════════
-          SECTION 1 — FLOATING NAVIGATION (Persistent)
-         ══════════════════════════════════════════════════════════════════ */}
-      <header className="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-5xl transition-all">
-        <div className="bg-[#0B1E33]/92 backdrop-blur-xl border border-[#C9A24B]/35 rounded-full px-5 sm:px-8 py-3.5 shadow-[0_20px_50px_rgba(11,30,51,0.28)] flex items-center justify-between">
-          {/* Left: Brand Logo */}
-          <Link href="/" className="flex items-center group">
-            <img
-              src="/Logo.png"
-              alt="Saathi Vyapar Logo"
-              className="h-10 sm:h-12 w-auto object-contain transition-transform group-hover:scale-105 duration-300"
-            />
+    <div className="min-h-screen bg-[#FAF7EF] text-[#1B4332] font-['Open_Sans',sans-serif]">
+      {/* ── Navigation ─────────────────────────────────────────────── */}
+      {/* A light pill that floats over the page. The dark full-width bar made
+          the first thing on screen a slab of navy. */}
+      <header className="sticky top-0 z-40 px-3 sm:px-6 pt-3 sm:pt-5">
+        <nav className="max-w-6xl mx-auto bg-white/90 backdrop-blur rounded-full shadow-[0_2px_20px_rgba(20,60,40,0.07)] border border-[#1B4332]/8 h-14 sm:h-16 flex items-center justify-between gap-3 pl-3 pr-3 sm:pl-5 sm:pr-4">
+          <Link href="/" className="flex items-center gap-2.5 shrink-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/Logo.png" alt="" className="h-8 w-auto object-contain" />
+            <span className="font-['Roboto',sans-serif] font-bold text-[#1B4332] text-[15px] hidden xs:inline sm:inline">
+              {t('brand_name')}
+            </span>
           </Link>
 
-          {/* Center: Nav links in cream */}
-          <nav className="hidden md:flex items-center gap-7 text-[#F5F1E6]/85 text-xs font-medium tracking-wide">
-            <a href="#product" className="hover:text-[#C9A24B] transition-colors">
-              {t('nav_product')}
-            </a>
-            <a href="#how-it-works" className="hover:text-[#C9A24B] transition-colors">
-            {t('nav_how_it_works')}
-            </a>
-            <a href="#impact" className="hover:text-[#C9A24B] transition-colors">
-            {t('nav_impact')}
-            </a>
-            <a href="#team" className="hover:text-[#C9A24B] transition-colors">
-            {t('nav_team')}
-            </a>
-          </nav>
+          <div className="hidden lg:flex items-center gap-7 text-[15px] text-[#1B4332]/75">
+            <a href="#help" className="hover:text-[#1B4332] transition-colors">{t('hp_nav_help')}</a>
+            <a href="#how" className="hover:text-[#1B4332] transition-colors">{t('hp_nav_how')}</a>
+            <a href="#schemes" className="hover:text-[#1B4332] transition-colors">{t('hp_nav_schemes')}</a>
+          </div>
 
-          {/* Right: Language Toggle + Gold-outlined "Try the Demo" Button */}
-          <div className="flex items-center gap-2.5">
-            <LanguageToggleButton className="border-[#C9A24B]/40 text-[#F5F1E6]/80 hover:text-[#F5F1E6]" />
-            <Link
-              href="/login"
-              className="hidden sm:inline-block text-xs text-[#F5F1E6]/80 hover:text-[#F5F1E6] font-medium px-3 py-1.5 transition-colors"
-            >
-              {t('nav_login')}
+          <div className="flex items-center gap-2 shrink-0">
+            <LanguageToggleButton className="!border-[#1B4332]/15 !bg-transparent !text-[#1B4332]" />
+            <Link href="/login" className="hidden sm:inline text-[15px] text-[#1B4332]/75 hover:text-[#1B4332] px-2 transition-colors">
+              {t('hp_login')}
             </Link>
             <Link
               href="/onboarding"
-              className="border border-[#C9A24B] text-[#C9A24B] hover:bg-[#C9A24B] hover:text-[#0B1E33] font-semibold text-xs sm:text-sm px-5 py-2 rounded-full transition-all duration-300 shadow-sm"
+              className="bg-[#C9A227] hover:bg-[#B8912A] text-white font-bold text-sm px-4 sm:px-5 py-2.5 rounded-full transition-colors whitespace-nowrap"
             >
-            {t('nav_try_demo')}
+              {t('hp_try')}
             </Link>
           </div>
-        </div>
+        </nav>
       </header>
 
-      {/* ══════════════════════════════════════════════════════════════════
-          SECTION 2 — HERO
-         ══════════════════════════════════════════════════════════════════ */}
-      <section className="pt-36 sm:pt-44 pb-16 px-4 sm:px-8 max-w-6xl mx-auto text-center relative z-10">
-        {/* Eyebrow Label */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#0B1E33]/5 border border-[#C9A24B]/30 mb-6">
-          <span className="w-2 h-2 rounded-full bg-[#C9A24B] animate-pulse" />
-          <p className="text-[11px] sm:text-xs font-bold text-[#C9A24B] tracking-[0.2em] uppercase font-sans">
-            {tr('SIH26091 / Ministry of Social Justice & Empowerment / Team Pantheon Eternal', 'SIH26091 / सामाजिक न्याय एवं अधिकारिता मंत्रालय / टीम पैंथियन इटरनल')}
-          </p>
-        </div>
+      <main>
+        {/* ── Hero: words left, the worked example right ─────────────── */}
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-12 sm:pt-16 sm:pb-14">
+          <div className="grid lg:grid-cols-[1fr_1.05fr] gap-10 lg:gap-14 items-center">
+            <Reveal>
+              <p className="text-[13px] font-semibold tracking-[0.12em] uppercase text-[#3F6B52]">
+                {t('hp_eyebrow')}
+              </p>
 
-        {/* Primary Serif Display Headline */}
-        <h1 className="font-['Playfair_Display',Georgia,serif] text-4xl sm:text-6xl md:text-7xl font-bold text-[#0B1E33] tracking-tight leading-[1.1] mb-6">
-          {t('hero_title_start')} <br className="hidden sm:inline" />
-          <span className="italic text-[#0B1E33]">{t('hero_title_end')}</span>
-        </h1>
+              <h1 className="mt-4 font-['Roboto',sans-serif] text-[2.5rem] sm:text-[3.4rem] font-bold text-[#1B4332] leading-[1.1] tracking-tight">
+                {t('hp_hero_title_a')}
+                <br />
+                {t('hp_hero_title_b')}
+              </h1>
 
-        {/* Subtitle */}
-        <p className="text-[#0B1E33]/80 font-['Inter',sans-serif] text-base sm:text-xl max-w-3xl mx-auto leading-relaxed mb-10">
-          {t('hero_subtitle')}
-        </p>
+              <p className="mt-5 text-[17px] leading-relaxed text-[#1B4332]/70 max-w-xl">
+                {t('hp_hero_sub')}
+              </p>
 
-        {/* Action Button Group */}
-        <div className="flex flex-wrap items-center justify-center gap-4 mb-14">
+              <div className="mt-8 flex flex-wrap items-center gap-x-7 gap-y-3">
+                <Link
+                  href="/onboarding"
+                  className="bg-[#C9A227] hover:bg-[#B08A1E] text-white font-bold text-[17px] px-8 py-4 rounded-full transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(201,162,39,0.30)]"
+                >
+                  {t('hp_hero_cta')} →
+                </Link>
+                <Link href="/login" className="font-semibold text-[#1B4332]/70 hover:text-[#1B4332] transition-colors">
+                  {t('hp_hero_secondary')}
+                </Link>
+              </div>
+            </Reveal>
+
+            {/* The worked example. One soft disc behind it for depth — no
+                handwriting, no drawn arrows: this goes in front of judges. */}
+            <Reveal delay={2} className="relative">
+              <span
+                aria-hidden="true"
+                className="hidden lg:block absolute -top-8 -right-4 w-[24rem] h-[24rem] rounded-full bg-[#BFCFB4]/45"
+              />
+
+              <div className="relative bg-white rounded-3xl shadow-[0_14px_44px_rgba(20,60,40,0.09)] border border-[#1B4332]/8 p-5 sm:p-6">
+                <span className="inline-block text-[11px] font-semibold text-[#1B4332]/50 border border-[#1B4332]/12 rounded-full px-3 py-1">
+                  {t('hp_demo_label')}
+                </span>
+
+                <div className="mt-4 grid gap-4 sm:grid-cols-[1fr_auto_1.1fr] sm:items-center">
+                  <div className="bg-[#FBF8EF] border border-[#1B4332]/10 rounded-2xl p-4">
+                    <p className="text-xs font-semibold text-[#1B4332]/55 mb-3">{t('hp_demo_book')}</p>
+                    <ul className="space-y-2.5 font-mono text-[15px] text-[#1B4332]/85">
+                      {exampleLines.map((line) => (
+                        <li key={line.raw}>{digits(line.raw)}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div aria-hidden="true" className="hidden sm:block text-xl text-[#C9A227]">→</div>
+
+                  <div className="bg-[#F3F6F0] rounded-2xl p-4">
+                    <p className="text-xs font-semibold text-[#1B4332]/55 mb-3">{t('hp_demo_result')}</p>
+                    <ul className="space-y-2">
+                      {exampleLines.map((line) => (
+                        <li key={line.raw} className="flex items-center justify-between gap-3 text-sm">
+                          <span className="text-[#1B4332]/75 truncate">{line.label}</span>
+                          <span className={`font-bold shrink-0 ${line.kind === 'in' ? 'text-[#1B7F4B]' : 'text-[#C62828]'}`}>
+                            {line.kind === 'in' ? '+' : '−'}{rupees(line.amount)}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <dl className="mt-4 pt-3 border-t border-[#1B4332]/10 space-y-1.5 text-sm">
+                      <div className="flex justify-between">
+                        <dt className="text-[#1B4332]/60">{t('hp_demo_in')}</dt>
+                        <dd className="font-semibold text-[#1B7F4B]">{rupees(moneyIn)}</dd>
+                      </div>
+                      <div className="flex justify-between">
+                        <dt className="text-[#1B4332]/60">{t('hp_demo_out')}</dt>
+                        <dd className="font-semibold text-[#C62828]">{rupees(moneyOut)}</dd>
+                      </div>
+                      <div className="flex justify-between text-[15px]">
+                        <dt className="font-bold text-[#1B4332]">{t('hp_demo_left')}</dt>
+                        <dd className="font-bold text-[#1B4332]">{rupees(moneyIn - moneyOut)}</dd>
+                      </div>
+                    </dl>
+                  </div>
+                </div>
+
+                <p className="mt-4 text-xs leading-relaxed text-[#1B4332]/50">{t('hp_demo_note')}</p>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ── What you can do, at a glance ───────────────────────────── */}
+        <section className="bg-[#F3EFE2]/70 border-y border-[#1B4332]/8">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 grid gap-8 sm:gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            {strip.map((item, i) => (
+              <Reveal key={item.title} delay={((i % 4) + 1) as 1 | 2 | 3 | 4} className="transition-transform duration-300 hover:-translate-y-0.5">
+                <h3 className="font-semibold text-[15px] leading-snug text-[#1B4332]">{item.title}</h3>
+                <p className="text-[13px] text-[#1B4332]/55 mt-1.5">{item.sub}</p>
+              </Reveal>
+            ))}
+          </div>
+        </section>
+
+        {/* ── What can it help you with ─────────────────────────────── */}
+        <section id="help" className="bg-white border-y border-[#1B4332]/8 scroll-mt-16">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
+            <h2 className="font-['Roboto',sans-serif] text-2xl sm:text-3xl font-bold text-[#1B4332]">{t('hp_help_title')}</h2>
+
+            <div className="mt-8 max-w-3xl divide-y divide-[#1B4332]/10">
+              {helps.map((item, i) => (
+                <Reveal key={item.q} delay={((i % 4) + 1) as 1 | 2 | 3 | 4}>
+                  <div className="py-5 first:pt-0">
+                    <h3 className="font-bold text-[19px] leading-snug text-[#1B4332]">{item.q}</h3>
+                    <p className="mt-2 text-[16px] leading-relaxed text-[#1B4332]/70">{item.a}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── How it works ─────────────────────────────────────────── */}
+        <section id="how" className="max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-20 scroll-mt-16">
+          <h2 className="font-['Roboto',sans-serif] text-2xl sm:text-3xl font-bold text-[#1B4332]">{t('hp_how_title')}</h2>
+
+          <ol className="mt-8 grid gap-8 sm:gap-10 sm:grid-cols-3">
+            {steps.map((step, i) => (
+              <li key={step.title}>
+                <Reveal delay={((i % 4) + 1) as 1 | 2 | 3 | 4}>
+                  <h3 className="font-bold text-[17px] text-[#1B4332]">
+                    <span className="text-[#C9A227] mr-2">{i + 1}.</span>
+                    {step.title}
+                  </h3>
+                  <p className="mt-2 text-[15px] leading-relaxed text-[#1B4332]/70">{step.body}</p>
+                </Reveal>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {/* ── Government schemes ───────────────────────────────────── */}
+        <section id="schemes" className="bg-white border-y border-[#1B4332]/8 scroll-mt-16">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-20 grid gap-10 md:grid-cols-2 md:items-start">
+            <div>
+              <h2 className="font-['Roboto',sans-serif] text-2xl sm:text-3xl font-bold text-[#1B4332]">{t('hp_schemes_title')}</h2>
+              <p className="mt-4 text-[15px] sm:text-base leading-relaxed text-[#1B4332]/72">
+                {t('hp_schemes_body')}
+              </p>
+            </div>
+
+            <ul className="space-y-3">
+              {schemePoints.map((point) => (
+                <li key={point} className="flex gap-3 text-[15px] leading-relaxed">
+                  <span aria-hidden="true" className="mt-2 h-1 w-1 rounded-full bg-[#C9A227] shrink-0" />
+                  <span className="text-[#1B4332]/78">{point}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        {/* ── Final call to action ─────────────────────────────────── */}
+        <section className="max-w-5xl mx-auto px-4 sm:px-6 py-16 sm:py-20 text-center">
+          <h2 className="font-['Roboto',sans-serif] text-2xl sm:text-3xl font-bold text-[#1B4332]">{t('hp_final_title')}</h2>
+          <p className="mt-3 text-[15px] sm:text-base text-[#1B4332]/70">{t('hp_final_body')}</p>
+
           <Link
             href="/onboarding"
-            className="px-8 py-4 bg-[#0B1E33] hover:bg-[#142D4B] text-[#F5F1E6] font-semibold text-sm rounded-full shadow-[0_10px_30px_rgba(11,30,51,0.2)] hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
+            className="mt-7 inline-block bg-[#C9A227] hover:bg-[#B08A1E] text-white font-bold px-8 py-4 rounded-full transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(201,162,39,0.30)]"
           >
-            {tr('Launch Advisory Demo', 'सलाहकार डेमो शुरू करें')}
+            {t('hp_hero_cta')} →
           </Link>
-          <button
-            onClick={() => setIsVoiceModalOpen(true)}
-            className="px-7 py-4 bg-[#F5F1E6] border border-[#C9A24B] text-[#0B1E33] hover:bg-[#C9A24B] hover:text-[#0B1E33] font-semibold text-sm rounded-full transition-all duration-300 shadow-sm flex items-center gap-2"
-          >
-            <span>🎙️</span>
-            <span>{tr('Voice Registration', 'वॉइस पंजीकरण')}</span>
-          </button>
-          <Link
-            href="/facilitator"
-            className="px-6 py-4 text-[#0B1E33]/80 hover:text-[#0B1E33] font-semibold text-sm rounded-full hover:bg-[#0B1E33]/5 transition-colors"
-          >
-            {tr('Facilitator Hub →', 'सुविधाकर्ता केंद्र →')}
-          </Link>
-        </div>
 
-        {/* Full-width Rounded-Corner (40px) Hero Image */}
-        <div className="relative w-full rounded-[40px] overflow-hidden shadow-[0_30px_80px_rgba(11,30,51,0.14)] border border-[#C9A24B]/30 group">
-          {/* Generated photograph */}
-          <img
-            src="https://lh3.googleusercontent.com/aida/AEtjO1XNMpVqGgJm68VUGZKWw0LvKcusyDLbyfpEeVnim3ZOO7HnOAO_b1gBUgM6rPwWhUjw5e8UyNN0VuAuvRNxDTCn1hD4VZwWSkzhri3myGmi7viaHe5QPbPPb-x2NcMUkTdUksxGCJ-HfBJ_8jYtDyswRc1IgHAlxnr-oAInnEIDA18tBUSzHSyf2TcAPa0r72kCKattpXXK8HjXh5iEV6Ik4OBXj8fq0nSUw4VvIdUEZ5J-mwl_Vq6L7Q"
-            alt="Rural Indian shopkeeper smiling while using a smartphone in a small village shop"
-            className="w-full h-[380px] sm:h-[500px] md:h-[580px] object-cover object-center group-hover:scale-102 transition-transform duration-700 ease-out"
-          />
+          <p className="mt-6 text-xs text-[#1B4332]/55">{t('hp_privacy')}</p>
+        </section>
+      </main>
 
-          {/* Gradient Overlay at Bottom */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0B1E33]/90 via-[#0B1E33]/30 to-transparent pointer-events-none" />
-
-          {/* Floating Pill Telemetry on Image */}
-          <div className="absolute bottom-6 left-6 right-6 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 text-left">
-            <div className="bg-[#0B1E33]/80 backdrop-blur-md border border-[#C9A24B]/40 px-5 py-3 rounded-[24px] text-[#F5F1E6]">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#C9A24B]">
-                  {tr('Live Rural Deployment', 'ग्रामीण क्षेत्र में लाइव तैनाती')}
-                </span>
-              </div>
-              <p className="font-['Playfair_Display',Georgia,serif] text-base sm:text-lg font-bold mt-1">
-                {tr('Ramesh General Store · Satara District', 'रमेश जनरल स्टोर · सतारा जिला')}
-              </p>
-              <p className="text-xs text-[#F5F1E6]/80 font-sans mt-0.5">
-                {tr('Break-Even: 12 units/day · Net Margin +28.4%', 'ब्रेक-ईवन: 12 यूनिट/दिन · शुद्ध मार्जिन +28.4%')}
-              </p>
-            </div>
-
-            <div className="bg-[#0B1E33]/80 backdrop-blur-md border border-[#C9A24B]/40 px-4 py-2.5 rounded-full text-xs text-[#F5F1E6] flex items-center gap-2">
-              <span className="text-[#C9A24B]">✓</span>
-              <span>{tr('Zero-Bandwidth WhatsApp & SMS Handshake Active', 'कम नेटवर्क में WhatsApp और SMS कनेक्शन सक्रिय')}</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════════════════════
-          SECTION 3 — TRUST / ALIGNMENT STRIP
-         ══════════════════════════════════════════════════════════════════ */}
-      <section className="py-8 bg-[#F5F1E6] border-y border-[#C9A24B]/25 overflow-hidden">
-        <div className="max-w-6xl mx-auto px-4 text-center mb-3">
-          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.28em] text-[#C9A24B]">
-            {tr('Connects you to', 'आपको इन योजनाओं से जोड़ता है')}
-          </span>
-        </div>
-        <div className="relative w-full overflow-hidden flex items-center">
-          <div className="animate-marquee whitespace-nowrap flex items-center gap-12 text-[#C9A24B] font-['Playfair_Display',Georgia,serif] text-sm sm:text-lg tracking-widest uppercase select-none">
-            <span>{tr('PMEGP · 35% Capital Subsidy', 'PMEGP · 35% पूंजी सब्सिडी')}</span>
-            <span className="text-xs text-[#C9A24B]/60">◆</span>
-            <span>{tr('Mudra Shishu, Kishor & Tarun', 'मुद्रा शिशु, किशोर और तरुण')}</span>
-            <span className="text-xs text-[#C9A24B]/60">◆</span>
-            <span>{tr('Stand-Up India (SC/ST & Women)', 'स्टैंड-अप इंडिया (SC/ST और महिलाएं)')}</span>
-            <span className="text-xs text-[#C9A24B]/60">◆</span>
-            <span>{tr('PM SVANidhi Micro-Credit', 'PM SVANidhi माइक्रो-क्रेडिट')}</span>
-            <span className="text-xs text-[#C9A24B]/60">◆</span>
-            <span>{tr('NABARD SHG Credit-Linkage', 'NABARD SHG क्रेडिट-लिंकेज')}</span>
-            <span className="text-xs text-[#C9A24B]/60">◆</span>
-            <span>{tr('PMEGP · 35% Capital Subsidy', 'PMEGP · 35% पूंजी सब्सिडी')}</span>
-            <span className="text-xs text-[#C9A24B]/60">◆</span>
-            <span>{tr('Mudra Shishu, Kishor & Tarun', 'मुद्रा शिशु, किशोर और तरुण')}</span>
-            <span className="text-xs text-[#C9A24B]/60">◆</span>
-            <span>{tr('Stand-Up India (SC/ST & Women)', 'स्टैंड-अप इंडिया (SC/ST और महिलाएं)')}</span>
-            <span className="text-xs text-[#C9A24B]/60">◆</span>
-            <span>{tr('PM SVANidhi Micro-Credit', 'PM SVANidhi माइक्रो-क्रेडिट')}</span>
-            <span className="text-xs text-[#C9A24B]/60">◆</span>
-            <span>{tr('NABARD SHG Credit-Linkage', 'NABARD SHG क्रेडिट-लिंकेज')}</span>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════════════════════
-          SECTION 4 — FLOATING VISUAL COLLAGE
-         ══════════════════════════════════════════════════════════════════ */}
-      <section id="product" className="py-28 px-4 sm:px-8 max-w-7xl mx-auto relative overflow-hidden">
-        {/* Background Large Serif Watermark Heading */}
-        <div className="absolute inset-x-0 top-12 text-center pointer-events-none select-none z-0">
-          <h2 className="font-['Playfair_Display',Georgia,serif] text-6xl sm:text-8xl md:text-9xl font-bold text-[#0B1E33]/[0.06] tracking-tight">
-            {tr('Financial Clarity', 'वित्तीय स्पष्टता')}
-          </h2>
-        </div>
-
-        <div className="relative z-10 text-center max-w-2xl mx-auto mb-16">
-          <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#C9A24B]">
-            {tr('Product Moments in Action', 'उत्पाद की झलक')}
-          </span>
-          <h3 className="font-['Playfair_Display',Georgia,serif] text-3xl sm:text-5xl font-bold text-[#0B1E33] mt-2">
-            {tr('Every Touchpoint Designed for Reality', 'हर संपर्क वास्तविक जरूरत के अनुसार')}
-          </h3>
-          <p className="text-sm sm:text-base text-[#0B1E33]/70 font-sans mt-3">
-            {tr('Layered advisory moments bridging conversational voice messages to formal banking readiness.', 'संवादात्मक वॉइस संदेशों से औपचारिक बैंकिंग तैयारी तक सलाह के चरण।')}
-          </p>
-        </div>
-
-        {/* Scattered 5 Glassmorphism Cards with Layered Z-Index */}
-        <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {/* Card 1: WhatsApp Voice Note Processing */}
-          <div className="bg-white/85 backdrop-blur-xl rounded-[32px] p-6 shadow-[0_15px_40px_rgba(11,30,51,0.06)] border border-[#C9A24B]/30 space-y-4 hover:-translate-y-1 transition-all duration-300">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#25D366] flex items-center gap-1.5 bg-[#25D366]/10 px-3 py-1 rounded-full">
-                <span>💬</span> WhatsApp वॉइस इनपुट
-              </span>
-              <span className="text-[10px] text-[#0B1E33]/50 font-mono">{tr('0.82s Latency', '0.82 सेकंड विलंब')}
-              </span>
-            </div>
-            <div className="bg-[#EFECE4] p-4 rounded-[20px] space-y-2">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#25D366] text-white flex items-center justify-center text-sm font-bold">
-                  ▶
-                </div>
-                <div className="flex-1 space-y-1">
-                  <div className="h-2 bg-[#C9A24B]/40 rounded-full w-4/5" />
-                  <div className="h-1.5 bg-[#C9A24B]/20 rounded-full w-2/3" />
-                </div>
-                <span className="text-[11px] font-bold text-[#0B1E33]/70">0:14</span>
-              </div>
-              <p className="text-xs text-[#0B1E33]/80 italic">
-                “नमस्ते! आज 20 पैकेट चाय पत्ती बिकी, ₹1,200 मिले और ₹400 सामान लाने में लगे।”
-              </p>
-            </div>
-            <div className="p-3 bg-[#0B1E33]/5 rounded-2xl border border-[#0B1E33]/10">
-              <p className="text-xs font-semibold text-[#0B1E33]">
-                {tr('AI Extraction: +₹1,200 Revenue, -₹400 Expense → Daily Cash Flow Balanced.', 'AI निष्कर्षण: +₹1,200 आय, -₹400 खर्च → दैनिक कैश फ्लो संतुलित।')}
-              </p>
-            </div>
-          </div>
-
-          {/* Card 2: Break-Even Math Card */}
-          <div className="bg-white/85 backdrop-blur-xl rounded-[32px] p-6 shadow-[0_15px_40px_rgba(11,30,51,0.06)] border border-[#C9A24B]/30 space-y-4 hover:-translate-y-1 transition-all duration-300">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#C9A24B] uppercase tracking-wider">
-                {tr('Deterministic Math', 'सटीक गणना')}
-              </span>
-              <span className="text-xs bg-[#0B1E33] text-white px-2.5 py-0.5 rounded-full font-mono">
-                {tr('Verified', 'सत्यापित')}
-              </span>
-            </div>
-            <h4 className="font-['Playfair_Display',Georgia,serif] text-2xl font-bold text-[#0B1E33]">
-              {tr('Break-Even: 12 units/day', 'ब्रेक-ईवन: 12 यूनिट/दिन')}
-            </h4>
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs font-medium text-[#0B1E33]/70">
-                <span>दैनिक बिक्री प्रगति (16 यूनिट)</span>
-                <span className="text-[#0B1E33] font-bold">133% लक्ष्य</span>
-              </div>
-              <div className="w-full bg-[#EFECE4] h-3 rounded-full overflow-hidden">
-                <div className="bg-[#C9A24B] h-full rounded-full w-[85%]" />
-              </div>
-            </div>
-            <p className="text-xs text-[#0B1E33]/70 leading-relaxed">
-              {tr('Every unit sold above 12 yields ₹45 pure net contribution toward debt servicing.', '12 से अधिक हर यूनिट पर ऋण भुगतान के लिए ₹45 शुद्ध योगदान मिलता है।')}
-            </p>
-          </div>
-
-          {/* Card 3: PMEGP Scheme Match Card */}
-          <div className="bg-white/85 backdrop-blur-xl rounded-[32px] p-6 shadow-[0_15px_40px_rgba(11,30,51,0.06)] border border-[#C9A24B]/30 space-y-4 hover:-translate-y-1 transition-all duration-300">
-            <div className="flex items-center justify-between">
-              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                {tr('Eligible Match · 94%', 'पात्रता मिलान · 94%')}
-              </span>
-              <span className="text-xs text-[#C9A24B] font-bold">{tr('Priority Scheme', 'प्राथमिक योजना')}</span>
-            </div>
-            <div>
-              <h4 className="font-['Playfair_Display',Georgia,serif] text-xl font-bold text-[#0B1E33]">
-                PMEGP (KVIC)
-              </h4>
-              <p className="text-xs text-[#C9A24B] font-semibold mt-0.5">
-                {tr('35% Capital Subsidy for Rural Enterprises', 'ग्रामीण उद्यमों के लिए 35% पूंजी सब्सिडी')}
-              </p>
-            </div>
-            <div className="bg-[#F5F1E6] p-3 rounded-2xl border border-[#C9A24B]/20 text-xs text-[#0B1E33]/80 space-y-1">
-              <div className="flex justify-between">
-                <span>अधिकतम ऋण राशि:</span>
-                <span className="font-bold text-[#0B1E33]">₹10,00,000</span>
-              </div>
-              <div className="flex justify-between">
-                <span>सरकारी सब्सिडी:</span>
-                <span className="font-bold text-emerald-700">₹3,50,000 (गैर-वापसी योग्य)</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Card 4: {tr('Notebook Photo to Ledger', 'नोटबुक फोटो से बही-खाता')} OCR */}
-          <div className="bg-white/85 backdrop-blur-xl rounded-[32px] p-6 shadow-[0_15px_40px_rgba(11,30,51,0.06)] border border-[#C9A24B]/30 space-y-4 hover:-translate-y-1 transition-all duration-300">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#0B1E33] uppercase tracking-wider">
-                {tr('📸 Notebook OCR', '📸 नोटबुक OCR')}
-              </span>
-              <span className="text-xs text-[#C9A24B] font-mono">{tr('Bahi-Khata', 'बही-खाता')}
-              </span>
-            </div>
-            <h4 className="font-['Playfair_Display',Georgia,serif] text-lg font-bold text-[#0B1E33]">
-              {tr('Photo to Structured Ledger', 'फोटो से संरचित बही-खाता')}
-            </h4>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="bg-[#EFECE4] p-2.5 rounded-xl">
-                <span className="text-[10px] text-[#0B1E33]/60 block font-bold">{tr('RAW KHATA NOTEBOOK', 'मूल खाता नोटबुक')}</span>
-                <span className="italic text-[#0B1E33]/80 font-serif">“रोहन ₹240 जमा, तेल ₹180 बाकी”</span>
-              </div>
-              <div className="bg-[#0B1E33] p-2.5 rounded-xl text-white">
-                <span className="text-[10px] text-[#C9A24B] block font-bold">{tr('PARSED LEDGER', 'प्रसंस्कृत बही-खाता')}</span>
-                <span className="font-mono text-[11px]">+₹240 In / -₹180 Rec</span>
-              </div>
-            </div>
-            <p className="text-xs text-[#0B1E33]/70">
-              {tr('Scans handwritten Devanagari numerals directly into double-entry accounting.', 'हस्तलिखित देवनागरी अंकों को सीधे डबल-एंट्री लेखांकन में बदलता है।')}
-            </p>
-          </div>
-
-          {/* Card 5: Facilitator Testimonial Card */}
-          <div className="bg-white/85 backdrop-blur-xl rounded-[32px] p-6 shadow-[0_15px_40px_rgba(11,30,51,0.06)] border border-[#C9A24B]/30 space-y-4 hover:-translate-y-1 transition-all duration-300 md:col-span-2 lg:col-span-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#C9A24B] uppercase tracking-wider">
-                {tr('Field Facilitator Reality', 'फील्ड सुविधाकर्ता की वास्तविकता')}
-              </span>
-              <span className="text-xs bg-[#0B1E33]/5 text-[#0B1E33] px-3 py-1 rounded-full font-bold">
-                {tr('1 SHG Worker : 50 Artisans', '1 SHG कार्यकर्ता : 50 कारीगर')}
-              </span>
-            </div>
-            <blockquote className="font-['Playfair_Display',Georgia,serif] text-lg sm:text-xl font-normal italic text-[#0B1E33] leading-relaxed">
-              {tr('“This changed how I support my entrepreneurs. Instead of guessing who qualifies for a loan,', '“इससे उद्यमियों की मदद करने का मेरा तरीका बदल गया। ऋण के लिए कौन पात्र है इसका अनुमान लगाने के बजाय,')}
-              {tr('we generate a verified financial dossier in 5 minutes and submit it directly to the rural bank branch.”', 'हम 5 मिनट में सत्यापित वित्तीय दस्तावेज़ तैयार करके सीधे ग्रामीण बैंक शाखा में जमा करते हैं।”')}
-            </blockquote>
-            <div className="flex items-center gap-3 pt-2">
-              <div className="w-10 h-10 rounded-full bg-[#0B1E33] text-[#C9A24B] flex items-center justify-center font-bold text-sm">
-                SD
-              </div>
-              <div>
-                <p className="text-sm font-bold text-[#0B1E33]">Sunita Devi</p>
-                <p className="text-xs text-[#0B1E33]/70">{tr('SHG Prerak & Rural Banking Mitra, Satara Cluster', 'SHG प्रेरक एवं ग्रामीण बैंकिंग मित्र, सतारा क्लस्टर')}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════════════════════
-          SECTION 5 — MANIFESTO
-         ══════════════════════════════════════════════════════════════════ */}
-      <section className="py-28 sm:py-36 px-6 max-w-4xl mx-auto text-center relative z-10">
-        {/* Faded Concentric Circles & Pantheon Column Outline */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-10 opacity-25">
-          <svg className="w-[500px] h-[500px] text-[#C9A24B]" fill="none" stroke="currentColor" viewBox="0 0 200 200">
-            <circle cx="100" cy="100" r="90" strokeDasharray="3 6" strokeWidth="0.75" />
-            <circle cx="100" cy="100" r="70" strokeWidth="0.5" />
-            <circle cx="100" cy="100" r="45" strokeDasharray="2 4" strokeWidth="0.75" />
-          </svg>
-        </div>
-
-        <div className="w-12 h-12 rounded-full bg-[#0B1E33] border border-[#C9A24B] flex items-center justify-center text-[#C9A24B] mx-auto mb-8 shadow-md">
-          <span className="text-xl font-serif">§</span>
-        </div>
-
-        <blockquote className="font-['Playfair_Display',Georgia,serif] text-2xl sm:text-4xl md:text-5xl text-[#0B1E33] leading-[1.3] font-normal italic">
-          “As government schemes multiply and financial products grow more complex, rural entrepreneurs
-          are left further behind. Saathi Vyapar closes that gap — in their language, on their phone,
-          without asking them to change how they live.”
-        </blockquote>
-
-        <div className="mt-8 flex items-center justify-center gap-3 text-xs font-bold uppercase tracking-[0.25em] text-[#C9A24B]">
-          <span className="w-8 h-px bg-[#C9A24B]/60" />
-          <span>{tr('The Sovereign Inclusion Manifesto', 'सर्वसमावेशी विकास घोषणापत्र')}</span>
-          <span className="w-8 h-px bg-[#C9A24B]/60" />
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════════════════════
-          SECTION 6 — FEATURE SPLIT: THE ADVISORY ENGINE
-         ══════════════════════════════════════════════════════════════════ */}
-      <section id="how-it-works" className="py-24 px-4 sm:px-8 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-          {/* Left Column: Stacked Feature List with Gold Accent Line */}
-          <div className="lg:col-span-6 space-y-8">
-            <div className="space-y-3">
-              <span className="text-xs font-bold uppercase tracking-[0.22em] text-[#C9A24B]">
-                {tr('Core Advisory Architecture', 'मुख्य सलाहकार संरचना')}
-              </span>
-              <h3 className="font-['Playfair_Display',Georgia,serif] text-3xl sm:text-5xl font-bold text-[#0B1E33] leading-tight">
-                {tr('An advisor that actually understands your business.', 'ऐसा सलाहकार जो आपके व्यवसाय को वास्तव में समझता है।')}
-              </h3>
-            </div>
-
-            {/* Stacked Features with Vertical Gold Line */}
-            <div className="border-l-2 border-[#C9A24B] pl-6 space-y-6">
-              <div className="space-y-1.5">
-                <h4 className="font-['Playfair_Display',Georgia,serif] text-xl font-bold text-[#0B1E33]">
-                  {tr('Deterministic Financial Engine', 'सटीक वित्तीय इंजन')}
-                </h4>
-                <p className="text-sm text-[#0B1E33]/75 leading-relaxed font-sans">
-                  {tr('Break-even and margin math that is provably correct, built on rigorous accounting axioms, and never AI-guessed or hallucinated.', 'ब्रेक-ईवन और मार्जिन की गणना कठोर लेखांकन सिद्धांतों पर आधारित और सत्यापन योग्य है; यह AI का अनुमान या कल्पना नहीं है।')}
-                </p>
-              </div>
-
-              <div className="space-y-1.5">
-                <h4 className="font-['Playfair_Display',Georgia,serif] text-xl font-bold text-[#0B1E33]">
-                  {tr('Notebook Photo to Ledger', 'नोटबुक फोटो से बही-खाता')}
-                </h4>
-                <p className="text-sm text-[#0B1E33]/75 leading-relaxed font-sans">
-                  {tr('Optical Character Recognition reads handwritten sales notebooks and vernacular slates, transforming daily paper records into structured balance sheets.', 'OCR हस्तलिखित बिक्री नोटबुक और स्थानीय भाषा के रिकॉर्ड पढ़कर दैनिक कागजी विवरण को संरचित बैलेंस शीट में बदलता है।')}
-                </p>
-              </div>
-
-              <div className="space-y-1.5">
-                <h4 className="font-['Playfair_Display',Georgia,serif] text-xl font-bold text-[#0B1E33]">
-                  {tr('Explainable by Design', 'डिज़ाइन से पारदर्शी')}
-                </h4>
-                <p className="text-sm text-[#0B1E33]/75 leading-relaxed font-sans">
-                  {tr('Every recommendation shows why. Transparent logic breaks down monthly fixed costs, contribution margins, and credit repayment limits.', 'हर सुझाव का कारण स्पष्ट दिखता है। पारदर्शी तर्क मासिक स्थिर लागत, योगदान मार्जिन और ऋण भुगतान सीमा को समझाता है।')}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column: Floating White Card Mockup */}
-          <div className="lg:col-span-6">
-            <div className="bg-gradient-to-br from-[#EFECE4] to-[#F5F1E6] rounded-[36px] p-6 sm:p-8 border border-[#C9A24B]/30 shadow-2xl space-y-6">
-              <div className="bg-white rounded-[28px] p-6 shadow-md border border-[#E5E2E1] space-y-5">
-                <div className="flex items-center justify-between pb-3 border-b border-[#E5E2E1]">
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#C9A24B]">
-                      {tr('FINANCIAL STRUCTURING DOSSIER', 'वित्तीय संरचना दस्तावेज़')}
-                    </span>
-                    <h5 className="font-['Playfair_Display',Georgia,serif] text-lg font-bold text-[#0B1E33]">
-                      Shree Ganesh Tailoring · Solapur
-                    </h5>
-                  </div>
-                  <span className="text-xs bg-[#0B1E33] text-[#F5F1E6] font-bold px-3 py-1 rounded-full">
-                    {tr('Solvent · Grade A', 'सक्षम · ग्रेड A')}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-[#F5F1E6] p-3.5 rounded-2xl">
-                    <span className="text-[10px] text-[#0B1E33]/60 uppercase font-bold">{tr('Monthly Revenue', 'मासिक आय')}</span>
-                    <p className="font-['Playfair_Display',Georgia,serif] text-2xl font-bold text-[#0B1E33]">₹28,500</p>
-                    <span className="text-[10px] text-emerald-700 font-bold">{tr('+14% vs Last Month', '+14% पिछले महीने की तुलना में')}</span>
-                  </div>
-                  <div className="bg-[#F5F1E6] p-3.5 rounded-2xl">
-                    <span className="text-[10px] text-[#0B1E33]/60 uppercase font-bold">{tr('Gross Margin', 'सकल मार्जिन')}</span>
-                    <p className="font-['Playfair_Display',Georgia,serif] text-2xl font-bold text-[#C9A24B]">34.2%</p>
-                    <span className="text-[10px] text-[#0B1E33]/70">{tr('Healthy Unit Economics', 'स्वस्थ यूनिट अर्थशास्त्र')}</span>
-                  </div>
-                </div>
-
-                <div className="p-3.5 bg-[#0B1E33] text-[#F5F1E6] rounded-2xl flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] uppercase text-[#C9A24B] font-bold">{tr('Break-Even Threshold', 'ब्रेक-ईवन सीमा')}</span>
-                    <p className="text-sm font-semibold">{tr('14 Garments per week to cover fixed costs', 'स्थिर लागत पूरी करने के लिए प्रति सप्ताह 14 परिधान')}</p>
-                  </div>
-                  <span className="text-xl font-bold text-[#C9A24B]">{tr('✓ Met', '✓ पूरा')}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════════════════════
-          SECTION 7 — FEATURE SPLIT: YOJANA KENDRA (Reversed Layout)
-         ══════════════════════════════════════════════════════════════════ */}
-      <section className="py-24 px-4 sm:px-8 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-          {/* Left Column (mirrored): Soft Navy Gradient Panel with Glass Card */}
-          <div className="lg:col-span-6 order-2 lg:order-1">
-            <div className="bg-gradient-to-br from-[#0B1E33] to-[#142D4B] rounded-[36px] p-6 sm:p-8 text-[#F5F1E6] shadow-2xl border border-[#C9A24B]/30 space-y-6">
-              <div className="bg-[#0B1E33]/80 backdrop-blur-xl border border-[#C9A24B]/40 rounded-[28px] p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#C9A24B] uppercase tracking-wider flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                    {tr('#1 Matched Scheme', '#1 मिलान की गई योजना')}
-                  </span>
-                  <span className="text-xs bg-emerald-900/60 text-emerald-300 font-bold px-2.5 py-0.5 rounded-full">
-                    {tr('96% Score', '96% स्कोर')}
-                  </span>
-                </div>
-
-                <div>
-                  <h5 className="font-['Playfair_Display',Georgia,serif] text-xl font-bold text-white">
-                    {tr('PMEGP — Prime Minister Employment Generation Programme', 'PMEGP — प्रधानमंत्री रोजगार सृजन कार्यक्रम')}
-                  </h5>
-                  <p className="text-xs text-[#C9A24B] font-semibold mt-1">
-                    {tr('35% Capital Subsidy for Special Category / Rural Area', 'विशेष श्रेणी / ग्रामीण क्षेत्र के लिए 35% पूंजी सब्सिडी')}
-                  </p>
-                </div>
-
-                <div className="bg-white/10 p-3.5 rounded-2xl space-y-2 text-xs">
-                  <p className="font-bold text-white uppercase text-[10px] tracking-wider">
-                    {tr('Document Checklist Ready:', 'दस्तावेज़ सूची तैयार:')}
-                  </p>
-                  <div className="space-y-1 text-[#F5F1E6]/90">
-                    <div className="flex items-center gap-2">
-                      <span className="text-emerald-400 font-bold">✓</span>
-                      <span>{tr('Aadhaar Card linked with mobile number', 'आधार कार्ड मोबाइल नंबर से लिंक है')}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-emerald-400 font-bold">✓</span>
-                      <span>{tr('EDP Training Certificate (online course matched)', 'EDP प्रशिक्षण प्रमाणपत्र (ऑनलाइन कोर्स मिलान)')}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-emerald-400 font-bold">✓</span>
-                      <span>{tr('Detailed Project Report (Generated automatically by Saathi)', 'विस्तृत परियोजना रिपोर्ट (साथी द्वारा स्वतः तैयार)')}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <Link
-                  href="/dashboard/schemes"
-                  className="block text-center w-full py-3 rounded-full bg-[#C9A24B] hover:bg-[#d9b25a] text-[#0B1E33] font-bold text-xs uppercase tracking-wider transition-all"
-                >
-                  {tr('View Scheme Application Roadmap', 'योजना आवेदन रोडमैप देखें')}
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column (mirrored): Feature Content */}
-          <div className="lg:col-span-6 space-y-8 order-1 lg:order-2">
-            <div className="space-y-3">
-              <span className="text-xs font-bold uppercase tracking-[0.22em] text-[#C9A24B]">
-                {tr('Welfare Scheme Allocation', 'कल्याण योजना आवंटन')}
-              </span>
-              <h3 className="font-['Playfair_Display',Georgia,serif] text-3xl sm:text-5xl font-bold text-[#0B1E33] leading-tight">
-                {tr('Government support, matched automatically.', 'सरकारी सहायता अपने आप मिलान करें।')}
-              </h3>
-            </div>
-
-            <div className="border-l-2 border-[#C9A24B] pl-6 space-y-6">
-              <div className="space-y-1.5">
-                <h4 className="font-['Playfair_Display',Georgia,serif] text-xl font-bold text-[#0B1E33]">
-                  {tr('Curated & Verified Schemes', 'चयनित और सत्यापित योजनाएं')}
-                </h4>
-                <p className="text-sm text-[#0B1E33]/75 leading-relaxed font-sans">
-                  {tr('Not unreliable live scraping. 15+ Central and State welfare initiatives verified directly against official ministry guidelines.', 'अविश्वसनीय लाइव स्क्रैपिंग नहीं। 15+ केंद्रीय और राज्य कल्याण योजनाएं आधिकारिक मंत्रालय दिशानिर्देशों के आधार पर सत्यापित हैं।')}
-                </p>
-              </div>
-
-              <div className="space-y-1.5">
-                <h4 className="font-['Playfair_Display',Georgia,serif] text-xl font-bold text-[#0B1E33]">
-                  {tr('Plain-Language Eligibility', 'सरल भाषा में पात्रता')}
-                </h4>
-                <p className="text-sm text-[#0B1E33]/75 leading-relaxed font-sans">
-                  {tr('Why you qualify, clearly explained in your spoken vernacular without legal jargon or fine-print ambiguity.', 'आप पात्र क्यों हैं, यह आपकी स्थानीय भाषा में बिना कानूनी जटिल शब्दों के स्पष्ट बताया जाता है।')}
-                </p>
-              </div>
-
-              <div className="space-y-1.5">
-                <h4 className="font-['Playfair_Display',Georgia,serif] text-xl font-bold text-[#0B1E33]">
-                  {tr('Full Document Checklist', 'पूरी दस्तावेज़ सूची')}
-                </h4>
-                <p className="text-sm text-[#0B1E33]/75 leading-relaxed font-sans">
-                  {tr('Know exactly what papers to gather before setting foot in a bank branch, cutting out wasted visits and mediator fees.', 'बैंक जाने से पहले जरूरी कागजात की पूरी जानकारी पाएं, जिससे बेकार चक्कर और बिचौलिया शुल्क बचें।')}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════════════════════
-          SECTION 8 — BUILT FOR EVERY ENTREPRENEUR (Use-case Grid)
-         ══════════════════════════════════════════════════════════════════ */}
-      <section id="impact" className="py-24 px-4 sm:px-8 max-w-7xl mx-auto">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="text-xs font-bold uppercase tracking-[0.22em] text-[#C9A24B]">
-            {tr('Hyper-Local Domain Diversity', 'स्थानीय व्यवसायों की विविधता')}
-          </span>
-          <h3 className="font-['Playfair_Display',Georgia,serif] text-3xl sm:text-5xl font-bold text-[#0B1E33] mt-2">
-            {tr('Built for every kind of entrepreneur.', 'हर प्रकार के उद्यमी के लिए बनाया गया।')}
-          </h3>
-          <p className="text-sm sm:text-base text-[#0B1E33]/70 font-sans mt-3">
-            {tr('Whether running a roadside stall or a handloom guild, tailored advisory workflows align with your reality.', 'चाहे सड़क किनारे दुकान हो या हथकरघा समूह, सलाहकार कार्यप्रवाह आपकी वास्तविक जरूरत के अनुसार ढलते हैं।')}
-          </p>
-
-          {/* Filter Pill Buttons */}
-          <div className="flex flex-wrap items-center justify-center gap-3 mt-8">
-            <button
-              onClick={() => setActivePersona('vendor')}
-              className={`px-5 py-2 rounded-full text-xs font-semibold transition-all ${
-                activePersona === 'vendor'
-                  ? 'bg-[#0B1E33] text-[#F5F1E6] shadow-md'
-                  : 'bg-transparent border border-[#0B1E33]/30 text-[#0B1E33] hover:border-[#0B1E33]'
-              }`}
-            >
-              {tr('Vendor', 'विक्रेता')}
-            </button>
-            <button
-              onClick={() => setActivePersona('tailor')}
-              className={`px-5 py-2 rounded-full text-xs font-semibold transition-all ${
-                activePersona === 'tailor'
-                  ? 'bg-[#0B1E33] text-[#F5F1E6] shadow-md'
-                  : 'bg-transparent border border-[#0B1E33]/30 text-[#0B1E33] hover:border-[#0B1E33]'
-              }`}
-            >
-              {tr('Tailor', 'दर्जी')}
-            </button>
-            <button
-              onClick={() => setActivePersona('artisan')}
-              className={`px-5 py-2 rounded-full text-xs font-semibold transition-all ${
-                activePersona === 'artisan'
-                  ? 'bg-[#0B1E33] text-[#F5F1E6] shadow-md'
-                  : 'bg-transparent border border-[#0B1E33]/30 text-[#0B1E33] hover:border-[#0B1E33]'
-              }`}
-            >
-              {tr('Artisan', 'कारीगर')}
-            </button>
-            <button
-              onClick={() => setActivePersona('dairy')}
-              className={`px-5 py-2 rounded-full text-xs font-semibold transition-all ${
-                activePersona === 'dairy'
-                  ? 'bg-[#0B1E33] text-[#F5F1E6] shadow-md'
-                  : 'bg-transparent border border-[#0B1E33]/30 text-[#0B1E33] hover:border-[#0B1E33]'
-              }`}
-            >
-              {tr('Dairy Farmer', 'डेयरी किसान')}
-            </button>
-          </div>
-        </div>
-
-        {/* 2x2 Grid of Large Rounded-Corner (32px) Image Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Card 1: Vegetable {tr('Vendor', 'विक्रेता')} */}
-          <div
-            className={`relative rounded-[32px] overflow-hidden shadow-lg border transition-all duration-300 min-h-[360px] flex flex-col justify-end p-8 group ${
-              activePersona === 'vendor' ? 'border-[#C9A24B] ring-2 ring-[#C9A24B]/40' : 'border-[#0B1E33]/15'
-            }`}
-          >
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0B1E33] via-[#0B1E33]/60 to-transparent z-10" />
-            <img
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUsioSc0kRYfrc8Vqifz2pkHNJqMGbYpgxMW2g73bisC0KXI_uOSyNFF4KU-H2z1LxVdnBysfhh2gPbL6n9Dhi6Pt7H6paQq2MdIsu08L1DVHTJasPLRuTtQZQv3MoFHV_QcKz3HTRlVpxhXeecMmtV7rDeUS6QKxvuO9gyeG_5SZaDnyogK9DJIfnuJCt8HVqV8pJ2cCQZnh2sKXGtWQXrwWXKBXr0_ObQC8sFvBbG-ZJ7UnplKeT"
-              alt="{tr('The Vegetable Vendor', 'सब्जी विक्रेता')}"
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-            />
-            <div className="relative z-20 space-y-2 text-white">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[#C9A24B] bg-[#0B1E33]/80 px-3 py-1 rounded-full inline-block">
-                {tr('Daily Working Capital', 'दैनिक कार्यशील पूंजी')}
-              </span>
-              <h4 className="font-['Playfair_Display',Georgia,serif] text-2xl font-bold">
-                {tr('The Vegetable Vendor', 'सब्जी विक्रेता')}
-              </h4>
-              <p className="text-sm text-[#F5F1E6]/90 font-sans leading-relaxed">
-                {tr('Pricing and daily cash-flow clarity, preventing wholesale market losses and debt traps.', 'कीमत और दैनिक कैश फ्लो की स्पष्टता, थोक बाजार के नुकसान और कर्ज के जाल से बचाव।')}
-              </p>
-            </div>
-          </div>
-
-          {/* Card 2: {tr('The Tailor', 'दर्जी')} */}
-          <div
-            className={`relative rounded-[32px] overflow-hidden shadow-lg border transition-all duration-300 min-h-[360px] flex flex-col justify-end p-8 group ${
-              activePersona === 'tailor' ? 'border-[#C9A24B] ring-2 ring-[#C9A24B]/40' : 'border-[#0B1E33]/15'
-            }`}
-          >
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0B1E33] via-[#0B1E33]/60 to-transparent z-10" />
-            <img
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlVItczi7mvsLqw-E4b8qcK2W_8FIz-RF52wVhdhXgbcaE2ofX5biw_61nRt71cjJdu9EhqH63mtKziLQHho4WTOrP5h7E6OJBYxjGily9DZW6qe1cnaPkk9-NXNAxxe7-gY07UEskPE8XEMKWYfdK0RSpaeonWMGGVgKLbSaTT0Hs8T2NIrwdePy4kOne6AmX3wdSUCeHAFatOY3225UwQAUx-3yF4h-HRAGQ17OyJKIuIJYW2r5q"
-              alt="{tr('The Tailor', 'दर्जी')}"
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-            />
-            <div className="relative z-20 space-y-2 text-white">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[#C9A24B] bg-[#0B1E33]/80 px-3 py-1 rounded-full inline-block">
-                {tr('Home Enterprise Scale', 'घरेलू व्यवसाय विस्तार')}
-              </span>
-              <h4 className="font-['Playfair_Display',Georgia,serif] text-2xl font-bold">
-                {tr('The Tailor', 'दर्जी')}
-              </h4>
-              <p className="text-sm text-[#F5F1E6]/90 font-sans leading-relaxed">
-                {tr('Knowing which loan actually fits a home business without predatory interest rates.', 'बिना शोषणकारी ब्याज दरों के यह जानना कि घरेलू व्यवसाय के लिए कौन सा ऋण सही है।')}
-              </p>
-            </div>
-          </div>
-
-          {/* Card 3: {tr('The Artisan', 'कारीगर')} */}
-          <div
-            className={`relative rounded-[32px] overflow-hidden shadow-lg border transition-all duration-300 min-h-[360px] flex flex-col justify-end p-8 group ${
-              activePersona === 'artisan' ? 'border-[#C9A24B] ring-2 ring-[#C9A24B]/40' : 'border-[#0B1E33]/15'
-            }`}
-          >
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0B1E33] via-[#0B1E33]/60 to-transparent z-10" />
-            <img
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuByVJTa3ExygCjPQOasIN5gEOOAJ1PZGEgQF-lU1-yCpPXWVzLWDYcrgNEi90O7oohUVCZcEcm9dTKZqSDQWvAsAES32J4Iu8MHYpVdpINkE10XV3tH115xYxcBRj3CrsxazF7PrnEjQPhS9qBu09BpOXXOKwSx33kjTqEGkjMCZdT1st3Y0ughPozKNNtkFeLkR-a4kWwBVA2Y5QcXhE7OTihAMkbqnIixGIXc6EBhWnCyldDPuYjE"
-              alt="{tr('The Artisan', 'कारीगर')}"
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-            />
-            <div className="relative z-20 space-y-2 text-white">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[#C9A24B] bg-[#0B1E33]/80 px-3 py-1 rounded-full inline-block">
-                {tr('Heritage Trade Formalization', 'पारंपरिक व्यापार का औपचारिकीकरण')}
-              </span>
-              <h4 className="font-['Playfair_Display',Georgia,serif] text-2xl font-bold">
-                {tr('The Artisan', 'कारीगर')}
-              </h4>
-              <p className="text-sm text-[#F5F1E6]/90 font-sans leading-relaxed">
-                {tr('Turning informal skill into a registered, fundable trade linked with Vishwakarma and Mudra.', 'अनौपचारिक कौशल को पंजीकृत और वित्तपोषण योग्य व्यापार में बदलना, जिसे विश्वकर्मा और मुद्रा से जोड़ा जा सके।')}
-              </p>
-            </div>
-          </div>
-
-          {/* Card 4: {tr('The Dairy Farmer', 'डेयरी किसान')} */}
-          <div
-            className={`relative rounded-[32px] overflow-hidden shadow-lg border transition-all duration-300 min-h-[360px] flex flex-col justify-end p-8 group ${
-              activePersona === 'dairy' ? 'border-[#C9A24B] ring-2 ring-[#C9A24B]/40' : 'border-[#0B1E33]/15'
-            }`}
-          >
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0B1E33] via-[#0B1E33]/60 to-transparent z-10" />
-            <img
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuChTAgtYZtqb5QrOwbpjiKpva6RfBwGeKSYGVsSgKw9MsCWrr85e3PMr79a4EJ2-H7BKEyEtOxHEBn_OwWOxtslx-WVfkFnNzXYFNEgO2P11PMFN3zllUbfdOc2IzP2aO4dBw6gNW-EDYF1GYi6Y2aqzeWfyULQA9Evgcfxq9H47w3U5JLBBri9eRp3XS6YTAlGfyRvGgmb8hUXXwmqaQysPFl5GI7r6SZVM_fys2ScPF0_ajlsVvJl"
-              alt="{tr('The Dairy Farmer', 'डेयरी किसान')}"
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-            />
-            <div className="relative z-20 space-y-2 text-white">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[#C9A24B] bg-[#0B1E33]/80 px-3 py-1 rounded-full inline-block">
-                {tr('Agrarian Risk Buffer', 'कृषि जोखिम सुरक्षा')}
-              </span>
-              <h4 className="font-['Playfair_Display',Georgia,serif] text-2xl font-bold">
-                {tr('The Dairy Farmer', 'डेयरी किसान')}
-              </h4>
-              <p className="text-sm text-[#F5F1E6]/90 font-sans leading-relaxed">
-                {tr('Seasonal risk planning made simple, hedging milk yield cycles against cattle feed outlays.', 'मौसमी जोखिम योजना को सरल बनाना और पशु चारे के खर्च के मुकाबले दूध उत्पादन चक्र को संतुलित करना।')}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════════════════════
-          SECTION 9 — TESTIMONIAL
-         ══════════════════════════════════════════════════════════════════ */}
-      <section className="py-24 px-6 max-w-4xl mx-auto text-center relative z-10">
-        <span className="text-6xl text-[#C9A24B] font-['Playfair_Display',Georgia,serif] leading-none block mb-4">
-          “
-        </span>
-
-        <blockquote className="font-['Playfair_Display',Georgia,serif] text-2xl sm:text-4xl text-[#0B1E33] leading-relaxed italic font-normal">
-          “For the first time, I know exactly how much my shop actually makes — and which government
-          scheme I can use to grow it.”
-        </blockquote>
-
-        <div className="mt-8 flex flex-col items-center gap-2">
-          <div className="w-12 h-12 rounded-full bg-[#0B1E33] text-[#C9A24B] flex items-center justify-center font-bold text-base border border-[#C9A24B]/40 shadow-sm">
-            RP
-          </div>
-          <p className="text-sm font-bold text-[#0B1E33]">Ramesh Patil</p>
-          <p className="text-xs text-[#0B1E33]/60 italic">
-            {tr('Illustrative user persona, based on target entrepreneur research', 'लक्षित उद्यमी शोध पर आधारित उदाहरणात्मक उपयोगकर्ता व्यक्तित्व')}
-          </p>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════════════════════
-          SECTION 10 — ROADMAP / UPDATES
-         ══════════════════════════════════════════════════════════════════ */}
-      <section className="py-24 px-4 sm:px-8 max-w-7xl mx-auto">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-12">
+      {/* ── Footer ───────────────────────────────────────────────── */}
+      <footer className="bg-[#1B4332] text-white/75">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
           <div>
-            <span className="text-xs font-bold uppercase tracking-[0.22em] text-[#C9A24B]">
-              {tr('The Horizon', 'क्षितिज')}
-            </span>
-            <h3 className="font-['Playfair_Display',Georgia,serif] text-3xl sm:text-5xl font-bold text-[#0B1E33] mt-1">
-              {tr('Where this is headed', 'आगे की दिशा')}
-            </h3>
-          </div>
-          <Link
-            href="/dashboard/business-guide"
-            className="text-xs sm:text-sm font-bold text-[#0B1E33] hover:text-[#C9A24B] flex items-center gap-1.5 transition-colors border-b border-[#0B1E33]/30 pb-0.5"
-          >
-            <span>{tr('View Full Roadmap', 'पूरा रोडमैप देखें')}</span>
-            <span>→</span>
-          </Link>
-        </div>
-
-        {/* 3-Card Grid for {tr('Future Scope', 'भविष्य की योजना')} */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Item 1 */}
-          <div className="bg-white rounded-[32px] p-7 border border-[#C9A24B]/25 shadow-md space-y-4 hover:-translate-y-1 transition-all duration-300">
-            <div className="flex items-center justify-between">
-              <span className="text-2xl">🗣️</span>
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-[#0B1E33]/5 text-[#0B1E33] px-3 py-1 rounded-full border border-[#0B1E33]/15">
-                {tr('Future Scope', 'भविष्य की योजना')}
-              </span>
-            </div>
-            <h4 className="font-['Playfair_Display',Georgia,serif] text-xl font-bold text-[#0B1E33]">
-              {tr('Voice Assistant Onboarding', 'वॉइस असिस्टेंट पंजीकरण')}
-            </h4>
-            <p className="text-sm text-[#0B1E33]/70 leading-relaxed">
-              {tr('Talk instead of type to register. Full conversational voice registration in Marathi, Tamil, Bengali, and 12 regional dialects.', 'टाइप करने के बजाय बोलकर पंजीकरण करें। मराठी, तमिल, बंगाली और 12 क्षेत्रीय बोलियों में पूर्ण संवादात्मक वॉइस पंजीकरण।')}
-            </p>
+            <p className="font-['Roboto',sans-serif] font-bold text-white">{t('brand_name')}</p>
+            <p className="text-sm mt-1 max-w-sm">{t('hp_footer_tagline')}</p>
           </div>
 
-          {/* Item 2 */}
-          <div className="bg-white rounded-[32px] p-7 border border-[#C9A24B]/25 shadow-md space-y-4 hover:-translate-y-1 transition-all duration-300">
-            <div className="flex items-center justify-between">
-              <span className="text-2xl">👥</span>
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-[#0B1E33]/5 text-[#0B1E33] px-3 py-1 rounded-full border border-[#0B1E33]/15">
-                {tr('Future Scope', 'भविष्य की योजना')}
-              </span>
-            </div>
-            <h4 className="font-['Playfair_Display',Georgia,serif] text-xl font-bold text-[#0B1E33]">
-              {tr('Facilitator Network', 'सुविधाकर्ता नेटवर्क')}
-            </h4>
-            <p className="text-sm text-[#0B1E33]/70 leading-relaxed">
-              {tr('One SHG worker, many entrepreneurs. Village-level animators driving batch enrollment and multi-firm subsidy tracking.', 'एक SHG कार्यकर्ता, कई उद्यमी। गांव स्तर के कार्यकर्ता समूह पंजीकरण और कई व्यवसायों की सब्सिडी ट्रैकिंग संभालेंगे।')}
-            </p>
-          </div>
-
-          {/* Item 3 */}
-          <div className="bg-white rounded-[32px] p-7 border border-[#C9A24B]/25 shadow-md space-y-4 hover:-translate-y-1 transition-all duration-300">
-            <div className="flex items-center justify-between">
-              <span className="text-2xl">🏛️</span>
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-[#0B1E33]/5 text-[#0B1E33] px-3 py-1 rounded-full border border-[#0B1E33]/15">
-                {tr('Future Scope', 'भविष्य की योजना')}
-              </span>
-            </div>
-            <h4 className="font-['Playfair_Display',Georgia,serif] text-xl font-bold text-[#0B1E33]">
-              {tr('Full Scheme Coverage', 'सभी योजनाओं का कवरेज')}
-            </h4>
-            <p className="text-sm text-[#0B1E33]/70 leading-relaxed">
-              {tr('Expanding beyond the initial curated dataset via official state-level data partnerships and automated portal linkages.', 'प्रारंभिक चयनित डेटा से आगे बढ़कर आधिकारिक राज्य-स्तरीय डेटा साझेदारी और स्वचालित पोर्टल लिंक के माध्यम से विस्तार।')}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════════════════════
-          SECTION 11 — CLOSING CTA
-         ══════════════════════════════════════════════════════════════════ */}
-      <section className="py-24 px-6 max-w-5xl mx-auto my-12 text-center">
-        <div className="bg-white/80 backdrop-blur-xl border border-[#C9A24B]/40 rounded-[40px] p-10 sm:p-16 shadow-[0_20px_60px_rgba(11,30,51,0.08)] space-y-8">
-          {/* Pantheon Emblem */}
-          <div className="w-14 h-14 rounded-full bg-[#0B1E33] border border-[#C9A24B] flex items-center justify-center text-[#C9A24B] mx-auto shadow-md">
-            <svg className="w-7 h-7 text-[#C9A24B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 10v11M12 10v11M16 10v11" />
-            </svg>
-          </div>
-
-          <div className="space-y-4 max-w-2xl mx-auto">
-            <h3 className="font-['Playfair_Display',Georgia,serif] text-3xl sm:text-5xl font-bold text-[#0B1E33] leading-tight">
-              {tr('Experience business advisory, reimagined for rural India.', 'ग्रामीण भारत के लिए नए रूप में व्यवसाय सलाह का अनुभव करें।')}
-            </h3>
-            <p className="text-sm sm:text-base text-[#0B1E33]/75 font-sans leading-relaxed">
-              {tr('Available today via zero-bandwidth SMS, WhatsApp voice note, or the web portal.', 'आज ही कम नेटवर्क वाले SMS, WhatsApp वॉइस नोट या वेब पोर्टल के माध्यम से उपलब्ध।')}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
-            <Link
-              href="/onboarding"
-              className="px-8 py-4 bg-[#0B1E33] hover:bg-[#142D4B] text-[#F5F1E6] font-semibold text-sm rounded-full shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5"
-            >
-              {tr('Watch the Demo', 'डेमो देखें')}
-            </Link>
-            <a
-              href="https://github.com/dev-lover-codes/Saathi-Vyapar"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-8 py-4 bg-transparent border border-[#C9A24B] text-[#0B1E33] hover:bg-[#C9A24B] hover:text-[#0B1E33] font-semibold text-sm rounded-full transition-all"
-            >
-              {tr('View on GitHub', 'GitHub पर देखें')}
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════════════════════
-          SECTION 12 — FOOTER
-         ══════════════════════════════════════════════════════════════════ */}
-      <footer id="team" className="bg-[#0B1E33] text-[#F5F1E6] pt-20 pb-12 px-6 sm:px-12 rounded-t-[64px] border-t border-[#C9A24B]/35 mt-16">
-        <div className="max-w-7xl mx-auto">
-          {/* 4-Column Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 pb-16 border-b border-white/10">
-            {/* Column 1: Brand */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <img
-                  src="/Logo.png"
-                  alt="Saathi Vyapar Logo"
-                  className="w-9 h-9 object-contain rounded-full border border-[#C9A24B]"
-                />
-                <span className="font-['Playfair_Display',Georgia,serif] text-xl font-bold text-white">
-                  Saathi Vyapar
-                </span>
-              </div>
-              <p className="text-xs text-[#F5F1E6]/75 leading-relaxed">
-                {tr('AI-driven hyper-local business advisory and financial structuring for India’s 63+ million rural micro-enterprises.', 'भारत के 6.3 करोड़ से अधिक ग्रामीण सूक्ष्म उद्यमों के लिए AI-संचालित स्थानीय व्यवसाय सलाह और वित्तीय संरचना।')}
-              </p>
-              <div className="flex items-center gap-3 pt-2">
-                <a
-                  href="https://github.com/dev-lover-codes/Saathi-Vyapar"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#C9A24B] hover:text-[#0B1E33] flex items-center justify-center transition-colors text-xs"
-                >
-                  GH
-                </a>
-                <a
-                  href={`https://wa.me/${cleanWhatsappNumber}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#25D366] hover:text-white flex items-center justify-center transition-colors text-xs"
-                >
-                  WA
-                </a>
-                <Link
-                  href="/login"
-                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#C9A24B] hover:text-[#0B1E33] flex items-center justify-center transition-colors text-xs"
-                >
-                  ⚡
-                </Link>
-              </div>
-            </div>
-
-            {/* Column 2: Project */}
-            <div className="space-y-3 text-xs">
-              <span className="font-bold uppercase tracking-widest text-[#C9A24B] block mb-2">
-                {tr('Project', 'प्रोजेक्ट')}
-              </span>
-              <p>
-                <a href="#product" className="text-[#F5F1E6]/75 hover:text-white transition-colors">
-                  {tr('Product Overview', 'उत्पाद अवलोकन')}
-                </a>
-              </p>
-              <p>
-                <a href="#how-it-works" className="text-[#F5F1E6]/75 hover:text-white transition-colors">
-                  {tr('Architecture & Engines', 'आर्किटेक्चर और इंजन')}
-                </a>
-              </p>
-              <p>
-                <a href="#impact" className="text-[#F5F1E6]/75 hover:text-white transition-colors">
-                  {tr('Impact & Personas', 'प्रभाव और उपयोगकर्ता')}
-                </a>
-              </p>
-              <p>
-                <Link href="/dashboard" className="text-[#F5F1E6]/75 hover:text-white transition-colors">
-                  {tr('Live Dashboard', 'लाइव डैशबोर्ड')}
-                </Link>
-              </p>
-            </div>
-
-            {/* Column 3: Team */}
-            <div className="space-y-3 text-xs">
-              <span className="font-bold uppercase tracking-widest text-[#C9A24B] block mb-2">
-                {tr('Team', 'टीम')}
-              </span>
-              <p>
-                <span className="text-[#F5F1E6]/90 font-semibold">{tr('Team', 'टीम')} Pantheon Eternal</span>
-              </p>
-              <p>
-                <span className="text-[#F5F1E6]/75">Smart India Hackathon (SIH26091)</span>
-              </p>
-              <p>
-                <span className="text-[#F5F1E6]/75">{tr('Ministry of Social Justice & Empowerment', 'सामाजिक न्याय एवं अधिकारिता मंत्रालय')}</span>
-              </p>
-              <p>
-                <a
-                  href="https://github.com/dev-lover-codes/Saathi-Vyapar"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[#C9A24B] hover:underline"
-                >
-                  {tr('Source Code on GitHub', 'GitHub पर सोर्स कोड')}
-                </a>
-              </p>
-            </div>
-
-            {/* Column 4: Resources */}
-            <div className="space-y-3 text-xs">
-              <span className="font-bold uppercase tracking-widest text-[#C9A24B] block mb-2">
-                {tr('Resources', 'संसाधन')}
-              </span>
-              <p>
-                <Link href="/dashboard/schemes" className="text-[#F5F1E6]/75 hover:text-white transition-colors">
-                  {tr('Yojana Kendra (15+ Schemes)', 'योजना केंद्र (15+ योजनाएं)')}
-                </Link>
-              </p>
-              <p>
-                <Link href="/dashboard/business-guide" className="text-[#F5F1E6]/75 hover:text-white transition-colors">
-                  {tr('Business Transformation Guide', 'व्यवसाय परिवर्तन गाइड')}
-                </Link>
-              </p>
-              <p>
-                <Link href="/facilitator" className="text-[#F5F1E6]/75 hover:text-white transition-colors">
-                  {tr('Facilitator & SHG Hub', 'सुविधाकर्ता और SHG केंद्र')}
-                </Link>
-              </p>
-              <p>
-                <Link href="/folio" className="text-[#C9A24B] hover:underline">
-                  {tr('Stitch Archival Exhibition Folio', 'स्टिच अभिलेखीय प्रदर्शनी फोलियो')}
-                </Link>
-              </p>
-            </div>
-          </div>
-
-          {/* Bottom Bar */}
-          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#F5F1E6]/60">
-            <p>© 2026 Pantheon Eternal · SIH26091 · सर्वाधिकार सुरक्षित।</p>
-            <div className="flex items-center gap-6">
-              <span className="hover:text-[#F5F1E6] cursor-pointer">{tr('Privacy', 'गोपनीयता')}</span>
-              <span>·</span>
-              <span className="hover:text-[#F5F1E6] cursor-pointer">{tr('Terms', 'नियम')}</span>
-              <span>·</span>
-              <span className="hover:text-[#F5F1E6] cursor-pointer">{tr('Accessibility', 'सुलभता')}</span>
-            </div>
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+            <Link href="/onboarding" className="hover:text-[#E8C766] transition-colors">{t('hp_try')}</Link>
+            <Link href="/login" className="hover:text-[#E8C766] transition-colors">{t('hp_login')}</Link>
+            <Link href="/dashboard/schemes" className="hover:text-[#E8C766] transition-colors">{t('hp_nav_schemes')}</Link>
           </div>
         </div>
       </footer>
 
-      {/* ── Fixed Floating Action Button (FAB) for Quick Outreach ── */}
-      <div className="fixed bottom-6 right-6 z-40">
-        {isFabOpen && (
-          <div className="flex flex-col gap-3 mb-3 animate-in fade-in slide-in-from-bottom-3 duration-300">
-            <a
-              href={`https://wa.me/${cleanWhatsappNumber}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-[#25D366] text-white shadow-xl hover:opacity-95 transition-all text-xs font-bold"
-            >
-              <span>💬</span>
-              <span>{tr('WhatsApp Advisory', 'WhatsApp सलाह')}</span>
-            </a>
-            <button
-              onClick={() => {
-                setIsFabOpen(false);
-                setIsVoiceModalOpen(true);
-              }}
-              className="flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-[#0B1E33] text-[#C9A24B] border border-[#C9A24B] shadow-xl hover:bg-[#142D4B] transition-all text-xs font-bold"
-            >
-              <span>🎙️</span>
-              <span>{tr('Voice Assistant', 'वॉइस असिस्टेंट')}</span>
-            </button>
-          </div>
-        )}
-
-        <button
-          onClick={() => setIsFabOpen(!isFabOpen)}
-          className="w-14 h-14 rounded-full bg-[#0B1E33] border-2 border-[#C9A24B] text-[#C9A24B] flex items-center justify-center shadow-2xl hover:scale-105 transition-all"
-        >
-          {isFabOpen ? '✕' : '🤝'}
-        </button>
-      </div>
-
-      {/* ── Voice Assistant Modal ── */}
-      <VoiceOnboardingModal
-        isOpen={isVoiceModalOpen}
-        onClose={() => setIsVoiceModalOpen(false)}
-      />
+      {/* Offered here too. Someone deciding whether to sign up can ask what
+          this does before committing to a form. */}
     </div>
   );
 }

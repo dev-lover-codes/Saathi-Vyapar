@@ -1,17 +1,9 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Suspense } from "react";
 import { LanguageProvider } from "@/contexts/LanguageContext";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import ChatPanel from "@/components/ChatPanel";
+import { getServerLanguage } from "@/lib/i18n.server";
 
 export const metadata: Metadata = {
   title: "Saathi Vyapar (साथी व्यापार) — AI Business Advisory for Rural Micro-Entrepreneurs",
@@ -31,15 +23,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Read the language on the server so the first paint is already in the
+  // visitor's language and <html lang> is correct for assistive tech.
+  const language = await getServerLanguage();
+
   return (
     <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased light scroll-smooth`}
+      lang={language}
+      className="h-full antialiased light scroll-smooth"
     >
       <head>
         <link rel="icon" href="/Logo.png" type="image/png" />
@@ -52,13 +48,18 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,400&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-full flex flex-col bg-[#F5F1E6] text-[#0B1E33] font-['Inter',sans-serif]">
-        <LanguageProvider>
+      <body className="min-h-full flex flex-col bg-[#F5F1E6] text-[#0B1E33] font-['Open_Sans',sans-serif]">
+        <LanguageProvider initialLanguage={language}>
           {children}
+          {/* Ask Saathi on every page. Suspense because the panel reads the
+              URL (?user_id=) with useSearchParams. */}
+          <Suspense fallback={null}>
+            <ChatPanel />
+          </Suspense>
         </LanguageProvider>
       </body>
     </html>

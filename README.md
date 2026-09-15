@@ -371,14 +371,24 @@ GEMINI_API_KEY=your-gemini-api-key
 # ── App URL ───────────────────────────────────────────────
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 
-# ── WhatsApp Cloud API (Meta) — optional for local dev ───
-WHATSAPP_ACCESS_TOKEN=your-token
-WHATSAPP_PHONE_NUMBER_ID=your-phone-id
-WHATSAPP_BUSINESS_ACCOUNT_ID=your-ba-id
-WHATSAPP_VERIFY_TOKEN=saathi_vyapar_whatsapp_verify_token_2026
+# WhatsApp Cloud API Configuration — optional for local dev
+WHATSAPP_ACCESS_TOKEN=your-whatsapp-cloud-access-token
+WHATSAPP_PHONE_NUMBER_ID=your-whatsapp-phone-number-id
+WHATSAPP_BUSINESS_ACCOUNT_ID=your-whatsapp-business-account-id
+WHATSAPP_VERIFY_TOKEN=your-custom-webhook-verify-token
 WHATSAPP_API_VERSION=v22.0
+# App Secret from Meta > App Settings > Basic. Required in production: inbound
+# webhooks are rejected unless their X-Hub-Signature-256 verifies against it.
+WHATSAPP_APP_SECRET=your-meta-app-secret
+# Pre-approved template used to welcome a newly added entrepreneur
+# (see scripts/create-whatsapp-template.mjs).
 WHATSAPP_WELCOME_TEMPLATE_NAME=saathi_vyapar_welcome
 WHATSAPP_WELCOME_TEMPLATE_LANG=hi
+
+# Twilio SMS Configuration
+TWILIO_ACCOUNT_SID=your-twilio-account-sid
+TWILIO_AUTH_TOKEN=your-twilio-auth-token
+TWILIO_PHONE_NUMBER=+1234567890
 ```
 
 > WhatsApp and Twilio keys are only needed for the messaging channels. The full web app works without them.
@@ -506,4 +516,4 @@ Developed with ❤️ by **Team Pantheon Eternal** for the **Smart India Hackath
 
 <div align="center">
   <sub>Saathi Vyapar · साथी व्यापार · Empowering Rural Indian Micro-Enterprises with Trust & AI</sub>
-</div># Saathi-Vyapar
+</div>
